@@ -1,0 +1,4 @@
+-r common.txt
+flake8>=4.0.1
+flake8-quotes>=3.3.2
+pre-commit
