@@ -165,3 +165,8 @@ cython_debug/
 
 # MacOS stuff
 .DS_Store
+
+# ETL application
+security/
+logs/
+state.json
