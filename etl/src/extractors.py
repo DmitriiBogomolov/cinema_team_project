@@ -41,7 +41,7 @@ class StatebleGenerator:
             if modified_set:
                 min_modifided = min(modified_set)
                 self.max_modified = max(modified_set)
-                self.state.set_state(self.keyword, {'last_modified': str(min_modifided)})
+                self.state.set_state(self.keyword, str(min_modifided))
 
             return data
 
@@ -53,10 +53,7 @@ class StatebleGenerator:
 
                 tricky_dt = self.max_modified + datetime.timedelta(milliseconds=500)
 
-                self.state.set_state(
-                        self.keyword,
-                        {'last_modified': str(tricky_dt)}
-                )
+                self.state.set_state(self.keyword, str(tricky_dt))
             raise StopIteration
 
 
@@ -75,12 +72,9 @@ def extract_query_statable(keyword: str, query_str: str, psql_manager: PSQLManag
                 generator: fetched StatebleGenerator object with DATA_CHUNK len
     """
 
-    state_obj = state.get_state(keyword)
-    if state_obj:
-        for item, index in state_obj.items():
-            query_str = query_str.replace("{%s}" % item, "'%s'" % index)
-    else:
-        query_str = query_str.replace("{%s}" % 'last_modified', "'%s'" % '1000-10-10')
+    state_value = state.get_state(keyword) or '1000-10-10'
+
+    query_str = query_str.replace("{last_modified}", f"'{state_value}'")
 
     logger.info(f'Starting extract query from {keyword}.')
 

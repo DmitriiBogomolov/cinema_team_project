@@ -56,19 +56,19 @@ class EtlManager():
             elsatic_manager.bulk(document_set)
 
     def start_filmwork_etl_process(self):
-        keyword = 'filmwork'
+        keyword = 'filmwork_last_modified'
         query_str = query_filmworks_by_modified_date
 
         self.start_base_etl_process(keyword, query_str)
 
     def start_genre_etl_process(self):
-        keyword = 'genre'
+        keyword = 'genre_last_modified'
         query_str = query_filmworks_by_genres_modified_date
 
         self.start_base_etl_process(keyword, query_str)
 
     def start_person_etl_process(self):
-        keyword = 'person'
+        keyword = 'person_last_modified'
         query_str = query_filmworks_by_person_modified_date
 
         self.start_base_etl_process(keyword, query_str)

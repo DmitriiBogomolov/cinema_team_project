@@ -25,14 +25,7 @@ def get_elastic_client() -> Elasticsearch:
                 es: Elasticsearch client object
     """
 
-    es = Elasticsearch(
-        settings.ELASTIC_HOST,
-        ca_certs=settings.ELASTIC_SRT_PATH,
-        basic_auth=(
-            settings.ELASTIC_LOGIN,
-            settings.ELASTIC_PASSWORD
-        )
-    )
+    es = Elasticsearch(settings.ELASTIC_HOST)
     return es
 
 

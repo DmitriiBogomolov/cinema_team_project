@@ -1,9 +1,9 @@
 version: "2.2"
 
 volumes:
-  postgres_data:
+  dev-postgres_data:
     driver: local
-  esdata01:
+  dev-esdata01:
     driver: local
 
 services:
@@ -11,7 +11,7 @@ services:
   es01:
     image: elasticsearch:7.17.9
     volumes:
-      - esdata01:/usr/share/elasticsearch/data
+      - dev-esdata01:/usr/share/elasticsearch/data
     ports:
       - ${ES_PORT}:9200
     environment:
@@ -29,9 +29,9 @@ services:
   db:
     image: postgres:13
     ports:
-        - "5432:5432"
+      - 5432:5432
     volumes:
-        - postgres_data:/var/lib/postgresql/data/
+        - dev-postgres_data:/var/lib/postgresql/data/
         - ./utils/init.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
         - .env
@@ -40,15 +40,3 @@ services:
     image: redis
     ports:
       - "6379:6379"
-
-  etl:
-    depends_on:
-      db:
-        condition: service_started
-      redis:
-        condition: service_started
-      es01:
-        condition: service_healthy
-    build: .
-    env_file:
-      - .env
