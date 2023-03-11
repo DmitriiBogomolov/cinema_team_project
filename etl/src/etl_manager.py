@@ -14,9 +14,11 @@ from psql import PSQLManager
 from psql_queries import (query_filmworks_by_genres_modified_date,
                           query_filmworks_by_modified_date,
                           query_filmworks_by_person_modified_date,
-                          query_genres_by_modified_date)
+                          query_genres_by_modified_date,
+                          query_persons_by_modified_date
+                          )
 from settings import settings
-from transformers import prepare_filmwork_documents, prepare_genre_documents
+from transformers import prepare_filmwork_documents, prepare_genre_documents, prepare_person_documents
 
 
 class ETLSegment(BaseModel):
@@ -54,6 +56,14 @@ ETL_PROCESSES = {
             query_str=query_genres_by_modified_date,
             transform_func=prepare_genre_documents,
             index_name='genres'
+        )
+    ],
+    'person_etl_process': [
+        ETLSegment(
+            keyword='PERSON_ETL_last_modified',
+            query_str=query_persons_by_modified_date,
+            transform_func=prepare_person_documents,
+            index_name='persons'
         )
     ]
 }

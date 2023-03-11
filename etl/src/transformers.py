@@ -7,7 +7,7 @@ from typing import List
 
 from psycopg2.extras import RealDictRow
 
-from models import Filmwork, Nested, Genre
+from models import Filmwork, Nested, Genre, Person
 
 
 def prepare_filmwork_documents(raw_data_set: List[RealDictRow], index_name: str) -> List[dict]:
@@ -66,6 +66,26 @@ def prepare_genre_documents(raw_data_set: List[RealDictRow], index_name: str) ->
             '_index': index_name,
             '_id': genre.id,
             '_source': genre.dict()
+        })
+
+    return documents
+
+
+def prepare_person_documents(raw_data_set: List[RealDictRow], index_name: str) -> List[dict]:
+    """Transform a collection of raw_data from extractor to list of elastic documents"""
+
+    documents = []
+
+    for person_raw in raw_data_set:
+
+        person = Person(
+            id=person_raw['id'],
+            full_name=person_raw['full_name']
+        )
+        documents.append({
+            '_index': index_name,
+            '_id': person.id,
+            '_source': person.dict()
         })
 
     return documents

@@ -1,4 +1,3 @@
-
 query_filmworks_by_modified_date = """
         SELECT
         fw.id,
@@ -96,4 +95,10 @@ query_genres_by_modified_date = """
     SELECT DISTINCT g.id, g.name, g.description, g.modified
     FROM content.genre g, content.genre_film_work gfw
     WHERE g.modified >= {GENRE_ETL_last_modified} AND gfw.genre_id = g.id;
+"""
+
+query_persons_by_modified_date = """
+    SELECT DISTINCT p.id, p.full_name, p.modified
+    FROM content.person p, content.person_film_work pfw
+    WHERE p.modified >= {PERSON_ETL_last_modified} AND pfw.person_id = p.id;
 """

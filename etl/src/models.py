@@ -35,3 +35,9 @@ class Genre(BaseModel):
     id: UUID
     name: str
     description: Optional[str] = None
+
+
+class Person(BaseModel):
+    """Represents the objects from "genres" elasticsearch schema"""
+    id: UUID
+    full_name: str
