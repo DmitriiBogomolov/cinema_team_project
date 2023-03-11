@@ -23,9 +23,10 @@ class Filmwork(BaseModel):
     genre: List[str]
     title: str
     description: Optional[str] = None
-    director: List[str]
+    directors_names: List[str]
     actors_names: List[str]
     writers_names: List[str]
+    directors: List[Nested]
     actors: List[Nested]
     writers: List[Nested]
 

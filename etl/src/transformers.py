@@ -33,9 +33,10 @@ def prepare_filmwork_documents(raw_data_set: List[RealDictRow], index_name: str)
             genre=filmwork_raw['genres'],
             title=filmwork_raw['title'],
             description=filmwork_raw['description'],
-            director=[d.name for d in directors],
+            directors=directors,
             actors=actors,
             writers=writers,
+            directors_names=[d.name for d in directors],
             actors_names=[a.name for a in actors],
             writers_names=[w.name for w in writers],
         )
