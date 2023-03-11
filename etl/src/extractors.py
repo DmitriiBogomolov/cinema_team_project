@@ -61,25 +61,13 @@ def extract_query_statable(keyword: str, query_str: str, psql_manager: PSQLManag
     """
     Preform SQL query string, making query.
     Start fetching from current state value.
-
-            Parameters:
-                keyword: state keyword for getting value
-                query_str: current keyword template values will be
-                           insert to query_str (by default, 'last_modified'
-                           from state restricts the query by 'modified' field)
-                psql_manager: the PSQLManager instance
-            Returns:
-                generator: fetched StatebleGenerator object with DATA_CHUNK len
     """
-
-    state_value = state.get_state(keyword) or '1000-10-10'
-
-    query_str = query_str.replace("{last_modified}", f"'{state_value}'")
-
     logger.info(f'Starting extract query from {keyword}.')
 
-    data_generator = psql_manager.get_execution_generator(query_str)
+    state_value = state.get_state(keyword) or '1000-10-10'
+    query_str = query_str.replace('{%s}' % keyword, "'%s\'" % state_value)
 
+    data_generator = psql_manager.get_execution_generator(query_str)
     generator = StatebleGenerator(data_generator, state, keyword)
 
     return generator

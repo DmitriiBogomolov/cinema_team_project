@@ -69,15 +69,12 @@ class ElasticManager:
                 logger.exception(e)
                 self.connect()
 
-    def create_filmwork_schema(self) -> None:
-        """
-        Create filmwork schema if not exist.
-        """
+    def create_schema(self, index_name: str, schema_src: str) -> None:
+        """Create schema if not exist."""
         try:
-            index_name = settings.INDEX_NAME
             if not self.client.indices.exists(index=index_name):
-                logger.info('Creating elasticsearch schema.')
-                with open(settings.SCHEMA_SRC) as schema_file:
+                logger.info(f'Creating schema for {index_name}')
+                with open(schema_src) as schema_file:
                     index_schema = json.load(schema_file)
                 self.client.indices.create(index=index_name, body=index_schema)
         except ConnectionError as e:
@@ -85,8 +82,4 @@ class ElasticManager:
             self.connect()
         except FileNotFoundError as e:
             logger.exception(e)
-            logger.error('Try to set SCHEMA_SRC in .env')
-
-
-elsatic_manager = ElasticManager()
-elsatic_manager.create_filmwork_schema()
+            logger.error(f'Can not find schema at {schema_src}')

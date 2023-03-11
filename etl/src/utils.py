@@ -41,8 +41,8 @@ backoff_decorator = backoff()
 def psycopg2_conn_context(dsn: PostgresDsn):
     conn = psycopg2.connect(dsn)
     try:
-        logger.info("Creating psql connection")
+        logger.info('Creating psql connection')
         yield conn
     finally:
-        logger.info("Closing psql connection")
+        logger.info('Closing psql connection')
         conn.close()

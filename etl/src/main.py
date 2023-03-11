@@ -6,6 +6,7 @@ state -> psql, extractors -> transformers -> elastic
 
 from time import sleep
 
+from elastic import ElasticManager
 from etl_manager import EtlManager
 from psql import PSQLManager
 from settings import settings
@@ -18,14 +19,13 @@ def main():
     with psycopg2_conn_context(settings.PSQL_DSN) as conn:
 
         psql_manager = PSQLManager(conn)
-        etl_manager = EtlManager(psql_manager)
+        elastic_manager = ElasticManager()
+
+        etl_manager = EtlManager(psql_manager, elastic_manager)
+        etl_manager.create_schemas()
 
         while True:
-
-            etl_manager.start_filmwork_etl_process()
-            etl_manager.start_genre_etl_process()
-            etl_manager.start_person_etl_process()
-
+            etl_manager.run()
             sleep(settings.SLEEP_DURATION)
 
 

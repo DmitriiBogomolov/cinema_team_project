@@ -17,14 +17,7 @@ from settings import settings
 
 
 class PSQLManager:
-    """
-    Basic class for manage psql connection, making queries.
-
-    Methods
-    -------
-    get_execution_generator:
-        make query and returns generator based on DATA_CHUNK size
-    """
+    """Basic class for manage psql connection, making queries."""
 
     def __init__(self, conn: connection):
         self.conn = conn

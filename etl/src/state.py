@@ -49,7 +49,7 @@ class JsonFileStorage(BaseStorage):
 
     def retrieve_state(self, key: str) -> str:
         try:
-            with open(self.file_path, "r") as read_file:
+            with open(self.file_path, 'r') as read_file:
                 d = json.load(read_file)
                 return d.get(key)
         except (JSONDecodeError, FileNotFoundError):
@@ -97,15 +97,14 @@ class FakeState:
         return '1000-10-10'
 
 
-match settings.STATE_TYPE:
-    case 'REDIS':
-        logger.info('The programm was started in REDIS statable mode.')
-        state = State(RedisStorage(settings.REDIS_HOST))
+if settings.STATE_TYPE == 'REDIS':
+    logger.info('The programm was started in REDIS statable mode.')
+    state = State(RedisStorage(settings.REDIS_HOST))
 
-    case 'JSON':
-        logger.info('The programm was started in JSON statable mode.')
-        state = State(JsonFileStorage(settings.STATE_FILE_PATH))
+elif settings.STATE_TYPE == 'JSON':
+    logger.info('The programm was started in JSON statable mode.')
+    state = State(JsonFileStorage(settings.STATE_FILE_PATH))
 
-    case 'FAKE':
-        logger.info('The programm was started without state handling.')
-        state = FakeState()
+elif settings.STATE_TYPE == 'FAKE':
+    logger.info('The programm was started without state handling.')
+    state = FakeState()

@@ -29,7 +29,7 @@
 
         docker-compose -f docker-compose-dev.yml up
 
-3. Установить зависимости в виртуальное окружение и из src запустить main.py.
+3. Установить зависимости в виртуальное окружение, перейти в папку src, запустить main.py.
 4. Для остановки используйте:
 
         docker-compose -f docker-compose-dev.yml down -v

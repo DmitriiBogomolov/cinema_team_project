@@ -28,3 +28,10 @@ class Filmwork(BaseModel):
     writers_names: List[str]
     actors: List[Nested]
     writers: List[Nested]
+
+
+class Genre(BaseModel):
+    """Represents the objects from "genres" elasticsearch schema"""
+    id: UUID
+    name: str
+    description: Optional[str] = None
