@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     SCHEMAS_DESTINATION = [
         Schema('movies', '../utils/filmworks_schema.json'),
         Schema('genres', '../utils/genres_schema.json'),
+        Schema('persons', '../utils/persons_schema.json')
     ]
 
     class Config:
