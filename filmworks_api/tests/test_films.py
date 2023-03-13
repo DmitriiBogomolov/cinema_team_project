@@ -1,7 +1,6 @@
-from filmworks_api.src.api.v1.films import Film, get_film_service
+from api.v1.films import Film, get_film_service
 from fastapi.testclient import TestClient
-from filmworks_api.src.main import app
-
+from main import app
 
 mock_filmwork = Film(
     uuid='5633f23a-9423-4c8e-81d9-584d9a402aeb',

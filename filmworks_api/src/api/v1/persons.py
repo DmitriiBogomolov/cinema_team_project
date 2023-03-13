@@ -2,7 +2,6 @@ from fastapi import APIRouter
 
 from .response_models import PersonDetail
 
-
 router = APIRouter()
 
 

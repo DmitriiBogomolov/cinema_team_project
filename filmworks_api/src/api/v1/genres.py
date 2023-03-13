@@ -1,7 +1,8 @@
-from fastapi import APIRouter
 from typing import List
-from .response_models import Genre
 
+from fastapi import APIRouter
+
+from .response_models import Genre
 
 router = APIRouter()
 

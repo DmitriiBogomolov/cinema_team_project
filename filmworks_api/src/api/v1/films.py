@@ -1,10 +1,10 @@
 from http import HTTPStatus
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
-
 from services.film import FilmService, get_film_service
-from .response_models import Film
 
+from .response_models import Film
 
 router = APIRouter()
 
