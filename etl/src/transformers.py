@@ -7,7 +7,7 @@ from typing import List
 
 from psycopg2.extras import RealDictRow
 
-from models import Filmwork, Nested, Genre, Person
+from models import Filmwork, FilmworkNested, Genre, Person, PersonNested
 
 
 def prepare_filmwork_documents(raw_data_set: List[RealDictRow], index_name: str) -> List[dict]:
@@ -21,11 +21,11 @@ def prepare_filmwork_documents(raw_data_set: List[RealDictRow], index_name: str)
         for person in filmwork_raw['persons']:
 
             if person['person_role'] == 'DR':
-                directors.append(Nested(id=person['person_id'], name=person['person_name']))
+                directors.append(FilmworkNested(id=person['person_id'], name=person['person_name']))
             elif person['person_role'] == 'AR':
-                actors.append(Nested(id=person['person_id'], name=person['person_name']))
+                actors.append(FilmworkNested(id=person['person_id'], name=person['person_name']))
             elif person['person_role'] == 'WR':
-                writers.append(Nested(id=person['person_id'], name=person['person_name']))
+                writers.append(FilmworkNested(id=person['person_id'], name=person['person_name']))
 
         filmwork = Filmwork(
             id=filmwork_raw['id'],
@@ -79,10 +79,16 @@ def prepare_person_documents(raw_data_set: List[RealDictRow], index_name: str) -
 
     for person_raw in raw_data_set:
 
+        roles_by_fwk_id = dict()
+        for fwk in person_raw['films']:
+            roles_by_fwk_id[fwk['id']] = (roles_by_fwk_id.get(fwk['id']) or []) + [(fwk['role'])]
+
         person = Person(
             id=person_raw['id'],
-            full_name=person_raw['full_name']
+            full_name=person_raw['full_name'],
+            films=[PersonNested(id=fw_id, roles=fw_r) for fw_id, fw_r in roles_by_fwk_id.items()]
         )
+
         documents.append({
             '_index': index_name,
             '_id': person.id,

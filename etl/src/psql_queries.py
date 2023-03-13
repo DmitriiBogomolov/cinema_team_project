@@ -94,11 +94,24 @@ query_filmworks_by_person_modified_date = """
 query_genres_by_modified_date = """
     SELECT DISTINCT g.id, g.name, g.description, g.modified
     FROM content.genre g, content.genre_film_work gfw
-    WHERE g.modified >= {GENRE_ETL_last_modified} AND gfw.genre_id = g.id;
+    WHERE g.modified >= {GENRE_ETL_last_modified} AND gfw.genre_id = g.id
+    ORDER BY g.modified, g.id;
 """
 
+
 query_persons_by_modified_date = """
-    SELECT DISTINCT p.id, p.full_name, p.modified
+    SELECT p.id, p.full_name, p.modified,
+    COALESCE (
+        json_agg(
+            DISTINCT jsonb_build_object(
+                'id', pfw.film_work_id,
+                'role', pfw.role
+            )
+        ) FILTER (WHERE pfw.id is not null),
+        '[]'
+    ) as films
     FROM content.person p, content.person_film_work pfw
-    WHERE p.modified >= {PERSON_ETL_last_modified} AND pfw.person_id = p.id;
+    WHERE p.modified >= {PERSON_ETL_last_modified} AND pfw.person_id = p.id
+    group by p.id
+    order by p.modified, p.id;
 """
