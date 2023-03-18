@@ -20,15 +20,16 @@ class Filmwork(BaseModel):
     """Represents the objects from "movies" elasticsearch schema"""
     id: UUID
     imdb_rating: Optional[float] = None
-    genre: List[str]
     title: str
     description: Optional[str] = None
-    directors_names: List[str]
-    actors_names: List[str]
-    writers_names: List[str]
+    genres: List[FilmworkNested]
     directors: List[FilmworkNested]
     actors: List[FilmworkNested]
     writers: List[FilmworkNested]
+    genres_names: List[str]
+    directors_names: List[str]
+    actors_names: List[str]
+    writers_names: List[str]
 
 
 class Genre(BaseModel):

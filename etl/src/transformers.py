@@ -16,6 +16,9 @@ def prepare_filmwork_documents(raw_data_set: List[RealDictRow], index_name: str)
     documents = []
 
     for filmwork_raw in raw_data_set:
+        genres = []
+        for genre in filmwork_raw['genres']:
+            genres.append(FilmworkNested(id=genre['genre_id'], name=genre['genre_name']))
 
         directors, actors, writers = [], [], []
         for person in filmwork_raw['persons']:
@@ -30,12 +33,13 @@ def prepare_filmwork_documents(raw_data_set: List[RealDictRow], index_name: str)
         filmwork = Filmwork(
             id=filmwork_raw['id'],
             imdb_rating=filmwork_raw['rating'],
-            genre=filmwork_raw['genres'],
             title=filmwork_raw['title'],
             description=filmwork_raw['description'],
+            genres=genres,
             directors=directors,
             actors=actors,
             writers=writers,
+            genres_names=[g.name for g in genres],
             directors_names=[d.name for d in directors],
             actors_names=[a.name for a in actors],
             writers_names=[w.name for w in writers],

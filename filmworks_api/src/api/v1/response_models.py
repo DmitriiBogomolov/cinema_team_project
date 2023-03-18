@@ -1,34 +1,33 @@
-from typing import List
-
 from pydantic import BaseModel
+from typing import List, Optional
 
 
-class Film(BaseModel):
+class UUIDModel(BaseModel):
     uuid: str
+
+
+class Film(UUIDModel):
     title: str
-    imdb_rating: float
+    imdb_rating: Optional[float]
 
 
-class Genre(BaseModel):
-    uuid: str
+class Genre(UUIDModel):
     name: str
 
 
-class Person(BaseModel):
-    uuid: str
+class Person(UUIDModel):
     full_name: str
 
 
 class FilmDetail(Film):
-    description: str
+    description: Optional[str]
     genre: List[Genre]
     actors: List[Person]
     writers: List[Person]
     directors: List[Person]
 
 
-class NestedFilm(BaseModel):
-    uuid: str
+class NestedFilm(UUIDModel):
     roles: List[str]
 
 

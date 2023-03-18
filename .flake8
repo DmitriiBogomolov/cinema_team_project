@@ -6,3 +6,5 @@ exclude =
     .venv/,
     env/,
     .env/,
+per-file-ignores =
+    psql_queries.py:E501

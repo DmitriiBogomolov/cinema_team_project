@@ -11,7 +11,7 @@ def orjson_dumps(v, *, default):
 
 class UUIDModel(BaseModel):
     """Core schema object."""
-    uuid: UUID
+    id: str
 
     class Config:
         json_loads = orjson.loads
@@ -25,7 +25,7 @@ class NestedGenre(UUIDModel):
 
 class NestedPerson(UUIDModel):
     """Represents a nested `person` object in schema."""
-    full_name: str
+    name: str
 
 
 class Filmwork(UUIDModel):
@@ -33,9 +33,9 @@ class Filmwork(UUIDModel):
     title: str
     imdb_rating: Optional[float] = None
     description: Optional[str] = None
-    genre: List[NestedGenre]
+    genres: List[NestedGenre]
     actors: List[NestedPerson]
-    director: List[NestedPerson]
+    directors: List[NestedPerson]
     writers: List[NestedPerson]
 
 

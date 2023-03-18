@@ -10,14 +10,22 @@ query_filmworks_by_modified_date = """
         COALESCE (
             json_agg(
                 DISTINCT jsonb_build_object(
+                    'genre_id', g.id,
+                    'genre_name', g.name
+                )
+            ) FILTER (WHERE gfw.genre_id is not null),
+            '[]'
+        ) as genres,
+        COALESCE (
+            json_agg(
+                DISTINCT jsonb_build_object(
                     'person_role', pfw.role,
                     'person_id', p.id,
                     'person_name', p.full_name
                 )
             ) FILTER (WHERE p.id is not null),
             '[]'
-        ) as persons,
-        array_agg(DISTINCT g.name) as genres
+        ) as persons
         FROM content.film_work fw
         LEFT JOIN content.person_film_work pfw ON pfw.film_work_id = fw.id
         LEFT JOIN content.person p ON p.id = pfw.person_id
@@ -40,6 +48,15 @@ query_filmworks_by_genres_modified_date = """
         COALESCE (
             json_agg(
                 DISTINCT jsonb_build_object(
+                    'genre_id', g.id,
+                    'genre_name', g.name
+                )
+            ) FILTER (WHERE gfw.genre_id is not null),
+            '[]'
+        ) as genres,
+        COALESCE (
+            json_agg(
+                DISTINCT jsonb_build_object(
                     'person_role', pfw.role,
                     'person_id', p.id,
                     'person_name', p.full_name
@@ -47,7 +64,6 @@ query_filmworks_by_genres_modified_date = """
             ) FILTER (WHERE p.id is not null),
             '[]'
         ) as persons,
-        array_agg(DISTINCT g.name) as genres,
         min(g.modified) as modified
         FROM content.film_work fw
         LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id
@@ -71,6 +87,15 @@ query_filmworks_by_person_modified_date = """
         COALESCE (
             json_agg(
                 DISTINCT jsonb_build_object(
+                    'genre_id', g.id,
+                    'genre_name', g.name
+                )
+            ) FILTER (WHERE gfw.genre_id is not null),
+            '[]'
+        ) as genres,
+        COALESCE (
+            json_agg(
+                DISTINCT jsonb_build_object(
                     'person_role', pfw.role,
                     'person_id', p.id,
                     'person_name', p.full_name
@@ -78,7 +103,6 @@ query_filmworks_by_person_modified_date = """
             ) FILTER (WHERE p.id is not null),
             '[]'
         ) as persons,
-        array_agg(DISTINCT g.name) as genres,
         min(p.modified) as modified
         FROM content.film_work fw
         LEFT JOIN content.genre_film_work gfw ON gfw.film_work_id = fw.id
