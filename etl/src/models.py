@@ -22,14 +22,14 @@ class Filmwork(BaseModel):
     imdb_rating: Optional[float] = None
     title: str
     description: Optional[str] = None
-    genres: List[FilmworkNested]
-    directors: List[FilmworkNested]
-    actors: List[FilmworkNested]
-    writers: List[FilmworkNested]
     genres_names: List[str]
     directors_names: List[str]
     actors_names: List[str]
     writers_names: List[str]
+    genres: List[FilmworkNested]
+    directors: List[FilmworkNested]
+    actors: List[FilmworkNested]
+    writers: List[FilmworkNested]
 
 
 class Genre(BaseModel):

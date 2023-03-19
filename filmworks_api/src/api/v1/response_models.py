@@ -1,9 +1,10 @@
 from pydantic import BaseModel
 from typing import List, Optional
+from uuid import UUID
 
 
 class UUIDModel(BaseModel):
-    uuid: str
+    uuid: UUID
 
 
 class Film(UUIDModel):

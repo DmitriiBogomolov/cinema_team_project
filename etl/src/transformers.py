@@ -80,12 +80,18 @@ def prepare_person_documents(raw_data_set: List[RealDictRow], index_name: str) -
     """Transform a collection of raw_data from extractor to list of elastic documents"""
 
     documents = []
+    roles_aliases = {
+        'AR': 'actor',
+        'WR': 'writer',
+        'DR': 'director'
+    }
 
     for person_raw in raw_data_set:
 
         roles_by_fwk_id = dict()
         for fwk in person_raw['films']:
-            roles_by_fwk_id[fwk['id']] = (roles_by_fwk_id.get(fwk['id']) or []) + [(fwk['role'])]
+            role = roles_aliases[fwk['role']]
+            roles_by_fwk_id[fwk['id']] = (roles_by_fwk_id.get(fwk['id']) or []) + [role]
 
         person = Person(
             id=person_raw['id'],

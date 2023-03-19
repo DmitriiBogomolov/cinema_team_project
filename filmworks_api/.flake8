@@ -1,0 +1,11 @@
+[flake8]
+max-line-length = 120
+inline-quotes = single
+import-order-style = pep8
+application_import_names =
+    api,
+    core,
+    db,
+    main,
+    models,
+    services

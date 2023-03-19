@@ -1,0 +1,16 @@
+version: "2.2"
+
+services:
+
+  test_es01:
+    image: elasticsearch:7.17.9
+
+    ports:
+      - 9201:9200
+    environment:
+      - discovery.type=single-node
+
+  test_redis:
+    image: redis
+    ports:
+      - "6380:6379"

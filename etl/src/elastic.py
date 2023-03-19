@@ -8,8 +8,7 @@ Backoff after disconnect.
 import json
 from collections.abc import Iterable
 
-from elastic_transport import ConnectionError
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, ConnectionError
 from elasticsearch.helpers import bulk
 
 from logger import logger

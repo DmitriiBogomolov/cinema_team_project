@@ -9,8 +9,6 @@ from db.elastic import get_elastic
 from db.redis import get_redis
 from models.film import Filmwork
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
-
 
 class FilmService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
@@ -18,12 +16,9 @@ class FilmService:
         self.elastic = elastic
 
     async def get_by_id(self, film_id: str) -> Optional[Filmwork]:
-        film = await self._film_from_cache(film_id)
+        film = await self._get_film_from_elastic(film_id)
         if not film:
-            film = await self._get_film_from_elastic(film_id)
-            if not film:
-                return None
-            await self._put_film_to_cache(film)
+            return None
         return film
 
     async def _get_film_from_elastic(self, film_id: str) -> Optional[Filmwork]:
@@ -129,19 +124,6 @@ class FilmService:
         for doc in res['hits']['hits']:
             movies.append(Filmwork(**doc['_source']))
         return movies
-
-    async def _film_from_cache(self, film_id: str) -> Optional[Filmwork]:
-        """Возвращает фильм из кеша по id"""
-        data = await self.redis.get(film_id)
-        if not data:
-            return None
-
-        film = Filmwork.parse_raw(data)
-        return film
-
-    async def _put_film_to_cache(self, film: Filmwork):
-        """Добавляем фильм в кеш"""
-        await self.redis.set(film.id, film.json(), FILM_CACHE_EXPIRE_IN_SECONDS)
 
 
 @lru_cache()
