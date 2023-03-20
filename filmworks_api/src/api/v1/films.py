@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from services.film import FilmService, get_film_service
-from .response_models import Film, FilmDetail, Genre, Person
+from .response_models import Film, FilmDetail
 
 router = APIRouter()
 
@@ -26,14 +26,7 @@ async def film_list(
     if not films:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
 
-    movies = []
-    for film in films:
-        movies.append(Film(
-            uuid=film.id,
-            title=film.title,
-            imdb_rating=film.imdb_rating,
-            ))
-    return movies
+    return [Film(**film.dict()) for film in films]
 
 
 @router.get('/search', response_model=List[Film])
@@ -52,14 +45,7 @@ async def film_search(
     if not films:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
 
-    movies = []
-    for film in films:
-        movies.append(Film(
-            uuid=film.id,
-            title=film.title,
-            imdb_rating=film.imdb_rating,
-            ))
-    return movies
+    return [Film(**film.dict()) for film in films]
 
 
 @router.get('/{film_id}', response_model=FilmDetail)
@@ -72,13 +58,4 @@ async def film_details(
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='film not found')
 
-    return FilmDetail(
-        uuid=film.id,
-        title=film.title,
-        imdb_rating=film.imdb_rating,
-        description=film.description,
-        genre=[Genre(uuid=g.id, name=g.name) for g in film.genres],
-        actors=[Person(uuid=p.id, full_name=p.name) for p in film.actors],
-        writers=[Person(uuid=p.id, full_name=p.name) for p in film.writers],
-        directors=[Person(uuid=p.id, full_name=p.name) for p in film.directors],
-        )
+    return FilmDetail(**film.dict())

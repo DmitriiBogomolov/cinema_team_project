@@ -1,10 +1,13 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from uuid import UUID
 
 
 class UUIDModel(BaseModel):
-    uuid: UUID
+    id: UUID = Field(alias='uuid')
+
+    class Config:
+        allow_population_by_field_name = True
 
 
 class Film(UUIDModel):
@@ -20,12 +23,16 @@ class Person(UUIDModel):
     full_name: str
 
 
+class NestedPerson(UUIDModel):
+    name: str = Field(alias='full_name')
+
+
 class FilmDetail(Film):
     description: Optional[str]
-    genre: List[Genre]
-    actors: List[Person]
-    writers: List[Person]
-    directors: List[Person]
+    genres: List[Genre] = Field(alias='genre')
+    actors: List[NestedPerson]
+    writers: List[NestedPerson]
+    directors: List[NestedPerson]
 
 
 class NestedFilm(UUIDModel):

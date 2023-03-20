@@ -22,8 +22,7 @@ async def get_genre_details(
             status_code=HTTPStatus.NOT_FOUND,
             detail='No genre with that UUID found.'
         )
-
-    return Genre(uuid=genre.uuid, name=genre.name)
+    return Genre(**genre.dict())
 
 
 @router.get('/', response_model=List[Genre])
@@ -36,5 +35,4 @@ async def get_genres_list(
             status_code=HTTPStatus.NOT_FOUND,
             detail='No any genres.'
         )
-
-    return [Genre(uuid=genre.uuid, name=genre.name) for genre in genres_list]
+    return [Genre(**genre.dict()) for genre in genres_list]

@@ -17,16 +17,7 @@ mock_filmwork = Filmwork(
     writers=[],
 )
 
-mock_response = FilmDetail(
-    uuid=mock_filmwork.id,
-    title=mock_filmwork.title,
-    imdb_rating=mock_filmwork.imdb_rating,
-    description=mock_filmwork.description,
-    genre=mock_filmwork.genres,
-    actors=mock_filmwork.actors,
-    directors=mock_filmwork.directors,
-    writers=mock_filmwork.writers
-)
+mock_response = FilmDetail(**mock_filmwork.dict())
 
 
 class MockFilmService:
@@ -49,4 +40,4 @@ client = TestClient(app)
 def test_get_film_by_id():
     response = client.get('/api/v1/films/5633f23a-9423-4c8e-81d9-584d9a402aeb')
     assert response.status_code == 200
-    assert response.json() == orjson.loads(mock_response.json())
+    assert response.json() == orjson.loads(mock_response.json(by_alias=True))

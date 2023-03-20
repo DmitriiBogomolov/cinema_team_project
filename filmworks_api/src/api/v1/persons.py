@@ -44,9 +44,7 @@ async def get_persons_list(response: Response,
             status_code=HTTPStatus.NOT_FOUND,
             detail='No such persons.'
         )
-
-    return [PersonDetail(uuid=person.uuid, full_name=person.full_name, films=person.films)
-            for person in persons_list]
+    return [PersonDetail(**person.dict()) for person in persons_list]
 
 
 @router.get('/{person_id}', response_model=PersonDetail)
@@ -60,8 +58,7 @@ async def get_person_details(
             status_code=HTTPStatus.NOT_FOUND,
             detail='No person with that UUID found.'
         )
-
-    return PersonDetail(uuid=person.uuid, full_name=person.full_name, films=person.films)
+    return PersonDetail(**person.dict())
 
 
 @router.get('/')

@@ -12,4 +12,6 @@ COPY . .
 
 EXPOSE 8000
 
-ENTRYPOINT [ "/app/entrypoint.sh" ]
+WORKDIR /app/src
+
+ENTRYPOINT [ "python", "main.py" ]

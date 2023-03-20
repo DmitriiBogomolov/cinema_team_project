@@ -22,25 +22,16 @@ class FilmService:
         return film
 
     async def _get_film_from_elastic(self, film_id: str) -> Optional[Filmwork]:
-        """Возвращает полную информацию о фильме из эластика по id"""
+        """Возвращает полную информацию о фильме из эластика по id."""
         try:
             doc = await self.elastic.get('movies', film_id)
         except NotFoundError:
             return None
         data = doc['_source']
-        return Filmwork(
-            id=data['id'],
-            title=data['title'],
-            imdb_rating=data['imdb_rating'],
-            description=data['description'],
-            genres=data['genres'],
-            actors=data['actors'],
-            writers=data['writers'],
-            directors=data['directors'],
-            )
+        return Filmwork(**data)
 
     async def get_search_list(self, params) -> Optional[Filmwork]:
-        """Возвращает список фильмов"""
+        """Возвращает список фильмов."""
         films = await self._get_search_from_elastic(*params)
         if not films:
             return None
@@ -59,14 +50,10 @@ class FilmService:
                 'query': {
                     'multi_match': {
                         'query': query,
-                        'fuzziness': 'auto',
                         'fields': [
-                            'title',
+                            'title^3',
                             'description',
-                            'genres_names',
-                            'actors_names',
-                            'writers_names',
-                            'directors_names'
+                            '*_names'
                         ]
                     }
                 }
@@ -74,13 +61,11 @@ class FilmService:
             res = await self.elastic.search(index='movies', doc_type='_doc', body=search)
         except NotFoundError:
             return None
-        movies = []
-        for doc in res['hits']['hits']:
-            movies.append(Filmwork(**doc['_source']))
-        return movies
+        docs = res['hits']['hits']
+        return [Filmwork(**doc['_source']) for doc in docs]
 
     async def get_list(self, params) -> Optional[Filmwork]:
-        """Возвращает список фильмов"""
+        """Возвращает список фильмов."""
         films = await self._get_films_from_elastic(*params)
         if not films:
             return None
@@ -106,24 +91,20 @@ class FilmService:
             # делаем запрос по жанрам
             if genre_id:
                 search['query'] = {
-                    'bool': {
-                        'must': [
-                            {'match': {'genres.id': genre_id}},
-                        ]
-                    }
-                }
+                    'nested': {
+                        'path': 'genres',
+                        'query': {
+                            'match': {'genres.id': genre_id}}}}
+
             # подключаем сортировку только по рейтингу
             if sort == '-imdb_rating':
-                search['sort'] = [
-                        {'imdb_rating': {'order': 'desc'}}
-                    ]
+                search['sort'] = [{'imdb_rating': 'desc'}]
+
             res = await self.elastic.search(index='movies', doc_type='_doc', body=search)
         except NotFoundError:
             return None
-        movies = []
-        for doc in res['hits']['hits']:
-            movies.append(Filmwork(**doc['_source']))
-        return movies
+        docs = res['hits']['hits']
+        return [Filmwork(**doc['_source']) for doc in docs]
 
 
 @lru_cache()

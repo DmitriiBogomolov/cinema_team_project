@@ -7,7 +7,7 @@ from redis.asyncio import Redis
 
 from db.elastic import get_elastic
 from db.redis import get_redis
-from models.common import Genre
+from models.genre import Genre
 
 SIZE = 200
 
@@ -39,25 +39,17 @@ class GenreService:
         except NotFoundError:
             return None
 
-        return Genre(
-            uuid=doc['_source']['id'],
-            name=doc['_source']['name'],
-            description=doc['_source']['description']
-        )
+        return Genre(**doc['_source'])
 
     async def _get_genres_list_from_elastic(self) -> Optional[List[Genre]]:
         try:
-            resp = await self.elastic.search(
-                                    index='genres',
-                                    size=SIZE,
-                                    sort=SORT_PARAMETER
-                                    )
+            resp = await self.elastic.search(index='genres', size=SIZE, sort=SORT_PARAMETER)
         except NotFoundError:
             return None
 
-        return [Genre(uuid=doc['_source']['id'],
-                      name=doc['_source']['name'],
-                      description=doc['_source']['description']) for doc in resp['hits']['hits']]
+        docs = resp['hits']['hits']
+
+        return [Genre(**doc['_source']) for doc in docs]
 
 
 @lru_cache()

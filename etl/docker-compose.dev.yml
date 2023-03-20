@@ -3,15 +3,11 @@ version: "2.2"
 volumes:
   dev-postgres_data:
     driver: local
-  dev-esdata01:
-    driver: local
 
 services:
 
   es01:
     image: elasticsearch:7.17.9
-    volumes:
-      - dev-esdata01:/usr/share/elasticsearch/data
     ports:
       - ${ES_PORT}:9200
     environment:

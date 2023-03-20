@@ -7,9 +7,7 @@ from redis.asyncio import Redis
 
 from db.elastic import get_elastic
 from db.redis import get_redis
-from models.common import NestedPersonFilmwork, Person
-
-GENRE_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
+from models.person import Person
 
 SORT_PARAMETER = 'full_name.raw'
 
@@ -55,12 +53,7 @@ class PersonService:
         except NotFoundError:
             return None
 
-        return Person(
-            uuid=doc['_source']['id'],
-            full_name=doc['_source']['full_name'],
-            films=[NestedPersonFilmwork(uuid=film['id'], roles=film['roles'])
-                   for film in doc['_source']['films']]
-        )
+        return Person(**doc['_source'])
 
     async def _get_persons_list_from_elastic(
                                     self,
@@ -86,13 +79,7 @@ class PersonService:
 
         docs = resp['hits']['hits']
 
-        return [
-            Person(
-                uuid=doc['_source']['id'],
-                full_name=doc['_source']['full_name'],
-                films=[NestedPersonFilmwork(uuid=film['id'], roles=film['roles'])
-                       for film in doc['_source']['films']]
-            ) for doc in docs]
+        return [Person(**doc['_source']) for doc in docs]
 
 
 @lru_cache()

@@ -1,13 +1,13 @@
 import logging  # noqa
-
 import uvicorn
+
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 
 from api.v1 import films, genres, persons
-from core import config
+from core import config, cache
 from core.logger import LOGGING  # noqa
 from db import elastic, redis
 
@@ -21,7 +21,7 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    redis.redis = Redis(host=config.REDIS_HOST, port=config.REDIS_PORT)
+    redis.redis = Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=config.REDIS_DB)
     elastic.es = AsyncElasticsearch(hosts=[f'{config.ELASTIC_HOST}:{config.ELASTIC_PORT}'])
 
 
@@ -30,6 +30,8 @@ async def shutdown():
     await redis.redis.close()
     await elastic.es.close()
 
+
+app.middleware('http')(cache.cache_middleware)
 
 app.include_router(films.router, prefix='/api/v1/films', tags=['films'])
 app.include_router(genres.router, prefix='/api/v1/genres', tags=['genres'])

@@ -1,4 +1,4 @@
-import json
+import orjson
 
 from fastapi.testclient import TestClient
 
@@ -30,10 +30,10 @@ client = TestClient(app)
 def test_get_genre_by_id() -> None:
     response = client.get(f'/api/v1/genres/{mock_genres.list_[0].uuid}')
     assert response.status_code == 200
-    assert response.json() == json.loads(mock_genres.list_[0].json(exclude={'description'}))
+    assert response.json() == orjson.loads(mock_genres.list_[0].json(exclude={'description'}))
 
 
 def test_get_genres_by_list() -> None:
     response = client.get('/api/v1/genres/')
     assert response.status_code == 200
-    assert response.json() == [json.loads(mock.json(exclude={'description'})) for mock in mock_genres.list_]
+    assert response.json() == [orjson.loads(mock.json(exclude={'description'})) for mock in mock_genres.list_]

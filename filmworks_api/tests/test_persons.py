@@ -1,4 +1,4 @@
-import json
+import orjson
 
 from fastapi.testclient import TestClient
 
@@ -40,10 +40,10 @@ client = TestClient(app)
 def test_get_person_by_id() -> None:
     response = client.get(f'/api/v1/persons/{mock_persons.list_[0].uuid}')
     assert response.status_code == 200
-    assert response.json() == json.loads(mock_persons.list_[0].json())
+    assert response.json() == orjson.loads(mock_persons.list_[0].json())
 
 
 def test_get_persons_by_list() -> None:
     response = client.get('/api/v1/persons/search')
     assert response.status_code == 200
-    assert response.json() == [json.loads(mock.json()) for mock in mock_persons.list_]
+    assert response.json() == [orjson.loads(mock.json()) for mock in mock_persons.list_]
