@@ -22,17 +22,17 @@ class PersonService:
         person = await self._get_person_from_elastic(person_id)
         if not person:
             return None
-
         return person
 
-    async def get_list(self,
-                       query: str = '',
-                       page_number: int = 1,
-                       page_size: int = 50,
-                       pit: str = '') -> list[Person] | None:
+    async def get_list(
+            self,
+            query: str = '',
+            page_number: int = 1,
+            page_size: int = 50,
+            pit: str = ''
+            ) -> list[Person] | None:
 
         persons_list = False
-
         params = {
             'query': query,
             'page_number': page_number,
@@ -55,11 +55,12 @@ class PersonService:
         return Person(**doc['_source'])
 
     async def _get_persons_list_from_elastic(
-                                    self,
-                                    query: str = '',
-                                    page_number: int = 1,
-                                    page_size: int = 50,
-                                    pit: str = '') -> list[Person] | None:
+            self,
+            query: str = '',
+            page_number: int = 1,
+            page_size: int = 50,
+            pit: str = ''
+            ) -> list[Person] | None:
 
         try:
             offset = (page_number-1) * page_size

@@ -1,8 +1,7 @@
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, Request, Query
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, Query
 
 from src.api.v1.response_models import PersonDetail
 from src.core.config import PIT_MAX_AGE
@@ -15,13 +14,15 @@ INDEX_NAME = 'persons'
 
 
 @router.get('/search', response_model=list[PersonDetail])
-async def get_persons_list(response: Response,
-                           query: str = Query(default='', max_length=100),
-                           page_number: int = Query(default=1, min=1),
-                           page_size: int = Query(default=50, min=1, max=200),
-                           person_list_PIT: str | None = Cookie(default=None),
-                           person_service: PersonService = Depends(get_person_service),
-                           PIT_service: PITService = Depends(get_pit_service)) -> list[PersonDetail]:
+async def get_persons_list(
+    response: Response,
+    query: str = Query(default='', max_length=100),
+    page_number: int = Query(default=1, min=1),
+    page_size: int = Query(default=50, min=1, max=200),
+    person_list_PIT: str | None = Cookie(default=None),
+    person_service: PersonService = Depends(get_person_service),
+    PIT_service: PITService = Depends(get_pit_service)
+) -> list[PersonDetail]:
 
     if not person_list_PIT:
         person_list_PIT = await PIT_service.get_pit_token(INDEX_NAME)
@@ -47,8 +48,9 @@ async def get_persons_list(response: Response,
 
 @router.get('/{person_id}', response_model=PersonDetail)
 async def get_person_details(
-                    person_id: UUID,
-                    person_service: PersonService = Depends(get_person_service)) -> PersonDetail:
+    person_id: UUID,
+    person_service: PersonService = Depends(get_person_service)
+) -> PersonDetail:
 
     person = await person_service.get_by_id(person_id)
     if not person:
@@ -57,10 +59,3 @@ async def get_person_details(
             detail='No person with that UUID found.'
         )
     return PersonDetail(**person.dict())
-
-
-@router.get('/')
-async def persons_list_redirect(request: Request):
-    redirect_url = request.url_for('get_persons_list')
-    response = RedirectResponse(url=redirect_url)
-    return response
