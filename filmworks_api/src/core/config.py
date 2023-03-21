@@ -1,18 +1,22 @@
 from logging import config as logging_config
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings
 from src.core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
 
 class AppConfig(BaseSettings):
-    PROJECT_NAME: str = Field(..., env='PROJECT_NAME')
-    REDIS_HOST: str = Field(..., env='REDIS_HOST')
-    REDIS_PORT: int = Field(..., env='REDIS_PORT')
-    REDIS_DB: int = Field(..., env='REDIS_DB')
+    PROJECT_NAME: str = 'movies'
+    REDIS_HOST: str = 'redis'
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 2
 
-    ELASTIC_HOST: str = Field(..., env='ELASTIC_HOST')
-    ELASTIC_PORT: int = Field(..., env='ELASTIC_PORT')
+    ELASTIC_HOST: str = 'es01'
+    ELASTIC_PORT: int = 9200
+
+    class Config:
+        env_file = '.env'
+        env_file_encoding = 'utf-8'
 
 
 class PITConfig(BaseSettings):
