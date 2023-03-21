@@ -1,23 +1,21 @@
-import os
 from logging import config as logging_config
-from dotenv import load_dotenv
-
+from pydantic import BaseSettings, Field
 from src.core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-load_dotenv(os.path.join(os.path.dirname(BASE_DIR), '.env'))
+class AppConfig(BaseSettings):
+    PROJECT_NAME: str = Field(..., env='PROJECT_NAME')
+    REDIS_HOST: str = Field(..., env='REDIS_HOST')
+    REDIS_PORT: int = Field(..., env='REDIS_PORT')
+    REDIS_DB: int = Field(..., env='REDIS_DB')
 
-PROJECT_NAME = os.getenv('PROJECT_NAME', 'movies')
+    ELASTIC_HOST: str = Field(..., env='ELASTIC_HOST')
+    ELASTIC_PORT: int = Field(..., env='ELASTIC_PORT')
 
-REDIS_HOST = os.getenv('REDIS_HOST', '127.0.0.1')
-REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
-REDIS_DB = int(os.getenv('REDIS_DB', 2))
+    PIT_MAX_AGE: int = 20  # in seconds
+    USE_PIT_ROTATION: bool = True
 
-ELASTIC_HOST = os.getenv('ELASTIC_HOST', '127.0.0.1')
-ELASTIC_PORT = int(os.getenv('ELASTIC_PORT', 9200))
 
-PIT_MAX_AGE = 20  # in seconds
-USE_PIT_ROTATION = True
+config = AppConfig()

@@ -7,7 +7,8 @@ from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 
 from src.api.v1 import films, genres, persons
-from src.core import config, cache
+from src.core import cache
+from src.core.config import config
 from src.core.logger import LOGGING  # noqa
 from src.db import elastic, redis
 

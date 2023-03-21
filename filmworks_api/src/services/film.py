@@ -29,7 +29,7 @@ class FilmService:
         data = doc['_source']
         return Filmwork(**data)
 
-    async def get_search_list(self, params) -> Filmwork | None:
+    async def get_search_list(self, params) -> list[Filmwork] | None:
         """Возвращает список фильмов."""
         films = await self._get_search_from_elastic(*params)
         if not films:
@@ -41,7 +41,7 @@ class FilmService:
             query: str,
             page_size: int,
             page_number: int,
-            ) -> Filmwork | None:
+            ) -> list[Filmwork] | None:
         try:
             search = {
                 'from': page_size * (page_number-1),
@@ -63,7 +63,7 @@ class FilmService:
         docs = res['hits']['hits']
         return [Filmwork(**doc['_source']) for doc in docs]
 
-    async def get_list(self, params) -> Filmwork | None:
+    async def get_list(self, params) -> list[Filmwork] | None:
         """Возвращает список фильмов."""
         films = await self._get_films_from_elastic(*params)
         if not films:
@@ -76,7 +76,7 @@ class FilmService:
             sort: str,
             page_size: int,
             page_number: int,
-            ) -> Filmwork | None:
+            ) -> list[Filmwork] | None:
         try:
             # если параметры пагинации не указаны,
             # по умолчанию будет выведено 50 записей на первой странице
