@@ -1,5 +1,4 @@
 from http import HTTPStatus
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -9,14 +8,14 @@ from src.api.v1.response_models import Film, FilmDetail
 router = APIRouter()
 
 
-@router.get('', response_model=List[Film])
+@router.get('', response_model=list[Film])
 async def film_list(
     genre: str = None,
     sort: str = None,
     page_size: int = 50,
     page_number: int = 1,
     film_service: FilmService = Depends(get_film_service)
-) -> List[Film]:
+) -> list[Film]:
 
     films = await film_service.get_list([
         genre,
@@ -30,13 +29,13 @@ async def film_list(
     return [Film(**film.dict()) for film in films]
 
 
-@router.get('/search', response_model=List[Film])
+@router.get('/search', response_model=list[Film])
 async def film_search(
     query: str,
     page_size: int = 50,
     page_number: int = 1,
     film_service: FilmService = Depends(get_film_service)
-) -> List[Film]:
+) -> list[Film]:
 
     films = await film_service.get_search_list([
         query,

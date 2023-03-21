@@ -9,7 +9,7 @@ from src.db.elastic import get_elastic
 from src.db.redis import get_redis
 
 
-class PITService():
+class PITService:
     """
     Generates elsaticsearch point in time token for a specific index.
     Returns a new token if the previous one has lifetime expired.
@@ -48,7 +48,7 @@ class PITService():
         pit_token = pit_token['id']
         return pit_token
 
-    async def _get_from_redis(self, pit_key: str) -> str:
+    async def _get_from_redis(self, pit_key: str) -> str | None:
         """Tries to take token from from redis"""
 
         pit_token = await self.redis.get(pit_key)

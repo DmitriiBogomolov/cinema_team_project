@@ -1,5 +1,3 @@
-from typing import List
-
 from src.models.common import UUIDModel
 
 
@@ -15,4 +13,4 @@ class NestedPerson(UUIDModel):
 
 class NestedPersonFilmwork(UUIDModel):
     """Represents a nested `person_filmwork` relation."""
-    roles: List[str]
+    roles: list[str]

@@ -1,4 +1,3 @@
-from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -6,13 +5,13 @@ from pydantic import BaseModel, Field
 
 class NestedFilm(BaseModel):
     id: UUID = Field(alias='uuid')
-    roles: List[str]
+    roles: list[str]
 
 
 class Person(BaseModel):
     id: UUID = Field(alias='uuid')
     full_name: str
-    films: List[Optional[NestedFilm]]
+    films: list[NestedFilm] | None = None
 
 
 list_ = [
