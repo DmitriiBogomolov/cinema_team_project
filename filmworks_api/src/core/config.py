@@ -14,8 +14,11 @@ class AppConfig(BaseSettings):
     ELASTIC_HOST: str = Field(..., env='ELASTIC_HOST')
     ELASTIC_PORT: int = Field(..., env='ELASTIC_PORT')
 
+
+class PITConfig(BaseSettings):
     PIT_MAX_AGE: int = 20  # in seconds
     USE_PIT_ROTATION: bool = True
 
 
 config = AppConfig()
+pit_config = PITConfig()
