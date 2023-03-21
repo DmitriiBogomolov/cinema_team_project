@@ -32,7 +32,7 @@ async def get_persons_list(response: Response,
         'query': query,
         'page_number': page_number,
         'page_size': page_size,
-        'PIT': person_list_PIT
+        'pit': person_list_PIT
     }
 
     persons_list = await person_service.get_list(**params)
