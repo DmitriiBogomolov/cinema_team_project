@@ -1,9 +1,10 @@
 import json
+from http import HTTPStatus
 
 from fastapi import Request
 from fastapi.responses import JSONResponse, Response
 
-from db.redis import get_redis
+from src.db.redis import get_redis
 
 CACHE_TTL = 60
 
@@ -19,7 +20,7 @@ async def cache_middleware(request: Request, call_next):
 
     response = await call_next(request)
 
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         response_body = b''
         async for chunk in response.body_iterator:
             response_body += chunk

@@ -1,10 +1,11 @@
 import orjson
+from http import HTTPStatus
 
 from fastapi.testclient import TestClient
 
 from mocks import mock_genres
-from api.v1.genres import get_genre_service
-from main import app
+from src.api.v1.genres import get_genre_service
+from src.main import app
 
 
 class MockGenreService:
@@ -29,11 +30,11 @@ client = TestClient(app)
 
 def test_get_genre_by_id() -> None:
     response = client.get(f'/api/v1/genres/{mock_genres.list_[0].uuid}')
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json() == orjson.loads(mock_genres.list_[0].json(exclude={'description'}))
 
 
 def test_get_genres_by_list() -> None:
     response = client.get('/api/v1/genres/')
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json() == [orjson.loads(mock.json(exclude={'description'})) for mock in mock_genres.list_]

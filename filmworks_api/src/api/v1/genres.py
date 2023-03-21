@@ -4,9 +4,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from services.genre import GenreService, get_genre_service
-
-from .response_models import Genre
+from src.api.v1.response_models import Genre
+from src.services.genre import GenreService, get_genre_service
 
 router = APIRouter()
 

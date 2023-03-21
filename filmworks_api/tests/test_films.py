@@ -1,10 +1,12 @@
 import orjson
+from http import HTTPStatus
+
 from fastapi.testclient import TestClient
 
-from api.v1.films import get_film_service
-from api.v1.response_models import FilmDetail
-from models.film import Filmwork
-from main import app
+from src.api.v1.films import get_film_service
+from src.api.v1.response_models import FilmDetail
+from src.models.film import Filmwork
+from src.main import app
 
 mock_filmwork = Filmwork(
     id='5633f23a-9423-4c8e-81d9-584d9a402aeb',
@@ -39,5 +41,5 @@ client = TestClient(app)
 
 def test_get_film_by_id():
     response = client.get('/api/v1/films/5633f23a-9423-4c8e-81d9-584d9a402aeb')
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json() == orjson.loads(mock_response.json(by_alias=True))

@@ -15,4 +15,7 @@ start-api:
 stop-api:
 	docker stop $(CONTAINER_NAME) && docker rm $(CONTAINER_NAME)
 
-start-service: start-etl start-api
+start-service:
+	cat etl/.env.example > etl/.env
+	cat filmworks_api/.env-sample > filmworks_api/.env
+	docker-compose up -d

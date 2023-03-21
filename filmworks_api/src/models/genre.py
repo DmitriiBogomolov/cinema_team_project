@@ -1,5 +1,6 @@
-from models.common import UUIDModel
 from typing import Optional
+
+from src.models.common import UUIDModel
 
 
 class Genre(UUIDModel):

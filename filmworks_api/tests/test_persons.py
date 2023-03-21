@@ -1,10 +1,11 @@
 import orjson
+from http import HTTPStatus
 
 from fastapi.testclient import TestClient
 
 from mocks import mock_persons
-from api.v1.persons import get_person_service, get_pit_service
-from main import app
+from src.api.v1.persons import get_person_service, get_pit_service
+from src.main import app
 
 
 class MockPersonService:
@@ -39,11 +40,11 @@ client = TestClient(app)
 
 def test_get_person_by_id() -> None:
     response = client.get(f'/api/v1/persons/{mock_persons.list_[0].uuid}')
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json() == orjson.loads(mock_persons.list_[0].json())
 
 
 def test_get_persons_by_list() -> None:
     response = client.get('/api/v1/persons/search')
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json() == [orjson.loads(mock.json()) for mock in mock_persons.list_]

@@ -1,7 +1,7 @@
 from typing import List
 
-from models.common import UUIDModel
-from models.nested import NestedPersonFilmwork
+from src.models.common import UUIDModel
+from src.models.nested import NestedPersonFilmwork
 
 
 class Person(UUIDModel):

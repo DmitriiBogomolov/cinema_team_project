@@ -1,6 +1,6 @@
 from typing import List
 
-from models.common import UUIDModel
+from src.models.common import UUIDModel
 
 
 class NestedGenre(UUIDModel):
