@@ -1,4 +1,4 @@
-from models.common import UUIDModel
+from src.models.common import UUIDModel
 
 
 class Genre(UUIDModel):

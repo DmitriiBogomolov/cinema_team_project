@@ -4,9 +4,9 @@ from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
 from redis.asyncio import Redis
 
-from db.elastic import get_elastic
-from db.redis import get_redis
-from models.film import Filmwork
+from src.db.elastic import get_elastic
+from src.db.redis import get_redis
+from src.models.film import Filmwork
 
 
 class FilmService:

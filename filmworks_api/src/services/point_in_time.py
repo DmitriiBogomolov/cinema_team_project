@@ -4,9 +4,9 @@ from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 from redis.asyncio import Redis
 
-from core.config import PIT_MAX_AGE, USE_PIT_ROTATION
-from db.elastic import get_elastic
-from db.redis import get_redis
+from src.core.config import PIT_MAX_AGE, USE_PIT_ROTATION
+from src.db.elastic import get_elastic
+from src.db.redis import get_redis
 
 
 class PITService:

@@ -1,5 +1,5 @@
-from models.common import UUIDModel
-from models.nested import NestedGenre, NestedPerson
+from src.models.common import UUIDModel
+from src.models.nested import NestedGenre, NestedPerson
 
 
 class Filmwork(UUIDModel):

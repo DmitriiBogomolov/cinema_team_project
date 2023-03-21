@@ -4,11 +4,10 @@ from uuid import UUID
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, Request, Query
 from fastapi.responses import RedirectResponse
 
-from core.config import PIT_MAX_AGE
-from services.person import PersonService, get_person_service
-from services.point_in_time import PITService, get_pit_service
-
-from .response_models import PersonDetail
+from src.api.v1.response_models import PersonDetail
+from src.core.config import PIT_MAX_AGE
+from src.services.person import PersonService, get_person_service
+from src.services.point_in_time import PITService, get_pit_service
 
 router = APIRouter()
 
