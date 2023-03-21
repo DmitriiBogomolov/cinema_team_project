@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, Query
 
+from src.api.v1.common import PaginationParams
 from src.api.v1.response_models import PersonDetail
 from src.core.config import pit_config
 from src.services.person import PersonService, get_person_service
@@ -17,8 +18,7 @@ INDEX_NAME = 'persons'
 async def get_persons_list(
     response: Response,
     query: str = Query(default='', max_length=100),
-    page_number: int = Query(default=1, min=1),
-    page_size: int = Query(default=50, min=1, max=200),
+    pp: PaginationParams = Depends(PaginationParams),
     person_list_PIT: str | None = Cookie(default=None),
     person_service: PersonService = Depends(get_person_service),
     PIT_service: PITService = Depends(get_pit_service)
@@ -31,8 +31,8 @@ async def get_persons_list(
 
     params = {
         'query': query,
-        'page_number': page_number,
-        'page_size': page_size,
+        'page_number': pp.page_number,
+        'page_size': pp.page_size,
         'pit': person_list_PIT
     }
 

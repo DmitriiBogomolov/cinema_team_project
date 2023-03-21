@@ -2,26 +2,26 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from src.services.film import FilmService, get_film_service
+from src.api.v1.common import PaginationParams
 from src.api.v1.response_models import Film, FilmDetail
+from src.services.film import FilmService, get_film_service
 
 router = APIRouter()
 
 
-@router.get('', response_model=list[Film])
+@router.get('/', response_model=list[Film])
 async def film_list(
+    pp: PaginationParams = Depends(PaginationParams),
     genre: str = None,
     sort: str = None,
-    page_size: int = 50,
-    page_number: int = 1,
     film_service: FilmService = Depends(get_film_service)
 ) -> list[Film]:
 
     films = await film_service.get_list([
         genre,
         sort,
-        page_size,
-        page_number
+        pp.page_size,
+        pp.page_number
     ])
     if not films:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
@@ -32,15 +32,14 @@ async def film_list(
 @router.get('/search', response_model=list[Film])
 async def film_search(
     query: str,
-    page_size: int = 50,
-    page_number: int = 1,
+    pp: PaginationParams = Depends(PaginationParams),
     film_service: FilmService = Depends(get_film_service)
 ) -> list[Film]:
 
     films = await film_service.get_search_list([
         query,
-        page_size,
-        page_number
+        pp.page_size,
+        pp.page_number
     ])
     if not films:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
