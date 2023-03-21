@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
 from uuid import UUID
 
 
@@ -12,7 +11,7 @@ class UUIDModel(BaseModel):
 
 class Film(UUIDModel):
     title: str
-    imdb_rating: Optional[float]
+    imdb_rating: float | None = None
 
 
 class Genre(UUIDModel):
@@ -28,16 +27,16 @@ class NestedPerson(UUIDModel):
 
 
 class FilmDetail(Film):
-    description: Optional[str]
-    genres: List[Genre] = Field(alias='genre')
-    actors: List[NestedPerson]
-    writers: List[NestedPerson]
-    directors: List[NestedPerson]
+    description: str | None = None
+    genres: list[Genre] = Field(alias='genre')
+    actors: list[NestedPerson]
+    writers: list[NestedPerson]
+    directors: list[NestedPerson]
 
 
 class NestedFilm(UUIDModel):
-    roles: List[str]
+    roles: list[str]
 
 
 class PersonDetail(Person):
-    films: List[NestedFilm]
+    films: list[NestedFilm]

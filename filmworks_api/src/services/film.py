@@ -1,5 +1,4 @@
 from functools import lru_cache
-from typing import Optional
 
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
@@ -15,13 +14,13 @@ class FilmService:
         self.redis = redis
         self.elastic = elastic
 
-    async def get_by_id(self, film_id: str) -> Optional[Filmwork]:
+    async def get_by_id(self, film_id: str) -> Filmwork | None:
         film = await self._get_film_from_elastic(film_id)
         if not film:
             return None
         return film
 
-    async def _get_film_from_elastic(self, film_id: str) -> Optional[Filmwork]:
+    async def _get_film_from_elastic(self, film_id: str) -> Filmwork | None:
         """Возвращает полную информацию о фильме из эластика по id."""
         try:
             doc = await self.elastic.get('movies', film_id)
@@ -30,7 +29,7 @@ class FilmService:
         data = doc['_source']
         return Filmwork(**data)
 
-    async def get_search_list(self, params) -> Optional[Filmwork]:
+    async def get_search_list(self, params) -> Filmwork | None:
         """Возвращает список фильмов."""
         films = await self._get_search_from_elastic(*params)
         if not films:
@@ -42,7 +41,7 @@ class FilmService:
             query: str,
             page_size: int,
             page_number: int,
-            ) -> Optional[Filmwork]:
+            ) -> Filmwork | None:
         try:
             search = {
                 'from': page_size * (page_number-1),
@@ -64,7 +63,7 @@ class FilmService:
         docs = res['hits']['hits']
         return [Filmwork(**doc['_source']) for doc in docs]
 
-    async def get_list(self, params) -> Optional[Filmwork]:
+    async def get_list(self, params) -> Filmwork | None:
         """Возвращает список фильмов."""
         films = await self._get_films_from_elastic(*params)
         if not films:
@@ -77,7 +76,7 @@ class FilmService:
             sort: str,
             page_size: int,
             page_number: int,
-            ) -> Optional[Filmwork]:
+            ) -> Filmwork | None:
         try:
             # если параметры пагинации не указаны,
             # по умолчанию будет выведено 50 записей на первой странице
