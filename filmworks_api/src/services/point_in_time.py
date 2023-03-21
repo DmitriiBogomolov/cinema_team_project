@@ -4,7 +4,7 @@ from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 from redis.asyncio import Redis
 
-from src.core.config import PIT_MAX_AGE, USE_PIT_ROTATION
+from src.core.config import pit_config
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
 
@@ -23,7 +23,7 @@ class PITService:
     async def get_pit_token(self, index_name: str) -> str:
         """If rotation enabled, tries to take it from redis."""
 
-        if not USE_PIT_ROTATION:
+        if not pit_config.USE_PIT_ROTATION:
             return await self.get_new_pit_token(index_name)
 
         pit_key = f'{index_name}_PIT'
@@ -39,7 +39,7 @@ class PITService:
     async def get_new_pit_token(self, index_name: str) -> str:
         """Generate a new token with PIT_MAX_AGE lifetime (in seconds)."""
 
-        keep_alive = f'{str(PIT_MAX_AGE + 20)}s'
+        keep_alive = f'{str(pit_config.PIT_MAX_AGE + 20)}s'
         pit_token = await self.elastic.open_point_in_time(
                             index_name,
                             params={'keep_alive': keep_alive},
@@ -60,7 +60,7 @@ class PITService:
     async def _set_to_redis(self, pit_key: str, pit_token: str) -> None:
         """Save token for a PIT_MAX_AGE seconds."""
 
-        await self.redis.set(pit_key, pit_token, PIT_MAX_AGE)
+        await self.redis.set(pit_key, pit_token, pit_config.PIT_MAX_AGE)
 
 
 @lru_cache()

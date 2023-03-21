@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, Query
 
 from src.api.v1.response_models import PersonDetail
-from src.core.config import PIT_MAX_AGE
+from src.core.config import pit_config
 from src.services.person import PersonService, get_person_service
 from src.services.point_in_time import PITService, get_pit_service
 
@@ -27,7 +27,7 @@ async def get_persons_list(
     if not person_list_PIT:
         person_list_PIT = await PIT_service.get_pit_token(INDEX_NAME)
 
-    response.set_cookie(key='person_list_PIT', value=person_list_PIT, max_age=PIT_MAX_AGE)
+    response.set_cookie(key='person_list_PIT', value=person_list_PIT, max_age=pit_config.PIT_MAX_AGE)
 
     params = {
         'query': query,
