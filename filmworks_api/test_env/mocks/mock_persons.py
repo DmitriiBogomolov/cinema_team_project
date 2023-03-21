@@ -11,7 +11,7 @@ class NestedFilm(BaseModel):
 class Person(BaseModel):
     id: UUID = Field(alias='uuid')
     full_name: str
-    films: list[NestedFilm] | None = None 
+    films: list[NestedFilm] | None = None
 
 
 list_ = [
