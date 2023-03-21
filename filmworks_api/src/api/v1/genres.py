@@ -11,8 +11,9 @@ router = APIRouter()
 
 @router.get('/{genre_id}', response_model=Genre)
 async def get_genre_details(
-                    genre_id: UUID,
-                    genre_service: GenreService = Depends(get_genre_service)) -> Genre:
+    genre_id: UUID,
+    genre_service: GenreService = Depends(get_genre_service)
+) -> Genre:
 
     genre = await genre_service.get_by_id(genre_id)
     if not genre:
@@ -25,7 +26,8 @@ async def get_genre_details(
 
 @router.get('/', response_model=list[Genre])
 async def get_genres_list(
-            genre_service: GenreService = Depends(get_genre_service)) -> list[Genre]:
+    genre_service: GenreService = Depends(get_genre_service)
+) -> list[Genre]:
 
     genres_list = await genre_service.get_list()
     if not genres_list:
