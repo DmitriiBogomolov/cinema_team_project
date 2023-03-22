@@ -23,8 +23,8 @@ services:
 
   es01:
     image: elasticsearch:7.17.9
-    ports:
-      - "9200:9200"
+    expose:
+      - "9200"
     environment:
       - discovery.type=single-node
     healthcheck:

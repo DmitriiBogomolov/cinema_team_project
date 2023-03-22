@@ -7,6 +7,7 @@ from redis.asyncio import Redis
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
 from src.models.film import Filmwork
+from src.api.v1.common import PaginationParams
 
 
 class FilmService:
@@ -20,6 +21,27 @@ class FilmService:
             return None
         return film
 
+    async def get_by_ids(self, film_ids: list[str]) -> list[Filmwork] | None:
+        """Возвращает список фильмов по id."""
+        films = await self._get_films_by_ids_from_elastic(film_ids)
+        if not films:
+            return None
+        return films
+
+    async def get_search_list(self, params) -> list[Filmwork] | None:
+        """Возвращает список фильмов."""
+        films = await self._get_search_from_elastic(*params)
+        if not films:
+            return None
+        return films
+
+    async def get_list(self, params) -> list[Filmwork] | None:
+        """Возвращает список фильмов."""
+        films = await self._get_films_from_elastic(*params)
+        if not films:
+            return None
+        return films
+
     async def _get_film_from_elastic(self, film_id: str) -> Filmwork | None:
         """Возвращает полную информацию о фильме из эластика по id."""
         try:
@@ -29,23 +51,33 @@ class FilmService:
         data = doc['_source']
         return Filmwork(**data)
 
-    async def get_search_list(self, params) -> list[Filmwork] | None:
-        """Возвращает список фильмов."""
-        films = await self._get_search_from_elastic(*params)
-        if not films:
+    async def _get_films_by_ids_from_elastic(self, film_ids: list[str]):
+        """Возвращает список фильмов из эластика по id."""
+        try:
+            search = {
+                'sort': [{'imdb_rating': 'desc'}],
+                'query': {
+                    'ids': {
+                        'values': film_ids
+                    }
+                },
+            }
+            res = await self.elastic.search(index='movies', doc_type='_doc', body=search)
+        except NotFoundError:
             return None
-        return films
+
+        docs = res['hits']['hits']
+        return [Filmwork(**doc['_source']) for doc in docs]
 
     async def _get_search_from_elastic(
             self,
             query: str,
-            page_size: int,
-            page_number: int,
+            pp: PaginationParams
             ) -> list[Filmwork] | None:
         try:
             search = {
-                'from': page_size * (page_number-1),
-                'size': page_size,
+                'from': pp.page_size * (pp.page_number-1),
+                'size': pp.page_size,
                 'query': {
                     'multi_match': {
                         'query': query,
@@ -63,26 +95,18 @@ class FilmService:
         docs = res['hits']['hits']
         return [Filmwork(**doc['_source']) for doc in docs]
 
-    async def get_list(self, params) -> list[Filmwork] | None:
-        """Возвращает список фильмов."""
-        films = await self._get_films_from_elastic(*params)
-        if not films:
-            return None
-        return films
-
     async def _get_films_from_elastic(
             self,
             genre_id: str,
             sort: str,
-            page_size: int,
-            page_number: int,
+            pp: PaginationParams
             ) -> list[Filmwork] | None:
         try:
             # если параметры пагинации не указаны,
             # по умолчанию будет выведено 50 записей на первой странице
             search = {
-                'from': page_size * (page_number-1),  # колво пропущенных записей
-                'size': page_size,
+                'from': pp.page_size * (pp.page_number-1),  # колво пропущенных записей
+                'size': pp.page_size,
                 'query': {
                     'match_all': {}
                 }

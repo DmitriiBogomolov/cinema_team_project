@@ -1,8 +1,24 @@
+from fastapi import Query
+
+
 class PaginationParams:
     """Общие парамеры постраничного разбиения выдачи эндпоинтов API."""
 
-    def __init__(self,
-                 page_size: int = 50,
-                 page_number: int = 1) -> None:
-        self.page_size = page_size
+    def __init__(
+        self,
+        page_number: int = Query(
+            1,
+            title='Page number.',
+            description='Page number to return',
+            ge=1,
+        ),
+        page_size: int = Query(
+            50,
+            title='Size of page.',
+            description='The number of records returned per page',
+            ge=1,
+            le=500,
+        ),
+    ):
         self.page_number = page_number
+        self.page_size = page_size

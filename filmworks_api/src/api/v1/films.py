@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get('/', response_model=list[Film])
 async def film_list(
-    pp: PaginationParams = Depends(PaginationParams),
+    pp: PaginationParams = Depends(),
     genre: str = None,
     sort: str = None,
     film_service: FilmService = Depends(get_film_service)
@@ -20,8 +20,7 @@ async def film_list(
     films = await film_service.get_list([
         genre,
         sort,
-        pp.page_size,
-        pp.page_number
+        pp
     ])
     if not films:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
@@ -32,14 +31,13 @@ async def film_list(
 @router.get('/search', response_model=list[Film])
 async def film_search(
     query: str,
-    pp: PaginationParams = Depends(PaginationParams),
+    pp: PaginationParams = Depends(),
     film_service: FilmService = Depends(get_film_service)
 ) -> list[Film]:
 
     films = await film_service.get_search_list([
         query,
-        pp.page_size,
-        pp.page_number
+        pp
     ])
     if not films:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')

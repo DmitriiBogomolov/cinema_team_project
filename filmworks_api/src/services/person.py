@@ -7,6 +7,7 @@ from redis.asyncio import Redis
 from src.db.elastic import get_elastic
 from src.db.redis import get_redis
 from src.models.person import Person
+from src.api.v1.common import PaginationParams
 
 SORT_PARAMETER = 'full_name.raw'
 
@@ -27,16 +28,14 @@ class PersonService:
     async def get_list(
             self,
             query: str = '',
-            page_number: int = 1,
-            page_size: int = 50,
+            pp: PaginationParams | None = None,
             pit: str = ''
             ) -> list[Person] | None:
 
         persons_list = False
         params = {
             'query': query,
-            'page_number': page_number,
-            'page_size': page_size,
+            'pp': pp,
             'pit': pit
         }
 
@@ -57,19 +56,18 @@ class PersonService:
     async def _get_persons_list_from_elastic(
             self,
             query: str = '',
-            page_number: int = 1,
-            page_size: int = 50,
+            pp: PaginationParams | None = None,
             pit: str = ''
             ) -> list[Person] | None:
 
         try:
-            offset = (page_number-1) * page_size
+            offset = (pp.page_number-1) * pp.page_size
             query = {'match': {'full_name': query}} if query else None
 
             resp = await self.elastic.search(
                     query=query,
                     from_=offset,
-                    size=page_size,
+                    size=pp.page_size,
                     sort=SORT_PARAMETER,
                     pit={'id': pit}
             )

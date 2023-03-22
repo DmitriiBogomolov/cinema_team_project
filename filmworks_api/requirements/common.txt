@@ -1,10 +1,10 @@
-redis==4.4.2
+redis==4.5.2
 elasticsearch[async]==7.17.9
-fastapi==0.61.1
-orjson==3.8.7
-pydantic==1.10.5
+fastapi==0.95.0
+orjson==3.8.8
+pydantic==1.10.6
 python-dotenv==1.0.0
 requests==2.28.2
-uvicorn[standard]>=0.12.2
+uvicorn[standard]>=0.21.1
 uvloop==0.17.0 ; sys_platform != "win32" and implementation_name == "cpython"
 gunicorn==20.1.0
