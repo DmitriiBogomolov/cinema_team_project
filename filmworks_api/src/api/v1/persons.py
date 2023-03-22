@@ -1,5 +1,4 @@
 from http import HTTPStatus
-from uuid import UUID
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, Query
 
@@ -48,7 +47,7 @@ async def get_persons_list(
 
 @router.get('/{person_id}', response_model=PersonDetail)
 async def get_person_details(
-    person_id: UUID,
+    person_id: str,
     person_service: PersonService = Depends(get_person_service)
 ) -> PersonDetail:
 
