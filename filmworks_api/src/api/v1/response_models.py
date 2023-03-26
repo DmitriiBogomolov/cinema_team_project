@@ -39,4 +39,4 @@ class NestedFilm(UUIDModel):
 
 
 class PersonDetail(Person):
-    films: list[NestedFilm]
+    films: list[NestedFilm | None]

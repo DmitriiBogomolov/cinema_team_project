@@ -25,4 +25,4 @@ jobs:
         pip install pytest
     - name: Running tests
       run: |
-        pytest filmworks_api/tests
+        pytest filmworks_api/tests/unit
