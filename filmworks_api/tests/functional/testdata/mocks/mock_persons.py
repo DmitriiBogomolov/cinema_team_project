@@ -2,7 +2,7 @@ from uuid import UUID
 
 from src.models.person import Person
 
-list_ = [
+PERSONS_LIST = [
     Person(
         id=UUID('26ffbc3e-c539-11ed-afa1-0242ac120002'),
         full_name='Person',
