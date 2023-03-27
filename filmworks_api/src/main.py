@@ -8,7 +8,7 @@ from redis.asyncio import Redis
 
 from src.api.v1 import films, genres, persons
 from src.core import cache
-from src.core.config import config
+from src.core.config import config, cache_config
 from src.core.logger import LOGGING  # noqa
 from src.db import elastic, redis
 
@@ -32,7 +32,8 @@ async def shutdown():
     await elastic.es.close()
 
 
-app.middleware('http')(cache.cache_middleware)
+if cache_config.USE_CACHING:
+    app.middleware('http')(cache.cache_middleware)
 
 app.include_router(films.router, prefix='/api/v1/films', tags=['films'])
 app.include_router(genres.router, prefix='/api/v1/genres', tags=['genres'])

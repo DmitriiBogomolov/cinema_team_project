@@ -1,5 +1,7 @@
 from logging import config as logging_config
+
 from pydantic import BaseSettings
+
 from src.core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
@@ -14,22 +16,12 @@ class AppConfig(BaseSettings):
     ELASTIC_HOST: str = 'es01'
     ELASTIC_PORT: int = 9200
 
-    class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
+    API_HOST: str = 'api'
+    API_PORT: int = 8000
 
-
-class PITConfig(BaseSettings):
-    PIT_MAX_AGE: int = 20  # in seconds
-    USE_PIT_ROTATION: bool = False
-
-    class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
-
-
-class CacheConfig(BaseSettings):
-    USE_CACHING: bool = False
+    @property
+    def API_URL(self):
+        return f'http://{self.API_HOST}:{self.API_PORT}'
 
     class Config:
         env_file = '.env'
@@ -37,5 +29,3 @@ class CacheConfig(BaseSettings):
 
 
 config = AppConfig()
-pit_config = PITConfig()
-cache_config = CacheConfig()
