@@ -1,7 +1,7 @@
 from uuid import UUID
 
 import orjson
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 def orjson_dumps(v, *, default):
@@ -10,8 +10,9 @@ def orjson_dumps(v, *, default):
 
 class UUIDModel(BaseModel):
     """Core schema object."""
-    id: UUID
+    id: UUID = Field(alias='uuid')
 
     class Config:
         json_loads = orjson.loads
         json_dumps = orjson_dumps
+        allow_population_by_field_name = True

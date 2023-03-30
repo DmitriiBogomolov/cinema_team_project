@@ -23,6 +23,10 @@ class AppConfig(BaseSettings):
     def API_URL(self):
         return f'http://{self.API_HOST}:{self.API_PORT}'
 
+    @property
+    def ELASTIC_URL(self):
+        return f'{self.ELASTIC_HOST}:{self.ELASTIC_PORT}'
+
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'

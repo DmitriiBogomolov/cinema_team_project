@@ -8,7 +8,7 @@ from src.db.elastic import get_elastic
 from src.db.redis import get_redis
 from src.models.genre import Genre
 
-SIZE = 200
+SIZE = 500
 
 SORT_PARAMETER = 'name.raw'
 
