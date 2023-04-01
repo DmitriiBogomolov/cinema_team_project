@@ -3,9 +3,14 @@ version: "3"
 services:
 
   api:
-    depends_on:
-      - etl
     build: filmworks_api
+    depends_on:
+      redis:
+        condition: service_started
+      es01:
+        condition: service_healthy
+    image:
+      api-image:latest
     env_file:
       - ./filmworks_api/.env
 

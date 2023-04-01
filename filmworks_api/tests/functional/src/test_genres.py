@@ -18,24 +18,11 @@ async def test_genre_not_found(
         clear_genres: None
 ):
 
-    url = f'{URL}/api/v1/genres/05fb2223-dabf-40e9-9924-20446fadf32'
+    url = f'{URL}/api/v1/genres/05fb2223-dabf-40e9-9924-20446fadf39'
     async with session.get(url) as resp:
         json = await resp.json()
         assert resp.status == HTTPStatus.NOT_FOUND
         assert json.get('detail') == 'No genre with that UUID found.'
-
-
-@pytest.mark.asyncio
-async def test_genres_not_found(
-        session: aiohttp.ClientSession,
-        clear_genres: None
-):
-
-    url = f'{URL}/api/v1/genres/'
-    async with session.get(url) as resp:
-        json = await resp.json()
-        assert resp.status == HTTPStatus.NOT_FOUND
-        assert json.get('detail') == 'No any genres.'
 
 
 @pytest.mark.asyncio

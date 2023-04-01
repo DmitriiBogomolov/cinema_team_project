@@ -38,3 +38,4 @@ pip install -r requirements/dev.txt
 
 - `start-etl` - запускает сервис из третьего спринта (Docker-compose)
 - `start-api` - запускает сервис с API (Docker)
+- `run-tests` - запускает тесты в отдельном контейнере

@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+
+  tests:
+    image: api-image:latest
+    env_file:
+      - filmworks_api/tests/functional/.env
+    entrypoint: >
+      sh -c "pip install -r tests/functional/requirements.txt
+      && python3 tests/functional/utils/wait_for_es.py
+      && python3 tests/functional/utils/wait_for_redis.py
+      && pytest"
+    depends_on:
+      - 'nginx'
+
+  es01:
+    image: elasticsearch:7.17.9
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s http://localhost:9200",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 120
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"

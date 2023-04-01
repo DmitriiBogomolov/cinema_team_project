@@ -19,3 +19,9 @@ start-service:
 	cat etl/.env.example > etl/.env
 	cat filmworks_api/.env-sample > filmworks_api/.env
 	docker-compose up -d
+
+run-tests:
+	cat etl/.env.example > etl/.env
+	cat filmworks_api/.env-sample > filmworks_api/.env
+	cat filmworks_api/tests/functional/.env-sample > filmworks_api/tests/functional/.env
+	docker-compose --project-name api_tests -f docker-compose.yaml -f docker-compose.tests.yaml up -d --build

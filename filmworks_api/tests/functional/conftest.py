@@ -1,4 +1,5 @@
 import asyncio
+import uuid
 from typing import AsyncIterator
 
 import aiohttp
@@ -9,7 +10,6 @@ from redis.asyncio import Redis
 
 from src.models.genre import Genre as GenreModel
 from tests.functional.settings import config
-from tests.functional.testdata import es_mapping
 from tests.functional.testdata.mocks.mock_genres import GENRES_LIST
 
 
@@ -48,27 +48,19 @@ async def redis() -> Redis:
     return redis
 
 
-@pytest_asyncio.fixture(scope='session', autouse=True)
-async def create_schemas(es: AsyncElasticsearch) -> None:
-    await es_mapping.create_schemas(es)
-
-
 @pytest_asyncio.fixture(scope='function', autouse=True)
 async def clear_redis(redis: Redis) -> None:
     await redis.flushall()
 
 
 @pytest_asyncio.fixture(scope='function')
-async def clear_genres(es: AsyncElasticsearch,
-                       create_schemas: None) -> None:
+async def clear_genres(es: AsyncElasticsearch) -> None:
     await es.delete_by_query(index='genres', body={'query': {'match_all': {}}})
     await es.indices.refresh(index='genres')
 
 
 @pytest_asyncio.fixture(scope='function')
-async def load_genres(es: AsyncElasticsearch,
-                      create_schemas: None,
-                      clear_genres: None) -> None:
+async def load_genres(es: AsyncElasticsearch, clear_genres: None) -> None:
     for genre in GENRES_LIST:
         await es.index(
             index='genres',
@@ -79,3 +71,8 @@ async def load_genres(es: AsyncElasticsearch,
     await es.indices.refresh(index='genres')
 
     return [GenreModel(**item) for item in GENRES_LIST]
+
+
+@pytest_asyncio.fixture(scope='session')
+async def random_uuid():
+    return uuid.uuid4()
