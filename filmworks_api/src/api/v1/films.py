@@ -17,11 +17,14 @@ async def film_list(
     film_service: FilmService = Depends(get_film_service)
 ) -> list[Film]:
 
-    films = await film_service.get_list([
-        genre,
-        sort,
-        pp
-    ])
+    params = {
+        'genre': genre,
+        'pp': pp,
+        'sort': sort
+    }
+
+    films = await film_service.get_search(**params)
+
     if not films:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
 
@@ -35,10 +38,11 @@ async def film_search(
     film_service: FilmService = Depends(get_film_service)
 ) -> list[Film]:
 
-    films = await film_service.get_search_list([
-        query,
-        pp
-    ])
+    params = {
+        'query': query,
+        'pp': pp
+    }
+    films = await film_service.get_search(**params)
     if not films:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
 

@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 
 from .mocks import mock_persons
 from src.api.v1.response_models import PersonDetail
-from src.api.v1.persons import get_person_service, get_pit_service
+from src.api.v1.persons import get_person_service
 from src.main import app
 
 
@@ -17,15 +17,6 @@ class MockPersonService:
         return mock_persons.response_models
 
 
-class MockPitService:
-    async def get_pit_token(self, *args, **kwargs) -> None:
-        pass
-
-
-def mock_pit_service():
-    return MockPitService()
-
-
 def mock_person_service():
     return MockPersonService()
 
@@ -33,8 +24,6 @@ def mock_person_service():
 app.user_middleware.clear()
 app.middleware_stack = app.build_middleware_stack()
 app.dependency_overrides[get_person_service] = mock_person_service
-app.dependency_overrides[get_pit_service] = mock_pit_service
-
 
 client = TestClient(app)
 

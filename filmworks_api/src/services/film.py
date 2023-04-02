@@ -1,138 +1,57 @@
 from functools import lru_cache
 
-from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
 from redis.asyncio import Redis
 
-from src.db.elastic import get_elastic
+from src.api.v1.common import PaginationParams
 from src.db.redis import get_redis
 from src.models.film import Filmwork
-from src.api.v1.common import PaginationParams
+from src.services.elastic_manager.elastic_handler import (ElasticHandler,
+                                                          get_elastic_handler)
+from src.services.elastic_manager.search_models import FilmSearch
 
 
 class FilmService:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
+    def __init__(self, redis: Redis, elastic_handler: ElasticHandler):
         self.redis = redis
-        self.elastic = elastic
+        self.elastic_handler = elastic_handler
 
     async def get_by_id(self, film_id: str) -> Filmwork | None:
-        film = await self._get_film_from_elastic(film_id)
-        if not film:
-            return None
-        return film
-
-    async def get_by_ids(self, film_ids: list[str]) -> list[Filmwork] | None:
-        """Возвращает список фильмов по id."""
-        films = await self._get_films_by_ids_from_elastic(film_ids)
-        if not films:
-            return None
-        return films
-
-    async def get_search_list(self, params) -> list[Filmwork] | None:
-        """Возвращает список фильмов."""
-        films = await self._get_search_from_elastic(*params)
-        if not films:
-            return None
-        return films
-
-    async def get_list(self, params) -> list[Filmwork] | None:
-        """Возвращает список фильмов."""
-        films = await self._get_films_from_elastic(*params)
-        if not films:
-            return None
-        return films
-
-    async def _get_film_from_elastic(self, film_id: str) -> Filmwork | None:
-        """Возвращает полную информацию о фильме из эластика по id."""
-        try:
-            doc = await self.elastic.get('movies', film_id)
-        except NotFoundError:
-            return None
-        data = doc['_source']
-        return Filmwork(**data)
-
-    async def _get_films_by_ids_from_elastic(self, film_ids: list[str]):
-        """Возвращает список фильмов из эластика по id."""
-        try:
-            search = {
-                'sort': [{'imdb_rating': 'desc'}],
-                'query': {
-                    'ids': {
-                        'values': film_ids
-                    }
-                },
-            }
-            res = await self.elastic.search(index='movies', doc_type='_doc', body=search)
-        except NotFoundError:
+        doc = await self.elastic_handler.get_by_id('movies', film_id)
+        if not doc:
             return None
 
-        docs = res['hits']['hits']
-        return [Filmwork(**doc['_source']) for doc in docs]
+        return Filmwork(**doc['_source'])
 
-    async def _get_search_from_elastic(
+    async def get_search(
             self,
-            query: str,
-            pp: PaginationParams
+            query: str | None = None,
+            genre: str | None = None,
+            pp: PaginationParams | None = None,
+            by_ids: list[str] | None = None,
+            sort: str | None = None
             ) -> list[Filmwork] | None:
-        try:
-            search = {
-                'from': pp.page_size * (pp.page_number-1),
-                'size': pp.page_size,
-                'query': {
-                    'multi_match': {
-                        'query': query,
-                        'fields': [
-                            'title^3',
-                            'description',
-                            '*_names'
-                        ]
-                    }
-                }
-            }
-            res = await self.elastic.search(index='movies', doc_type='_doc', body=search)
-        except NotFoundError:
+
+        search = FilmSearch(
+            sort=sort,
+            pp=pp
+        )
+
+        search.add_multi_match_query(query)
+        search.add_nested_genre_query(genre)
+        search.add_by_ids_query(by_ids)
+        docs = await self.elastic_handler.search(search)
+
+        films = [Filmwork(**doc['_source']) for doc in docs]
+
+        if not films:
             return None
-        docs = res['hits']['hits']
-        return [Filmwork(**doc['_source']) for doc in docs]
-
-    async def _get_films_from_elastic(
-            self,
-            genre_id: str,
-            sort: str,
-            pp: PaginationParams
-            ) -> list[Filmwork] | None:
-        try:
-            # если параметры пагинации не указаны,
-            # по умолчанию будет выведено 50 записей на первой странице
-            search = {
-                'from': pp.page_size * (pp.page_number-1),  # колво пропущенных записей
-                'size': pp.page_size,
-                'query': {
-                    'match_all': {}
-                }
-            }
-            # делаем запрос по жанрам
-            if genre_id:
-                search['query'] = {
-                    'nested': {
-                        'path': 'genres',
-                        'query': {
-                            'match': {'genres.id': genre_id}}}}
-
-            # подключаем сортировку только по рейтингу
-            if sort == '-imdb_rating':
-                search['sort'] = [{'imdb_rating': 'desc'}]
-
-            res = await self.elastic.search(index='movies', doc_type='_doc', body=search)
-        except NotFoundError:
-            return None
-        docs = res['hits']['hits']
-        return [Filmwork(**doc['_source']) for doc in docs]
+        return films
 
 
 @lru_cache()
 def get_film_service(
         redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+        elastic_handler: ElasticHandler = Depends(get_elastic_handler)
 ) -> FilmService:
-    return FilmService(redis, elastic)
+    return FilmService(redis, elastic_handler)

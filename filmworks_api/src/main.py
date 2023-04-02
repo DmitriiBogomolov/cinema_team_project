@@ -1,6 +1,6 @@
 import logging  # noqa
-import uvicorn
 
+import uvicorn
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
@@ -8,7 +8,7 @@ from redis.asyncio import Redis
 
 from src.api.v1 import films, genres, persons
 from src.core import cache
-from src.core.config import config, cache_config
+from src.core.config import cache_config, config
 from src.core.logger import LOGGING  # noqa
 from src.db import elastic, redis
 
