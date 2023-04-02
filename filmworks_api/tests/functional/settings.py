@@ -9,14 +9,14 @@ logging_config.dictConfig(LOGGING)
 
 class AppConfig(BaseSettings):
     PROJECT_NAME: str = 'movies'
-    REDIS_HOST: str = 'redis'
+    REDIS_HOST: str = 'localhost'
     REDIS_PORT: int = 6379
     REDIS_DB: int = 2
 
-    ELASTIC_HOST: str = 'es01'
+    ELASTIC_HOST: str = 'localhost'
     ELASTIC_PORT: int = 9200
 
-    API_HOST: str = 'api'
+    API_HOST: str = 'localhost'
     API_PORT: int = 8000
 
     @property

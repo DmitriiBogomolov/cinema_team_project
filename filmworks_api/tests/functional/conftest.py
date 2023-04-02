@@ -9,8 +9,10 @@ from elasticsearch import AsyncElasticsearch
 from redis.asyncio import Redis
 
 from src.models.genre import Genre as GenreModel
+from src.models.film import Filmwork as FilmModel
 from tests.functional.settings import config
 from tests.functional.testdata.mocks.mock_genres import GENRES_LIST
+from tests.functional.testdata.mocks.mock_films import FILMS_LIST
 
 
 @pytest.fixture(scope='session')
@@ -76,3 +78,23 @@ async def load_genres(es: AsyncElasticsearch, clear_genres: None) -> None:
 @pytest_asyncio.fixture(scope='session')
 async def random_uuid():
     return uuid.uuid4()
+
+
+@pytest_asyncio.fixture(scope='function')
+async def clear_films(es: AsyncElasticsearch) -> None:
+    await es.delete_by_query(index='movies', body={'query': {'match_all': {}}})
+    await es.indices.refresh(index='movies')
+
+
+@pytest_asyncio.fixture(scope='function')
+async def load_films(es: AsyncElasticsearch, clear_films: None) -> None:
+    for film in FILMS_LIST:
+        await es.index(
+            index='movies',
+            id=film['id'],
+            document=film
+        )
+
+    await es.indices.refresh(index='movies')
+
+    return [FilmModel(**item) for item in FILMS_LIST]
