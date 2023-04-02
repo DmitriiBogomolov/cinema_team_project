@@ -1,3 +1,6 @@
+![Tests](https://github.com/wrawka/Team-12-Async-API/actions/workflows/tests.yml/badge.svg)
+![Code Style](https://github.com/wrawka/Team-12-Async-API/actions/workflows/checks.yml/badge.svg)
+
 # Техническое задание на второй модуль
 
 Ваш второй проект — асинхронный API для кинотеатра. Этот сервис будет точкой входа для всех клиентов. В первой итерации в сервисе будут только анонимные пользователи. Функции авторизации и аутентификации запланированы в модуле Auth.
