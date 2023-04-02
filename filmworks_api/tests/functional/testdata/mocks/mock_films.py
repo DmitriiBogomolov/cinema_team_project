@@ -183,5 +183,38 @@ FILMS_LIST = [
         ],
         writers=[],
         directors=[]
+    ),
+    dict(
+        id=UUID('830857b7-64d2-4a95-98c4-b03351daff52'),
+        title='Robot Chicken: Star Wars III',
+        imdb_rating=8.1,
+        actors_names=['Abraham Benrubi'],
+        description='The Emmy Award-winning Robot Chicken returns with its third send-up of the Star Wars universe! In this all-new hour-long special, four very different characters -- Emperor Palpatine, Darth Vader, Boba Fett and Gary the Stormtrooper -- reveal untold stories that weave and interconnect throughout all six Star Wars films! Set phasers to \'fun\'! Oh wait, that\'s the wrong franchise.',  # noqa
+        genres=[],
+        actors=[],
+        writers=[],
+        directors=[]
+    ),
+    dict(
+        id=UUID('d1099968-805e-4a2b-a2ec-18bbde1201ac'),
+        title='Robot Chicken: Star Wars Episode II',
+        imdb_rating=8.1,
+        actors_names=['Abraham Benrubi'],
+        description='The second of three Star Wars themed Robot Chicken parodies.',
+        genres=[],
+        actors=[],
+        writers=[],
+        directors=[]
+    ),
+    dict(
+        id=UUID('d77e45fc-2b84-442f-b652-caf31cb07c80'),
+        title='Robot Chicken: Star Wars',
+        imdb_rating=8.1,
+        actors_names=['Abraham Benrubi'],
+        description='The first of three Star Wars themed Robot Chicken parodies.',
+        genres=[],
+        actors=[],
+        writers=[],
+        directors=[]
     )
 ]

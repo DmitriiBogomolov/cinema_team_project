@@ -15,7 +15,7 @@ async def film_list(
     genre: str = None,
     sort: str = None,
     film_service: FilmService = Depends(get_film_service)
-) -> list[Film]:
+) -> list[Film | None]:
 
     params = {
         'genre': genre,
@@ -26,7 +26,7 @@ async def film_list(
     films = await film_service.get_search(**params)
 
     if not films:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
+        return []
 
     return [Film(**film.dict()) for film in films]
 
@@ -36,7 +36,7 @@ async def film_search(
     query: str,
     pp: PaginationParams = Depends(),
     film_service: FilmService = Depends(get_film_service)
-) -> list[Film]:
+) -> list[Film | None]:
 
     params = {
         'query': query,
@@ -44,7 +44,7 @@ async def film_search(
     }
     films = await film_service.get_search(**params)
     if not films:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='films not found')
+        return []
 
     return [Film(**film.dict()) for film in films]
 

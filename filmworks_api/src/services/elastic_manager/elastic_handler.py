@@ -9,6 +9,7 @@ from src.services.elastic_manager import search_models
 
 class ElasticHandler:
     """Handle elasticsearch queries"""
+
     def __init__(self, elastic: AsyncElasticsearch):
         self.elastic = elastic
 
@@ -36,6 +37,7 @@ class ElasticHandler:
             Returns:
                 List of hits documents (dict).
         """
+
         try:
             resp = await self.elastic.search(**search.get_search_params())
 

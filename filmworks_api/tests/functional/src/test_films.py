@@ -7,7 +7,7 @@ import pytest
 from src.models.film import Filmwork as FilmModel
 
 from ..settings import config
-from ..testdata.mocks.mock_films import ResponseFilmDetailModel, ResponseFilmModel
+from ..testdata.mocks.mock_films import ResponseFilmDetailModel, ResponseFilmModel, FILMS_LIST
 
 URL = config.API_URL + '/api/v1/films'
 
@@ -31,9 +31,9 @@ async def test_films_not_found(
 ):
     url = f'{URL}/'
     async with session.get(url) as resp:
-        assert resp.status == HTTPStatus.NOT_FOUND
+        assert resp.status == HTTPStatus.OK
         json = await resp.json()
-        assert json.get('detail') == 'films not found'
+        assert json == []
 
 
 @pytest.mark.asyncio
@@ -59,7 +59,7 @@ async def test_films_list(
     async with session.get(url) as resp:
         assert resp.status == HTTPStatus.OK
         json = await resp.json()
-        assert len(json) == 6
+        assert len(json) == len(FILMS_LIST)
         assert json == [ResponseFilmModel(**film.dict()).get_json()
                         for film in sorted_films]
 
@@ -81,11 +81,11 @@ async def test_films_list_pagination_offset(
         session: aiohttp.ClientSession,
         load_films: list[FilmModel]
 ):
-    url = f'{URL}/?sort=-imdb_rating&page_size=4&page_number=2'
+    url = f'{URL}/?sort=-imdb_rating&page_size=4&page_number=3'
     async with session.get(url) as resp:
         assert resp.status == HTTPStatus.OK
         json = await resp.json()
-        assert len(json) == 2
+        assert len(json) == 1
 
 
 @pytest.mark.asyncio

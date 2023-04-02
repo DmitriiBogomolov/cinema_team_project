@@ -3,6 +3,7 @@ from src.api.v1.common import PaginationParams
 
 class Search:
     """Basic class for aggregate elasticsearch parameters"""
+
     def __init__(self, sort=None, pp: PaginationParams | None = None):
         self.query = {}
         self.set_sort(sort)
@@ -17,6 +18,7 @@ class Search:
             Side effect:
                 Set sort in Elastic format to a Search object.
         """
+
         if not condition:
             return
         elif condition[0] == '-':
@@ -26,6 +28,7 @@ class Search:
 
     def set_pagination(self, pp: PaginationParams | None = None) -> None:
         """Set pagination params to a Search object"""
+
         if not pp:
             return
         self.size = pp.page_size
@@ -33,6 +36,7 @@ class Search:
 
     def get_search_params(self) -> dict:
         """Returns dict of parameters for searching through the ElasticSearch driver"""
+
         dic = self.__dict__
         if dic['query'] == {}:
             dic['query'] = None
@@ -45,6 +49,7 @@ class FilmSearch(Search):
     Concrete classes extends search parameters, for example:
     search by index and construct filtering parameters.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.index = 'movies'

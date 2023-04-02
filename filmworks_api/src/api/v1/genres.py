@@ -9,21 +9,19 @@ router = APIRouter()
 
 
 @router.get('/', response_model=list[Genre])
-async def get_genres_list(
+async def genres_list(
     genre_service: GenreService = Depends(get_genre_service)
-) -> list[Genre]:
+) -> list[Genre | None]:
 
-    genres_list = await genre_service.get_list()
-    if not genres_list:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail='No any genres.'
-        )
-    return [Genre(**genre.dict()) for genre in genres_list]
+    genres = await genre_service.get_list()
+    if not genres:
+        return []
+
+    return [Genre(**genre.dict()) for genre in genres]
 
 
 @router.get('/{genre_id}', response_model=Genre)
-async def get_genre_details(
+async def genre_details(
     genre_id: str,
     genre_service: GenreService = Depends(get_genre_service)
 ) -> Genre:

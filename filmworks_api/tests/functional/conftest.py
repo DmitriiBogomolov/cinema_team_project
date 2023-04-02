@@ -13,6 +13,7 @@ from src.models.film import Filmwork as FilmModel
 from tests.functional.settings import config
 from tests.functional.testdata.mocks.mock_genres import GENRES_LIST
 from tests.functional.testdata.mocks.mock_films import FILMS_LIST
+from tests.functional.testdata.mocks.mock_persons import TEST_PERSONS
 
 
 @pytest.fixture(scope='session')
@@ -98,3 +99,23 @@ async def load_films(es: AsyncElasticsearch, clear_films: None) -> None:
     await es.indices.refresh(index='movies')
 
     return [FilmModel(**item) for item in FILMS_LIST]
+
+
+@pytest_asyncio.fixture(scope='function')
+async def clear_persons(es: AsyncElasticsearch) -> None:
+    await es.delete_by_query(index='persons', body={'query': {'match_all': {}}})
+    await es.indices.refresh(index='persons')
+
+
+@pytest_asyncio.fixture(scope='function')
+async def load_persons(es: AsyncElasticsearch, clear_persons: None) -> None:
+    for person in TEST_PERSONS:
+        await es.index(
+            index='persons',
+            id=person['id'],
+            document=person
+        )
+
+    await es.indices.refresh(index='persons')
+
+    # return [FilmModel(**item) for item in FILMS_LIST]
