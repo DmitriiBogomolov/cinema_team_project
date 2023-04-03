@@ -4,24 +4,16 @@ from fastapi import Depends
 
 from src.api.v1.common import PaginationParams
 from src.models.person import Person
-from src.services.elastic_manager.elastic_handler import (ElasticHandler,
-                                                          get_elastic_handler)
-from src.services.elastic_manager.search_models import PersonSearch
+from src.services.repository.elastic_repository import get_elastic_repository
+from src.services.repository.common import AbstractRepository
+from src.services.base_service import BaseService
 
 SORT_PARAMETER = 'full_name.raw'
 
-INDEX_NAME = 'persons'
 
-
-class PersonService:
-    def __init__(self, elastic_handler: ElasticHandler):
-        self.elastic_handler = elastic_handler
-
+class PersonService(BaseService):
     async def get_by_id(self, person_id: str) -> Person | None:
-        doc = await self.elastic_handler.get_by_id(INDEX_NAME, person_id)
-        if not doc:
-            return None
-        return Person(**doc['_source'])
+        return await super().get_by_id('persons', person_id, Person)
 
     async def get_list(
             self,
@@ -29,23 +21,17 @@ class PersonService:
             pp: PaginationParams | None = None
             ) -> list[Person] | None:
 
-        search = PersonSearch(
-            sort=SORT_PARAMETER,
-            pp=pp
-        )
-        search.add_match_query(query)
+        params = {
+            'sort': SORT_PARAMETER,
+            'pp': pp,
+            'full_name': query
+        }
 
-        docs = await self.elastic_handler.search(search)
-        persons_list = [Person(**doc['_source']) for doc in docs]
-
-        if not persons_list:
-            return None
-
-        return persons_list
+        return await super().get_list('persons', params, Person)
 
 
 @lru_cache()
 def get_person_service(
-        elastic_handler: ElasticHandler = Depends(get_elastic_handler)
+        repository: AbstractRepository = Depends(get_elastic_repository)
 ) -> PersonService:
-    return PersonService(elastic_handler)
+    return PersonService(repository)

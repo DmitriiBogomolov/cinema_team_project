@@ -23,7 +23,7 @@ async def film_list(
         'sort': sort
     }
 
-    films = await film_service.get_search(**params)
+    films = await film_service.get_list(**params)
 
     if not films:
         return []
@@ -42,7 +42,7 @@ async def film_search(
         'query': query,
         'pp': pp
     }
-    films = await film_service.get_search(**params)
+    films = await film_service.get_list(**params)
     if not films:
         return []
 

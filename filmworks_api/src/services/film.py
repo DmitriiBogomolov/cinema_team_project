@@ -4,23 +4,16 @@ from fastapi import Depends
 
 from src.api.v1.common import PaginationParams
 from src.models.film import Filmwork
-from src.services.elastic_manager.elastic_handler import (ElasticHandler,
-                                                          get_elastic_handler)
-from src.services.elastic_manager.search_models import FilmSearch
+from src.services.repository.elastic_repository import get_elastic_repository
+from src.services.repository.common import AbstractRepository
+from src.services.base_service import BaseService
 
 
-class FilmService:
-    def __init__(self, elastic_handler: ElasticHandler):
-        self.elastic_handler = elastic_handler
-
+class FilmService(BaseService):
     async def get_by_id(self, film_id: str) -> Filmwork | None:
-        doc = await self.elastic_handler.get_by_id('movies', film_id)
-        if not doc:
-            return None
+        return await super().get_by_id('movies', film_id, Filmwork)
 
-        return Filmwork(**doc['_source'])
-
-    async def get_search(
+    async def get_list(
             self,
             query: str | None = None,
             genre: str | None = None,
@@ -29,25 +22,19 @@ class FilmService:
             sort: str | None = None
             ) -> list[Filmwork] | None:
 
-        search = FilmSearch(
-            sort=sort,
-            pp=pp
-        )
+        params = {
+            'sort': sort,
+            'pp': pp,
+            'movie': query,
+            'genres': genre,
+            'by_ids': by_ids
+        }
 
-        search.add_multi_match_query(query)
-        search.add_nested_genre_query(genre)
-        search.add_by_ids_query(by_ids)
-        docs = await self.elastic_handler.search(search)
-
-        films = [Filmwork(**doc['_source']) for doc in docs]
-
-        if not films:
-            return None
-        return films
+        return await super().get_list('movies', params, Filmwork)
 
 
 @lru_cache()
 def get_film_service(
-        elastic_handler: ElasticHandler = Depends(get_elastic_handler)
+        repository: AbstractRepository = Depends(get_elastic_repository)
 ) -> FilmService:
-    return FilmService(elastic_handler)
+    return FilmService(repository)

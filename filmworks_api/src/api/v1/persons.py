@@ -44,7 +44,7 @@ async def person_films(
         )
 
     film_ids = [str(film.id) for film in person.films]
-    film_list = await film_service.get_search(by_ids=film_ids, sort='imdb_rating')
+    film_list = await film_service.get_list(by_ids=film_ids, sort='imdb_rating')
 
     if not film_list:
         return []
