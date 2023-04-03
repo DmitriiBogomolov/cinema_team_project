@@ -13,7 +13,7 @@ from src.core.logger import LOGGING  # noqa
 from src.db import elastic, redis
 
 app = FastAPI(
-    title=config.PROJECT_NAME,
+    title=config.project_name,
     docs_url='/api/openapi',
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
@@ -22,8 +22,8 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    redis.redis = Redis(host=config.REDIS_HOST, port=config.REDIS_PORT, db=config.REDIS_DB)
-    elastic.es = AsyncElasticsearch(hosts=[f'{config.ELASTIC_HOST}:{config.ELASTIC_PORT}'])
+    redis.redis = Redis(host=config.redis_host, port=config.redis_port, db=config.redis_db)
+    elastic.es = AsyncElasticsearch(hosts=[f'{config.elastic_host}:{config.elastic_port}'])
 
 
 @app.on_event('shutdown')
@@ -32,7 +32,7 @@ async def shutdown():
     await elastic.es.close()
 
 
-if cache_config.USE_CACHING:
+if cache_config.use_caching:
     app.middleware('http')(cache.cache_middleware)
 
 app.include_router(films.router, prefix='/api/v1/films', tags=['films'])

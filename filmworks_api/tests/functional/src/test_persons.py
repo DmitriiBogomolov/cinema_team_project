@@ -1,89 +1,83 @@
 from http import HTTPStatus
 
-import aiohttp
 import pytest
 
-from tests.functional.settings import config
 from tests.functional.testdata.mocks.mock_persons import TEST_PERSONS, RESPONSE_REFS
 
-URL = config.API_URL + '/api/v1/persons'
+URL = 'persons'
+
+pytestmark = pytest.mark.asyncio
 
 
-@pytest.mark.asyncio
-async def test_get_person_by_non_existant_uuid_returns_404(
-        session: aiohttp.ClientSession,
-        random_uuid
+@pytest.mark.parametrize('person_id, expected_status', [
+    ('ffffffff-ffff-ffff-ffff-ffffffffffff', HTTPStatus.NOT_FOUND),
+    (TEST_PERSONS[0]['id'], HTTPStatus.OK),
+])
+async def test_get_person_status(
+    person_id,
+    expected_status,
+    load_persons,
+    make_get_request
 ):
-    url = f'{URL}{random_uuid}'
-    async with session.get(url) as resp:
-        assert resp.status == HTTPStatus.NOT_FOUND
+    url = f"""/{URL}/{person_id}"""
+    response = await make_get_request(url)
+
+    assert response.status == expected_status
 
 
-@pytest.mark.asyncio
-async def test_get_person_by_correct_uuid_returns_OK(
-        session: aiohttp.ClientSession,
-        load_persons
-):
-    url = f"""{URL}/{TEST_PERSONS[0]['id']}"""
-    async with session.get(url) as resp:
-        assert resp.status == HTTPStatus.OK
-
-
-@pytest.mark.asyncio
 async def test_get_person_by_correct_uuid_returns_correct_data(
-        session: aiohttp.ClientSession,
-        load_persons
+    make_get_request,
+    load_persons
 ):
-    url = f"""{URL}/{TEST_PERSONS[0]['id']}"""
-    async with session.get(url) as resp:
-        api_response = await resp.json()
-        assert api_response == RESPONSE_REFS['response_ref']
+    url = f"""/{URL}/{TEST_PERSONS[0]['id']}"""
+    response = await make_get_request(url)
+
+    assert response.body == RESPONSE_REFS['response_ref']
 
 
-@pytest.mark.asyncio
 async def test_get_person_films(
-        session: aiohttp.ClientSession,
-        load_persons,
-        load_films
+    make_get_request,
+    load_persons,
+    load_films
 ):
-    url = f"""{URL}/{TEST_PERSONS[0]['id']}/film"""
-    async with session.get(url) as resp:
-        assert resp.status == HTTPStatus.OK
-        person_films = await resp.json()
-        assert len(person_films) == 3
-        assert person_films == RESPONSE_REFS['films_ref']
+    url = f"""/{URL}/{TEST_PERSONS[0]['id']}/film"""
+    response = await make_get_request(url)
+
+    assert response.status == HTTPStatus.OK
+    assert len(response.body) == 3
+    assert response.body == RESPONSE_REFS['films_ref']
 
 
-@pytest.mark.asyncio
 async def test_person_search(
-        session: aiohttp.ClientSession,
-        load_persons
+    make_get_request,
+    load_persons
 ):
-    url = f"""{URL}/search?query=Aaron"""
-    async with session.get(url) as resp:
-        assert resp.status == HTTPStatus.OK
-        person_films = await resp.json()
-        assert len(person_films) == 6
+    url = f"""/{URL}/search?query=Aaron"""
+    response = await make_get_request(url)
+
+    assert response.status == HTTPStatus.OK
+    assert len(response.body) == 6
 
 
-@pytest.mark.asyncio
+@pytest.mark.parametrize('page_size, page_number, expected_length, expected_status', [
+    (5, None, 5, HTTPStatus.OK),
+    (5, 2, 1, HTTPStatus.OK),
+    (-10, 2, 1, HTTPStatus.UNPROCESSABLE_ENTITY),
+])
 async def test_person_search_pagination(
-        session: aiohttp.ClientSession,
-        load_persons
+    make_get_request,
+    load_persons,
+    page_size,
+    page_number,
+    expected_length,
+    expected_status
 ):
-    url = f"""{URL}/search?query=Aaron&page_size=5"""
-    async with session.get(url) as resp:
-        assert resp.status == HTTPStatus.OK
-        person_films = await resp.json()
-        assert len(person_films) == 5
+    url = f"""/{URL}/search?query=Aaron"""
+    if page_size:
+        url += f'&page_size={page_size}'
+    if page_number:
+        url += f'&page_number={page_number}'
+    response = await make_get_request(url)
 
-
-@pytest.mark.asyncio
-async def test_person_search_pagination_offset(
-        session: aiohttp.ClientSession,
-):
-    url = f"""{URL}/search?query=Aaron&page_number=2&page_size=5"""
-    async with session.get(url) as resp:
-        assert resp.status == HTTPStatus.OK
-        person_films = await resp.json()
-        assert len(person_films) == 1
+    assert response.status == expected_status
+    assert len(response.body) == expected_length

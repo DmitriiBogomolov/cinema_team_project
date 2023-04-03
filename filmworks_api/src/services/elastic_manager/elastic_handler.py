@@ -13,7 +13,7 @@ class ElasticHandler:
     def __init__(self, elastic: AsyncElasticsearch):
         self.elastic = elastic
 
-    async def get_by_id(self, index_name: str, id: str) -> dict:
+    async def get_by_id(self, index_name: str, id: str) -> dict | None:
         """
         Get document by id from elastic.
             Parameters:
@@ -28,7 +28,7 @@ class ElasticHandler:
             return None
         return doc
 
-    async def search(self, search: search_models.Search) -> list[dict]:
+    async def search(self, search: search_models.Search) -> list[dict] | None:
         """
         Search documents in elastic.
             Parameters:

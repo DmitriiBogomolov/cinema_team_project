@@ -8,13 +8,13 @@ logging_config.dictConfig(LOGGING)
 
 
 class AppConfig(BaseSettings):
-    PROJECT_NAME: str = 'movies'
-    REDIS_HOST: str = 'redis'
-    REDIS_PORT: int = 6379
-    REDIS_DB: int = 2
+    project_name: str = 'movies'
+    redis_host: str = 'redis'
+    redis_port: int = 6379
+    redis_db: int = 2
 
-    ELASTIC_HOST: str = 'es01'
-    ELASTIC_PORT: int = 9200
+    elastic_host: str = 'es01'
+    elastic_port: int = 9200
 
     class Config:
         env_file = '.env'
@@ -22,8 +22,8 @@ class AppConfig(BaseSettings):
 
 
 class PITConfig(BaseSettings):
-    PIT_MAX_AGE: int = 20  # in seconds
-    USE_PIT_ROTATION: bool = False
+    pit_max_age: int = 20  # in seconds
+    use_pit_rotation: bool = False
 
     class Config:
         env_file = '.env'
@@ -31,7 +31,7 @@ class PITConfig(BaseSettings):
 
 
 class CacheConfig(BaseSettings):
-    USE_CACHING: bool = False
+    use_caching: bool = False
 
     class Config:
         env_file = '.env'

@@ -1,9 +1,7 @@
 from functools import lru_cache
 
 from fastapi import Depends
-from redis.asyncio import Redis
 
-from src.db.redis import get_redis
 from src.models.genre import Genre
 from src.services.elastic_manager.elastic_handler import (ElasticHandler,
                                                           get_elastic_handler)
@@ -13,8 +11,7 @@ SORT_PARAMETER = 'name.raw'
 
 
 class GenreService:
-    def __init__(self, redis: Redis, elastic_handler: ElasticHandler):
-        self.redis = redis
+    def __init__(self, elastic_handler: ElasticHandler):
         self.elastic_handler = elastic_handler
 
     async def get_by_id(self, genre_id: str) -> Genre | None:
@@ -42,7 +39,6 @@ class GenreService:
 
 @lru_cache()
 def get_genre_service(
-        redis: Redis = Depends(get_redis),
         elastic_handler: ElasticHandler = Depends(get_elastic_handler)
 ) -> GenreService:
-    return GenreService(redis, elastic_handler)
+    return GenreService(elastic_handler)

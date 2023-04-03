@@ -1,10 +1,8 @@
 from functools import lru_cache
 
 from fastapi import Depends
-from redis.asyncio import Redis
 
 from src.api.v1.common import PaginationParams
-from src.db.redis import get_redis
 from src.models.film import Filmwork
 from src.services.elastic_manager.elastic_handler import (ElasticHandler,
                                                           get_elastic_handler)
@@ -12,8 +10,7 @@ from src.services.elastic_manager.search_models import FilmSearch
 
 
 class FilmService:
-    def __init__(self, redis: Redis, elastic_handler: ElasticHandler):
-        self.redis = redis
+    def __init__(self, elastic_handler: ElasticHandler):
         self.elastic_handler = elastic_handler
 
     async def get_by_id(self, film_id: str) -> Filmwork | None:
@@ -51,7 +48,6 @@ class FilmService:
 
 @lru_cache()
 def get_film_service(
-        redis: Redis = Depends(get_redis),
         elastic_handler: ElasticHandler = Depends(get_elastic_handler)
 ) -> FilmService:
-    return FilmService(redis, elastic_handler)
+    return FilmService(elastic_handler)

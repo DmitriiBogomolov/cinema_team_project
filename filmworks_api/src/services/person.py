@@ -1,10 +1,8 @@
 from functools import lru_cache
 
 from fastapi import Depends
-from redis.asyncio import Redis
 
 from src.api.v1.common import PaginationParams
-from src.db.redis import get_redis
 from src.models.person import Person
 from src.services.elastic_manager.elastic_handler import (ElasticHandler,
                                                           get_elastic_handler)
@@ -16,8 +14,7 @@ INDEX_NAME = 'persons'
 
 
 class PersonService:
-    def __init__(self, redis: Redis, elastic_handler: ElasticHandler):
-        self.redis = redis
+    def __init__(self, elastic_handler: ElasticHandler):
         self.elastic_handler = elastic_handler
 
     async def get_by_id(self, person_id: str) -> Person | None:
@@ -49,7 +46,6 @@ class PersonService:
 
 @lru_cache()
 def get_person_service(
-        redis: Redis = Depends(get_redis),
         elastic_handler: ElasticHandler = Depends(get_elastic_handler)
 ) -> PersonService:
-    return PersonService(redis, elastic_handler)
+    return PersonService(elastic_handler)

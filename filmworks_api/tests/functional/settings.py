@@ -8,13 +8,13 @@ logging_config.dictConfig(LOGGING)
 
 
 class AppConfig(BaseSettings):
-    PROJECT_NAME: str = 'movies'
-    REDIS_HOST: str = 'localhost'
-    REDIS_PORT: int = 6379
-    REDIS_DB: int = 2
+    project_name: str = 'movies'
+    redis_host: str = 'localhost'
+    redis_port: int = 6379
+    redis_db: int = 2
 
-    ELASTIC_HOST: str = 'localhost'
-    ELASTIC_PORT: int = 9200
+    elastic_host: str = 'localhost'
+    elastic_port: int = 9200
 
     API_HOST: str = 'localhost'
     API_PORT: int = 8000
@@ -25,7 +25,7 @@ class AppConfig(BaseSettings):
 
     @property
     def ELASTIC_URL(self):
-        return f'{self.ELASTIC_HOST}:{self.ELASTIC_PORT}'
+        return f'{self.elastic_host}:{self.elastic_port}'
 
     class Config:
         env_file = '.env'

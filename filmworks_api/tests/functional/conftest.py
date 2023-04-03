@@ -1,8 +1,10 @@
 import asyncio
 import uuid
-from typing import AsyncIterator
+from typing import AsyncIterator, Optional
+from dataclasses import dataclass
 
 import aiohttp
+from multidict import CIMultiDictProxy
 import pytest
 import pytest_asyncio
 from elasticsearch import AsyncElasticsearch
@@ -22,6 +24,30 @@ def event_loop():
     loop = policy.new_event_loop()
     yield loop
     loop.close()
+
+
+@dataclass
+class HTTPResponse:
+    body: dict
+    headers: CIMultiDictProxy[str]
+    status: int
+
+
+@pytest_asyncio.fixture(scope='function')
+async def make_get_request(session):
+    async def inner(
+        method: str, params: Optional[dict] = None
+    ) -> HTTPResponse:
+        params = params or {}
+        url = config.API_URL + '/api/v1' + method
+        response = await session.get(url, params=params)
+        return HTTPResponse(
+            body=await response.json(),
+            headers=response.headers,
+            status=response.status,
+        )
+
+    return inner
 
 
 @pytest_asyncio.fixture(scope='session')
@@ -44,9 +70,9 @@ async def es() -> AsyncIterator[AsyncElasticsearch]:
 @pytest_asyncio.fixture(scope='session')
 async def redis() -> Redis:
     redis = Redis(
-        host=config.REDIS_HOST,
-        port=config.REDIS_PORT,
-        db=config.REDIS_DB
+        host=config.redis_host,
+        port=config.redis_port,
+        db=config.redis_db
     )
     return redis
 
