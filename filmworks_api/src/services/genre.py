@@ -11,14 +11,19 @@ SORT_PARAMETER = 'name.raw'
 
 
 class GenreService(BaseService):
-    async def get_by_id(self, genre_id: str) -> Genre | None:
-        return await super().get_by_id('genres', genre_id, Genre)
+    @property
+    def model(self):
+        return Genre
+
+    @property
+    def index_name(self):
+        return 'genres'
 
     async def get_list(self) -> list[Genre] | None:
         params = {
             'sort': SORT_PARAMETER
         }
-        return await super().get_list('genres', params, Genre)
+        return await super().get_list(params)
 
 
 @lru_cache()

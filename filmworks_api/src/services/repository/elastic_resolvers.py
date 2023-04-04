@@ -1,7 +1,7 @@
 from src.api.v1.common import PaginationParams
 
 
-class BasicParamsResolver():
+class BasicParamsResolver:
     def __init__(self, params: dict) -> None:
         self.elastic_params = {}
 

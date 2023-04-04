@@ -22,14 +22,14 @@ class ElasticRepository(AbstractRepository):
     def __init__(self, elastic: AsyncElasticsearch):
         self.elastic = elastic
 
-    async def get_by_id(self, index_name: str, id: str) -> dict:
+    async def get_by_id(self, index_name: str, id: str) -> dict | None:
         try:
-            doc = await self.elastic.get(index_name, id)
+            doc = await self.elastic.get(index=index_name, id=id)
         except NotFoundError:
             return None
         return doc['_source']
 
-    async def get_list(self, index_name: str, params: dict) -> list[dict]:
+    async def get_list(self, index_name: str, params: dict) -> list[dict] | None:
         try:
             resolver = self.param_resolvers[index_name](params)
 

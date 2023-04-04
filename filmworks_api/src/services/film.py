@@ -10,8 +10,13 @@ from src.services.base_service import BaseService
 
 
 class FilmService(BaseService):
-    async def get_by_id(self, film_id: str) -> Filmwork | None:
-        return await super().get_by_id('movies', film_id, Filmwork)
+    @property
+    def model(self):
+        return Filmwork
+
+    @property
+    def index_name(self):
+        return 'movies'
 
     async def get_list(
             self,
@@ -20,7 +25,7 @@ class FilmService(BaseService):
             pp: PaginationParams | None = None,
             by_ids: list[str] | None = None,
             sort: str | None = None
-            ) -> list[Filmwork] | None:
+    ) -> list[Filmwork] | None:
 
         params = {
             'sort': sort,
@@ -30,7 +35,7 @@ class FilmService(BaseService):
             'by_ids': by_ids
         }
 
-        return await super().get_list('movies', params, Filmwork)
+        return await super().get_list(params)
 
 
 @lru_cache()

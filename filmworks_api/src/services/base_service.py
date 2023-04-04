@@ -1,4 +1,4 @@
-import abc
+from abc import ABC, abstractmethod
 from http import HTTPStatus
 
 from pydantic import ValidationError
@@ -8,22 +8,28 @@ from src.services.repository.common import AbstractRepository
 from src.models.common import UUIDModel
 
 
-class BaseService(abc.ABC):
+class BaseService(ABC):
     def __init__(self, repository: AbstractRepository):
         self.repository = repository
 
-    async def get_by_id(self,
-                        index_name: str,
-                        id: str,
-                        model: UUIDModel
-                        ) -> UUIDModel | None:
+    @property
+    @abstractmethod
+    def model(self):
+        pass
 
-        instance = await self.repository.get_by_id(index_name, id)
+    @property
+    @abstractmethod
+    def index_name(self):
+        pass
+
+    async def get_by_id(self, doc_id: str) -> UUIDModel | None:
+
+        instance = await self.repository.get_by_id(self.index_name, doc_id)
         if not instance:
             return None
 
         try:
-            response = model(**instance)
+            response = self.model(**instance)
         except ValidationError:
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
@@ -32,18 +38,16 @@ class BaseService(abc.ABC):
         return response
 
     async def get_list(self,
-                       index_name: str,
-                       params: dict,
-                       model: UUIDModel
+                       params: dict
                        ) -> list[UUIDModel] | None:
 
-        instances = await self.repository.get_list(index_name, params)
+        instances = await self.repository.get_list(self.index_name, params)
 
         if not instances:
             return None
 
         try:
-            response = [model(**instance) for instance in instances]
+            response = [self.model(**instance) for instance in instances]
         except ValidationError:
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,

@@ -12,14 +12,19 @@ SORT_PARAMETER = 'full_name.raw'
 
 
 class PersonService(BaseService):
-    async def get_by_id(self, person_id: str) -> Person | None:
-        return await super().get_by_id('persons', person_id, Person)
+    @property
+    def model(self):
+        return Person
+
+    @property
+    def index_name(self):
+        return 'persons'
 
     async def get_list(
             self,
             query: str | None = None,
             pp: PaginationParams | None = None
-            ) -> list[Person] | None:
+    ) -> list[Person] | None:
 
         params = {
             'sort': SORT_PARAMETER,
@@ -27,7 +32,7 @@ class PersonService(BaseService):
             'full_name': query
         }
 
-        return await super().get_list('persons', params, Person)
+        return await super().get_list(params)
 
 
 @lru_cache()
