@@ -1,0 +1,568 @@
+openapi: 3.0.3
+info:
+  title: Сервис авторизации для онлайн-кинотеатра.
+  version: 0.0.1
+security:
+  - BasicAuth: []
+  - BearerAuth: []
+servers:
+  - url: http://localhost:80/auth
+    description: Dev server
+
+paths:
+
+  /register:
+    post:
+      summary: Регистрация пользователя.
+      tags:
+        - Auth
+      security: 
+        - BasicAuth: []
+      requestBody:
+        required: true
+        description: Регистрационные данные.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+      responses:
+        "201":
+          description: Успешное создание пользователя.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserData"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        default:
+          $ref: "#/components/responses/UnknownError"
+  
+  /login:
+    post:
+      summary: Вход
+      tags:
+        - Auth
+      security:
+        - BasicAuth: []
+      responses:
+        "200":
+          description: Успешный вход
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenPair"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+
+  /logout:
+    post:
+      summary: Выход
+      tags:
+        - Auth
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: No Content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Успешный выход из аккаунта
+        default:
+          $ref: "#/components/responses/UnknownError"
+      
+  /users/me/:
+    get:
+      summary: Профиль пользователя
+      security:
+        - BearerAuth: []
+      tags:
+        - Users
+      operationId: user-profile
+      responses:
+        "200":
+          description: Успешный ответ с данными профиля
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserData"
+        default:
+          $ref: "#/components/responses/UnknownError"
+    put:
+      summary: Обновление данных профиля
+      tags:
+        - Users
+      operationId: user-update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserData"
+        
+  /users/me/history:
+    get:
+      summary: История входов в аккаунт.
+      security:
+        - BearerAuth: []
+      tags:
+        - Users
+      operationId: user-history
+      parameters:
+        - $ref: "#/components/parameters/AuthParameter"
+      responses:
+        "200":
+          description: Успешный ответ с историей входов в аккаунт.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccessEvent"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+  
+  /users/me/change_password:
+    post:
+      summary: Изменение пароля.
+      tags:
+        - Users
+      operationId: user-password-change
+      requestBody:
+        required: true
+        description: Старые и новые логин/пароль.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordChange"
+      responses:
+        "200":
+          $ref: "#/components/responses/200Ok"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        default:
+          $ref: "#/components/responses/UnknownError"
+
+  /jwt/create:
+    post:
+      summary: Аутентификация и получение пары токенов.
+      tags:
+        - JWT
+      operationId: jwt-create
+      security:
+        - BasicAuth: []
+      parameters:
+        - $ref: "#/components/parameters/UserAgent"
+        - $ref: "#/components/parameters/IPAddress"
+      requestBody:
+        required: true
+        description: Логин/пароль.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+      responses:
+        "200":
+          description: Успешный ответ с access и refresh токенами.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenPair"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+  
+  /jwt/refresh:
+    post:
+      summary: Обновить токен.
+      tags:
+        - JWT
+      operationId: jwt-refresh
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AuthParameter"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenPair"
+      responses:
+        "200":
+          $ref: "#/components/responses/200Ok"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+
+  /roles:
+    get:
+      summary: Получить список ролей.
+      security:
+        - BearerAuth: []
+      tags:
+        - Roles
+      operationId: list-roles
+      parameters:
+        - $ref: "#/components/parameters/AuthParameter"
+      responses:
+        "200":
+          description: Успех.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RolesListResponse"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+    post:
+      summary: Создание роли.
+      security:
+        - BearerAuth: []
+      tags:
+        - Roles
+      operationId: create-role
+      parameters:
+        - $ref: "#/components/parameters/AuthParameter"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Role"
+      responses:
+        "201":
+          description: Успешное создание роли.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+
+  /roles/{role_id}:
+    put:
+      summary: Изменение роли.
+      security:
+        - BearerAuth: []
+      tags:
+        - Roles
+      operationId: update-role
+      parameters:
+        - $ref: "#/components/parameters/AuthParameter"
+        - $ref: "#/components/parameters/RoleId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Role"
+      responses:
+        "200":
+          description: Успешное изменение роли.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+    delete:
+      summary: Удаление роли.
+      security:
+        - BearerAuth: []
+      tags:
+        - Roles
+      operationId: delete-role
+      parameters:
+        - $ref: "#/components/parameters/AuthParameter"
+        - $ref: "#/components/parameters/RoleId"
+      responses:
+        "200":
+          $ref: "#/components/responses/200Ok"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        
+
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+      description: HTTP Basic Authentication with username and password.
+
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    AuthParameter:
+      in: header
+      name: Authorization
+      schema:
+        type: string
+        example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" 
+      required: true
+    UserAgent:
+      in: header
+      name: User-Agent
+      description: "Устройство клиента, использующего токен."
+      schema:
+        type: string
+        example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36" 
+      required: true
+    IPAddress:
+      in: header
+      name: X-Forwarded-For
+      description: "Маршрут и IP адрес клиента, использующего токен."
+      schema:
+        type: string
+        example: "103.0.113.165, 60.91.3.17, 120.192.338.678" 
+      required: true
+    UserId:
+      in: path
+      name: user_id
+      required: true
+      description: Идентификатор пользователя
+      schema:
+        type: string
+      example:  e1d7fcec-e8d9-4967-8150-ae0996e44713
+    RoleId:
+      in: path
+      name: role_id
+      required: true
+      description: Идентификатор роли
+      schema:
+        type: string
+      example:  e1d7fcec-e8d9-4967-8150-ae0996e44713
+
+  responses:
+    UnknownError:
+      description: Неизвестная ошибка
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Ошибка
+                example: Произошла неизвестная ошибка
+    
+    200Ok:
+      description: Успешно.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: integer
+                description: Статус-код ответа.
+                example: 200
+              message:
+                type: string
+                description: Сообщение.
+                example: OK
+   
+    400BadRequest:
+      description: Невалидное тело запроса.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: integer
+                description: Статус-код ответа.
+                example: 400
+              message:
+                type: string
+                description: Сообщение.
+                example: Wrong requst body.
+    
+    401Unauthorized:
+      description: Ошибка авторизации.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: integer
+                description: Статус-код ответа.
+                example: 401
+              message:
+                type: string
+                description: Сообщение.
+                example: Unauthorized or wrong user credentials.
+                
+    404NotFound:
+      description: Запрашиваемый ресурс не найден.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - message
+            properties:
+              code:
+                type: integer
+                description: Статус-код ответа.
+                example: 404
+              message:
+                type: string
+                description: Сообщение.
+                example: Not found.
+
+  schemas:
+    Credentials:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          format: email
+          example: user@email.com
+          pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        password:
+          type: string
+          format: password
+          example: SD_g151@1af
+
+    UserData:
+      type: object
+      required:
+        - id
+        - username
+        - roles
+      properties:
+        id:
+          type: string
+          format: password
+          example: 6931c67c-d85f-11ed-afa1-0242ac120002
+        username:
+          type: string
+          format: email
+          example: user@email.com
+          pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        roles:
+          type: array
+          example: []
+          description: Роли назначенные пользователю
+
+    PasswordChange:
+      type: object
+      required:
+        - old_password
+        - new_password
+        - new_password_re
+      properties:
+        password:
+          type: string
+          example: SD_g151@1af
+        new_password:
+          type: string
+          example: New@Password123
+        new_password_re:
+          type: string
+          example: New@Password123
+          
+    Token:
+      type: string
+      maxLength: 0
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+
+    TokenPair:
+      type: object
+      description: Пара JWT-токенов (access/refersh)
+      properties:
+        access:
+          description: Access Token
+          $ref: "#/components/schemas/Token"
+        refresh:
+          description: Refresh Token
+          $ref: "#/components/schemas/Token"
+    
+    AccessEvent:
+      type: object
+      properties:
+        user_agent: 
+          type: string
+          example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
+        ip_address:
+          type: string
+          example: "103.0.113.165, 60.91.3.17, 120.192.338.678"
+        datetime:
+          type: string
+          format: date-time
+          example: 2017-07-21T17:32:28Z
+
+    Role:
+      type: object
+      required:
+        - name
+      properties:
+        name: 
+          type: string
+          example: "Модератор"
+        description:
+          type: string
+          example: "Следит за соблюдением правил ресурса в конкретных темах или разделах сетевого ресурса"
+
+    RoleId:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: 6931c67c-d85f-11ed-afa1-0242ac120002
+
+    RoleResponse:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          example: 6931c67c-d85f-11ed-afa1-0242ac120002
+        name: 
+          type: string
+          example: "Модератор"
+        description:
+          type: string
+          example: "Следит за соблюдением правил ресурса в конкретных темах или разделах сетевого ресурса"
+
+    RolesListResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/RoleResponse"
