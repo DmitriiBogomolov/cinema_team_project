@@ -1,4 +1,5 @@
 [flake8]
+exclude = mocks
 max-line-length = 120
 inline-quotes = single
 import-order-style = pep8
@@ -9,3 +10,4 @@ application_import_names =
     main,
     models,
     services
+ignore = W605, E402

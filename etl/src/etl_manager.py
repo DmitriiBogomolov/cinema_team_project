@@ -83,9 +83,9 @@ class EtlManager:
             gets data -> preform data portion -> bulk it to elastic
         """
         data_generator = extract_query_statable(
-                etl_segment.keyword,
-                etl_segment.query_str,
-                self.psql_manager
+            etl_segment.keyword,
+            etl_segment.query_str,
+            self.psql_manager
         )
 
         for data_set in data_generator:

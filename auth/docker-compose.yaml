@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:13
+    ports:
+      - "5437:5432"
+    volumes:
+        - auth_pg_data:/var/lib/postgresql/data/
+    env_file:
+        - .env
+
+volumes:
+  auth_pg_data:
+    driver: local

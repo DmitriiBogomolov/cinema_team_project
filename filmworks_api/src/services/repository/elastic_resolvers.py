@@ -23,7 +23,7 @@ class BasicParamsResolver:
             return {condition: 'asc'}
 
     def get_from(self, pp: PaginationParams) -> int:
-        return (pp.page_number-1) * pp.page_size
+        return (pp.page_number - 1) * pp.page_size
 
     def get_size(self, pp: PaginationParams) -> int:
         return pp.page_size

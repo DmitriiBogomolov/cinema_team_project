@@ -41,10 +41,10 @@ class PITService:
 
         keep_alive = f'{str(pit_config.pit_max_age + 20)}s'
         pit_token = await self.elastic.open_point_in_time(
-                            index_name,
-                            params={'keep_alive': keep_alive},
-                            headers=None
-                            )
+            index_name,
+            params={'keep_alive': keep_alive},
+            headers=None
+        )
         pit_token = pit_token['id']
         return pit_token
 
