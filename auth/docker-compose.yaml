@@ -9,6 +9,10 @@ services:
         - auth_pg_data:/var/lib/postgresql/data/
     env_file:
         - .env
+  redis:
+    image: redis
+    ports:
+      - "6388:6379"
 
 volumes:
   auth_pg_data:
