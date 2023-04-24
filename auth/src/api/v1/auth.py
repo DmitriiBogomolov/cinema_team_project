@@ -7,9 +7,9 @@ from flask_jwt_extended import (create_access_token,
 from werkzeug.security import check_password_hash
 from marshmallow.exceptions import ValidationError
 
-from src.schemas import UserSchema, UserJWTPayloadSchema
-from src.models import User, UserProfile
-from src import app, db, refresh_blacklist
+from src.schemas import UserSchema, UserJWTPayloadSchema, SessionSchema
+from src.models import User
+from app import app, db, refresh_blacklist
 
 
 auth = Blueprint('auth', __name__)
@@ -19,6 +19,12 @@ basic_auth = HTTPBasicAuth()
 
 user_schema = UserSchema()
 user_payload_schema = UserJWTPayloadSchema()
+session_schema = SessionSchema()
+
+
+@basic_auth.error_handler
+def auth_error(status):
+    return jsonify(message='Unauthorized or wrong user credentials.'), status
 
 
 @basic_auth.verify_password
@@ -38,12 +44,6 @@ def register():
             return jsonify(message='User with that email already exists.'), 409
 
         db.session.add(user)
-        db.session.flush()
-
-        user_profile = UserProfile(
-            user_id=user.id
-        )
-        db.session.add(user_profile)
         db.session.commit()
 
         return jsonify(user_schema.dump(user)), 201
@@ -67,12 +67,21 @@ def login():
         access = create_access_token(identity=user_payload)
         refresh = create_refresh_token(identity=user_payload)
 
+        session = session_schema.load({
+            'user_id': user.id,
+            'user_agent': request.user_agent,
+            'remote_addr': request.environ['REMOTE_ADDR']
+        })
+        db.session.add(session)
+        db.session.commit()
+
         return jsonify(
             access=access,
             refresh=refresh
         )
 
-    except Exception:
+    except Exception as e:
+        print(e)
         return jsonify(message='Something went wrong.'), 500
 
 
