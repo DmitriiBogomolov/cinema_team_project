@@ -7,6 +7,11 @@ class AppSettings(BaseSettings):
     PG_DB: str = 'auth_database'
     PG_HOST: str = 'localhost'
     PG_PORT: str = 5437
+    JWT_SECRET_KEY: str
+    JWT_ACCESS_TOKEN_EXPIRES: int = 15 * 60
+    JWT_REFRESH_TOKEN_EXPIRES: int = 30 * 24 * 60 * 60
+    REDIS_HOST: str = 'localhost'
+    REDIS_PORT: int = 6388
 
     @property
     def POSTGRES_DSN(self):
