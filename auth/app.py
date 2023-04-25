@@ -4,9 +4,9 @@ import redis
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-from flask_jwt_extended import JWTManager
 
 from src.settings import app_settings
+from src.managers.jwt_manager import get_jwt_manager
 
 
 ACCESS_EXP = timedelta(seconds=app_settings.JWT_ACCESS_TOKEN_EXPIRES)
@@ -24,7 +24,7 @@ db = SQLAlchemy()
 db.init_app(app)
 
 ma = Marshmallow(app)
-jwt = JWTManager(app)
+jwt = get_jwt_manager(app)
 
 refresh_blacklist = redis.StrictRedis(
     host=app_settings.REDIS_HOST,
