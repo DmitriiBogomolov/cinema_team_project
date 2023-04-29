@@ -1,0 +1,34 @@
+from flask import jsonify, app
+from flask.wrappers import Response
+from flask_jwt_extended import JWTManager
+
+from src.models import User
+
+
+def get_jwt_manager(app: app.Flask) -> JWTManager:
+    """Provide configured JWTManager"""
+
+    jwt = JWTManager(app)
+
+    @jwt.user_lookup_loader
+    def user_lookup_callback(_jwt_header: dict, _jwt_data: dict) -> Response:
+        user_id = _jwt_data['sub']['id']
+        return User.query.filter_by(id=user_id).one_or_none()
+
+    @jwt.expired_token_loader
+    def expired_token_callback(_jwt_header: dict, _jwt_payload: dict) -> Response:
+        return jsonify(message='Provided JWT expired'), 401
+
+    @jwt.invalid_token_loader
+    def invalid_token_callback(_jwt_header: dict) -> Response:
+        return jsonify(message='Provided JWT expired is invalid'), 401
+
+    @jwt.token_verification_failed_loader
+    def token_verification_failed(_jwt_header: dict) -> Response:
+        return jsonify(message='Get off the site, scammer!'), 401
+
+    @jwt.unauthorized_loader
+    def no_jwt_cb(_jwt_header: dict) -> Response:
+        return jsonify(message='No JWT provided.'), 401
+
+    return jwt
