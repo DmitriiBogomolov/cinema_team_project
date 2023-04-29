@@ -1,23 +1,29 @@
 import uuid
+
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy_utils import EmailType, Timestamp
 
-from app import db
+
+db = SQLAlchemy()
 
 
 class BasicModel(Timestamp):
+    """Provide standard field: id, created, modified"""
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
 
 
 class User(db.Model, BasicModel):
+    """Represents user"""
     __tablename__ = 'users'
 
     email = db.Column(EmailType, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
 
 
-class Session(db.Model, BasicModel):
-    __tablename__ = 'sessions'
+class LoginEntrie(db.Model, BasicModel):
+    """Represents a record of user log-ins journal"""
+    __tablename__ = 'login_entries'
 
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     agent_platform = db.Column(db.String)
@@ -29,6 +35,7 @@ class Session(db.Model, BasicModel):
 
 
 class Role(db.Model, BasicModel):
+    """Represents users role"""
     __tablename__ = 'roles'
 
     name = db.Column(db.String, nullable=False)

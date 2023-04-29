@@ -2,11 +2,12 @@ from datetime import timedelta
 
 import redis
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 from src.settings import app_settings
-from src.managers.jwt_manager import get_jwt_manager
+from src.managers.jwt import get_jwt_manager
+from src.managers.basic_auth import get_basic_auth
+from src.models import db
 
 
 ACCESS_EXP = timedelta(seconds=app_settings.JWT_ACCESS_TOKEN_EXPIRES)
@@ -20,11 +21,11 @@ app.config['JWT_REFRESH_TOKEN_EXPIRES'] = REFRESH_EXP
 app.config['SQLALCHEMY_DATABASE_URI'] = app_settings.POSTGRES_DSN
 
 
-db = SQLAlchemy()
 db.init_app(app)
 
 ma = Marshmallow(app)
 jwt = get_jwt_manager(app)
+basic_auth = get_basic_auth()
 
 refresh_blacklist = redis.StrictRedis(
     host=app_settings.REDIS_HOST,
