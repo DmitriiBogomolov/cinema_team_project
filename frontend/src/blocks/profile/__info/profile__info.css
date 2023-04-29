@@ -1,0 +1,26 @@
+.profile__info {
+    display: grid;
+    grid-template-columns: 148px auto 56px;
+    grid-template-rows: repeat(2, auto);
+    grid-template-areas:
+    "avatar name edit"
+    "avatar description description";
+    grid-auto-flow: row;
+    grid-auto-rows: auto;
+    grid-gap: 0;
+    justify-content: left;
+    overflow: hidden;
+}
+
+@media screen and (max-width: 780px) {
+    .profile__info {
+        grid-template-columns: auto 34px;
+        grid-template-rows: repeat(3, auto);
+        grid-template-areas:
+        "avatar avatar"
+        "name edit"
+        "description gap";
+        justify-content: center;
+        margin: 0 0 0 34px;
+    }
+}

@@ -5,6 +5,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 from src.settings import app_settings
 
@@ -14,6 +15,7 @@ REFRESH_EXP = timedelta(seconds=app_settings.JWT_REFRESH_TOKEN_EXPIRES)
 
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config['JWT_SECRET_KEY'] = app_settings.JWT_SECRET_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = ACCESS_EXP
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = REFRESH_EXP
