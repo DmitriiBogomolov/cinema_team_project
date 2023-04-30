@@ -6,7 +6,7 @@ security:
   - BasicAuth: []
   - BearerAuth: []
 servers:
-  - url: http://localhost:80/auth
+  - url: http://localhost:5000/api/v1
     description: Dev server
 
 paths:
@@ -16,7 +16,7 @@ paths:
       summary: Регистрация пользователя.
       tags:
         - Auth
-      security: 
+      security:
         - BasicAuth: []
       requestBody:
         required: true
@@ -36,7 +36,7 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         default:
           $ref: "#/components/responses/UnknownError"
-  
+
   /login:
     post:
       summary: Вход
@@ -44,6 +44,13 @@ paths:
         - Auth
       security:
         - BasicAuth: []
+      requestBody:
+        required: true
+        description: Регистрационные данные.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
       responses:
         "200":
           description: Успешный вход
@@ -74,7 +81,7 @@ paths:
                     example: Успешный выход из аккаунта
         default:
           $ref: "#/components/responses/UnknownError"
-      
+
   /users/me/:
     get:
       summary: Профиль пользователя
@@ -103,7 +110,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/UserData"
-        
+
   /users/me/history:
     get:
       summary: История входов в аккаунт.
@@ -125,7 +132,7 @@ paths:
                   $ref: "#/components/schemas/AccessEvent"
         "401":
           $ref: "#/components/responses/401Unauthorized"
-  
+
   /users/me/change_password:
     post:
       summary: Изменение пароля.
@@ -178,7 +185,7 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
-  
+
   /jwt/refresh:
     post:
       summary: Обновить токен.
@@ -201,7 +208,7 @@ paths:
         "401":
           $ref: "#/components/responses/401Unauthorized"
 
-  /roles:
+  /roles/me:
     get:
       summary: Получить список ролей.
       security:
@@ -296,7 +303,7 @@ paths:
           $ref: "#/components/responses/401Unauthorized"
         "404":
           $ref: "#/components/responses/404NotFound"
-        
+
 
 components:
   securitySchemes:
@@ -316,7 +323,7 @@ components:
       name: Authorization
       schema:
         type: string
-        example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" 
+        example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
       required: true
     UserAgent:
       in: header
@@ -324,7 +331,7 @@ components:
       description: "Устройство клиента, использующего токен."
       schema:
         type: string
-        example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36" 
+        example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
       required: true
     IPAddress:
       in: header
@@ -332,7 +339,7 @@ components:
       description: "Маршрут и IP адрес клиента, использующего токен."
       schema:
         type: string
-        example: "103.0.113.165, 60.91.3.17, 120.192.338.678" 
+        example: "103.0.113.165, 60.91.3.17, 120.192.338.678"
       required: true
     UserId:
       in: path
@@ -363,7 +370,7 @@ components:
                 type: string
                 description: Ошибка
                 example: Произошла неизвестная ошибка
-    
+
     200Ok:
       description: Успешно.
       content:
@@ -382,7 +389,7 @@ components:
                 type: string
                 description: Сообщение.
                 example: OK
-   
+
     400BadRequest:
       description: Невалидное тело запроса.
       content:
@@ -401,7 +408,7 @@ components:
                 type: string
                 description: Сообщение.
                 example: Wrong requst body.
-    
+
     401Unauthorized:
       description: Ошибка авторизации.
       content:
@@ -420,7 +427,7 @@ components:
                 type: string
                 description: Сообщение.
                 example: Unauthorized or wrong user credentials.
-                
+
     404NotFound:
       description: Запрашиваемый ресурс не найден.
       content:
@@ -444,10 +451,10 @@ components:
     Credentials:
       type: object
       required:
-        - username
+        - email
         - password
       properties:
-        username:
+        email:
           type: string
           format: email
           example: user@email.com
@@ -494,7 +501,7 @@ components:
         new_password_re:
           type: string
           example: New@Password123
-          
+
     Token:
       type: string
       maxLength: 0
@@ -510,11 +517,11 @@ components:
         refresh:
           description: Refresh Token
           $ref: "#/components/schemas/Token"
-    
+
     AccessEvent:
       type: object
       properties:
-        user_agent: 
+        user_agent:
           type: string
           example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
         ip_address:
@@ -530,7 +537,7 @@ components:
       required:
         - name
       properties:
-        name: 
+        name:
           type: string
           example: "Модератор"
         description:
@@ -555,7 +562,7 @@ components:
         id:
           type: string
           example: 6931c67c-d85f-11ed-afa1-0242ac120002
-        name: 
+        name:
           type: string
           example: "Модератор"
         description:

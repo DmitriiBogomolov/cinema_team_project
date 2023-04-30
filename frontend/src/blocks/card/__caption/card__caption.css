@@ -1,0 +1,7 @@
+.card__caption {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 22px 22px;
+    align-items: center;
+}

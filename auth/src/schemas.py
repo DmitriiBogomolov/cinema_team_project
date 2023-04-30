@@ -1,5 +1,5 @@
 from app import ma
-from src.models import User, LoginEntrie
+from src.models import User, LoginEntrie, Role
 
 from marshmallow import (fields,
                          post_load,
@@ -97,3 +97,29 @@ class OutputEntrieSchema(ma.SQLAlchemyAutoSchema):
     """Represents LoginEntrie directly"""
     class Meta:
         model = LoginEntrie
+
+
+class RoleSchema(ma.SQLAlchemySchema):
+    """Role registration schema and getting standard data."""
+
+    class Meta:
+        model = Role
+        load_only = ['name']
+        dump_only = ['id']
+
+    id = fields.UUID(required=True)
+    name = fields.String(required=True)
+    description = fields.String(required=False)
+
+    @post_load
+    def make_obj(self, data: dict, **kwargs) -> Role:
+        return Role(**data)
+
+
+class UpdateRoleSchema(ma.SQLAlchemySchema):
+    """Schema for updating role."""
+    class Meta:
+        model = Role
+
+    name = fields.String(required=True)
+    description = fields.String(required=False)

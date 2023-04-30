@@ -3,6 +3,7 @@ from datetime import timedelta
 import redis
 from flask import Flask
 from flask_marshmallow import Marshmallow
+from flask_cors import CORS
 
 from settings import app_settings
 from src.pre_configured.jwt import get_jwt_manager
@@ -15,6 +16,7 @@ REFRESH_EXP = timedelta(seconds=app_settings.JWT_REFRESH_TOKEN_EXPIRES)
 
 
 app = Flask(__name__)
+cors = CORS(app, resources={r'/api/*': {'origins': '*'}})  # разрешаем CORS для работы фронтенда
 app.config['JWT_SECRET_KEY'] = app_settings.JWT_SECRET_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = ACCESS_EXP
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = REFRESH_EXP

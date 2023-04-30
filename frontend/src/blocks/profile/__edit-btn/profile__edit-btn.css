@@ -1,0 +1,34 @@
+.profile__edit-btn {
+    grid-area: edit;
+    width: 24px;
+    height: 24px;
+    box-sizing: border-box;
+    border: 1px solid #FFFFFF;
+    background-color: black;
+    align-self: end;
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 1.32827L2.60377 8.7666L1.28302 7.41936L8.66038 0L10 1.32827ZM0 10L1.96226 9.41177L0.584906 8.08349L0 10Z" fill="white"/></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 10px;
+    margin: 0 0 8px 18px;
+    padding: 0;
+}
+
+.profile__edit-btn:hover {
+    opacity: .6;
+    cursor: pointer;
+}
+
+@media screen and (max-width: 780px) {
+    .profile__edit-btn {
+        margin: auto auto 8px 10px;
+    }
+}
+
+@media screen and (max-width: 450px) {
+    .profile__edit-btn {
+        width: 18px;
+        height: 18px;
+        background-size: 7.5px;
+    }
+}

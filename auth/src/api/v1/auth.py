@@ -9,7 +9,6 @@ from src.services.jwt_service import jwt_service
 from src.services.user_service import user_service, AlreadyExistsError
 from app import basic_auth
 
-
 auth = Blueprint('auth', __name__)
 
 user_schema = UserSchema()
