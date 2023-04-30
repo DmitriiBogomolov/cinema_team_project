@@ -20,6 +20,7 @@
 
         docker-compose down -v
 
+4. Документация OpenAPI: [http://localhost:8000/swagger/](http://localhost:8000/swagger/)
 
 ## Разработка
 
