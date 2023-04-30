@@ -4,9 +4,9 @@ import redis
 from flask import Flask
 from flask_marshmallow import Marshmallow
 
-from src.settings import app_settings
-from src.managers.jwt import get_jwt_manager
-from src.managers.basic_auth import get_basic_auth
+from settings import app_settings
+from src.pre_configured.jwt import get_jwt_manager
+from src.pre_configured.basic_auth import get_basic_auth
 from src.models import db
 
 
@@ -36,6 +36,7 @@ refresh_blacklist = redis.StrictRedis(
 from src.api.v1.auth import auth
 from src.api.v1.users import users
 from src.api.v1.roles import roles
+
 
 app.register_blueprint(auth, url_prefix='/api/v1')
 app.register_blueprint(users, url_prefix='/api/v1/users')

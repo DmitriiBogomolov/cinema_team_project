@@ -8,7 +8,7 @@ from marshmallow import (fields,
                          validates_schema)
 from werkzeug.security import generate_password_hash
 
-from src.utils.validators import password_validator
+from src.validators import password_validator
 
 
 class UserSchema(ma.SQLAlchemySchema):
@@ -55,7 +55,7 @@ class ChangePasswordSchema(Schema):
     new_password_re = fields.String(required=True, validate=password_validator)
 
     @validates_schema
-    def validate_numbers(self, data: dict, **kwargs) -> None:
+    def validate_equal(self, data: dict, **kwargs) -> None:
         if data['new_password'] != data['new_password_re']:
             raise ValidationError('new_password must be equal to new_password_re.')
 
