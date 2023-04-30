@@ -2,9 +2,11 @@ from uuid import UUID
 
 from flask import abort
 from werkzeug.security import check_password_hash
+from sqlalchemy.exc import IntegrityError
 
 from src.schemas import UserSchema, LoginEntrieSchema, UpdateUserSchema
 from src.models import User, LoginEntrie
+from src.exceptions import AlreadyExistsError
 from app import db
 
 
@@ -13,18 +15,13 @@ entrie_schema = LoginEntrieSchema()  # repr one record of logins history
 update_schema = UpdateUserSchema()
 
 
-class AlreadyExistsError(Exception):
-    """Called if the user already exist"""
-    pass
-
-
 class UserService():
     def create_user(self, user_data: dict) -> User:
         """Create new user"""
         user = user_schema.load(user_data)
 
         if User.query.filter_by(email=user.email).first():
-            raise AlreadyExistsError
+            raise AlreadyExistsError('User with that email already exists.')
 
         db.session.add(user)
         db.session.commit()
@@ -35,11 +32,12 @@ class UserService():
         """Update provided user data"""
         valid_data = update_schema.load(user_data)
 
-        if User.query.filter_by(email=valid_data['email']).first():
-            raise AlreadyExistsError
-
-        cur_user.email = valid_data['email']
-        db.session.commit()
+        try:
+            User.query.filter_by(id=cur_user.id).update(valid_data)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback
+            raise AlreadyExistsError('Role with that name already exists')
 
         return cur_user
 

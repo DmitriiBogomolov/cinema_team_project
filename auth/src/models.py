@@ -8,6 +8,13 @@ from sqlalchemy_utils import EmailType, Timestamp
 db = SQLAlchemy()
 
 
+user_role = db.Table(
+    'user_roles',
+    db.Column('left_id', db.ForeignKey('users.id')),
+    db.Column('right_id', db.ForeignKey('roles.id')),
+)
+
+
 class BasicModel(Timestamp):
     """Provide standard field: id, created, modified"""
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
@@ -19,6 +26,12 @@ class User(db.Model, BasicModel):
 
     email = db.Column(EmailType, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
+    roles = db.relationship(
+        'Role',
+        secondary=user_role,
+        backref='users',
+        cascade='all'
+    )
 
 
 class LoginEntrie(db.Model, BasicModel):
@@ -38,5 +51,5 @@ class Role(db.Model, BasicModel):
     """Represents users role"""
     __tablename__ = 'roles'
 
-    name = db.Column(db.String, nullable=False)
+    name = db.Column(db.String, unique=True, nullable=False)
     description = db.Column(db.String)

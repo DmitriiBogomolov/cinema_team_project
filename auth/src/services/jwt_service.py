@@ -1,20 +1,14 @@
 from flask_jwt_extended import create_access_token, create_refresh_token
 
-from jwt.exceptions import InvalidTokenError
-
 from src.schemas import UserSchema, UserJWTPayloadSchema, LoginEntrieSchema
 from src.models import User
+from src.exceptions import RevokedTokenError
 from app import app, refresh_blacklist
 
 
 user_schema = UserSchema()
 user_payload_schema = UserJWTPayloadSchema()  # repr user data in jwt
 entrie_schema = LoginEntrieSchema()  # repr one record of logins history
-
-
-class RevokedTokenError(InvalidTokenError):
-    """Called if the token is in blocklist"""
-    pass
 
 
 class JWTService():

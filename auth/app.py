@@ -8,6 +8,7 @@ from flask_cors import CORS
 from settings import app_settings
 from src.pre_configured.jwt import get_jwt_manager
 from src.pre_configured.basic_auth import get_basic_auth
+from src import error_handlers
 from src.models import db
 
 
@@ -44,6 +45,7 @@ app.register_blueprint(auth, url_prefix='/api/v1')
 app.register_blueprint(users, url_prefix='/api/v1/users')
 app.register_blueprint(roles, url_prefix='/api/v1/roles')
 
+error_handlers.register_error_handlers(app)
 
 with app.app_context():
     db.create_all()

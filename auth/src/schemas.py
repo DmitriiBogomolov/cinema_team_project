@@ -11,16 +11,24 @@ from werkzeug.security import generate_password_hash
 from src.validators import password_validator
 
 
+class NotEmptySchema:
+    @validates_schema
+    def validate_no_data(self, data, **kwargs):
+        if not data:
+            raise ValidationError('No provided data.')
+
+
 class UserSchema(ma.SQLAlchemySchema):
     """User registration schema and getting standard data."""
 
     class Meta:
         model = User
         load_only = ['password']
-        dump_only = ['id']
+        dump_only = ['id', 'roles']
 
     id = fields.UUID(required=True)
     email = fields.Email(required=True)
+    roles = ma.Nested('RoleSchema', many=True)
 
     password = fields.String(
         required=True,
@@ -104,7 +112,6 @@ class RoleSchema(ma.SQLAlchemySchema):
 
     class Meta:
         model = Role
-        load_only = ['name']
         dump_only = ['id']
 
     id = fields.UUID(required=True)
@@ -121,5 +128,12 @@ class UpdateRoleSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Role
 
-    name = fields.String(required=True)
+    name = fields.String(required=False)
     description = fields.String(required=False)
+
+
+class ProvidedRoleSchema(ma.SQLAlchemyAutoSchema):
+    """Used to seting roles"""
+    class Meta:
+        model = Role
+        dump_only = ['name', 'description']

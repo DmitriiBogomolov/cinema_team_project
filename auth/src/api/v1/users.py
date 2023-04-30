@@ -1,3 +1,5 @@
+import uuid
+
 from flask import Blueprint, request, jsonify
 from flask.wrappers import Response
 from flask_jwt_extended import jwt_required, current_user
@@ -5,9 +7,11 @@ from flask_jwt_extended import jwt_required, current_user
 from src.schemas import (UserSchema,
                          UpdateUserSchema,
                          OutputEntrieSchema,
-                         ChangePasswordSchema)
+                         ChangePasswordSchema,
+                         ProvidedRoleSchema)
 from src.api.v1.wrappers import default_exception_wrapper
-from src.services.user_service import user_service, AlreadyExistsError
+from src.services.user_service import user_service
+from src.services.role_service import role_service
 
 
 users = Blueprint('users', __name__)
@@ -15,6 +19,7 @@ users = Blueprint('users', __name__)
 user_schema = UserSchema()
 update_schema = UpdateUserSchema()
 password_schema = ChangePasswordSchema()
+provided_role_schema = ProvidedRoleSchema()
 
 
 @users.route('/me', methods=('GET',))
@@ -34,13 +39,9 @@ def update_user_data() -> Response:
     Expected: JSON
         "email": "user@email.com"
     """
-    try:
-        data = request.get_json()
-        user = user_service.update_user(current_user, data)
-        return jsonify(user_schema.dump(user)), 201
-
-    except AlreadyExistsError:
-        return jsonify(message='User with that email already exists.'), 409
+    data = request.get_json()
+    user = user_service.update_user(current_user, data)
+    return jsonify(user_schema.dump(user)), 201
 
 
 @users.route('/me/history', methods=('GET',))
@@ -72,3 +73,41 @@ def change_password() -> Response:
         valid_data['new_password']
     )
     return jsonify({'message': 'OK'}), 200
+
+
+@users.route('/<uuid:user_id>/set_roles', methods=('POST',))
+@jwt_required()
+@default_exception_wrapper
+def set_roles(user_id: uuid.UUID) -> Response:
+    """
+    Set provided roles to user.       ................
+    Expected: JSON
+    [
+        {"id": "f8275c2f-a84b-462e-8a8a-ef42977a63cf"},
+        {"id": "78e7b190-70bd-4068-848e-5be6f920514c"}
+    ]
+    """
+    data = request.get_json()
+    valid_data = provided_role_schema.load(data, many=True)
+
+    user = role_service.set_roles(user_id, [role['id'] for role in valid_data])
+    return jsonify(user_schema.dump(user)), 200
+
+
+@users.route('/<uuid:user_id>/revoke_roles', methods=('POST',))
+@jwt_required()
+@default_exception_wrapper
+def revoke_roles(user_id: uuid.UUID) -> Response:
+    """
+    Remove provided roles from user.
+    Expected: JSON
+    [
+        {"id": "f8275c2f-a84b-462e-8a8a-ef42977a63cf"},
+        {"id": "78e7b190-70bd-4068-848e-5be6f920514c"}
+    ]
+    """
+    data = request.get_json()
+    valid_data = provided_role_schema.load(data, many=True)
+
+    user = role_service.revoke_roles(user_id, [role['id'] for role in valid_data])
+    return jsonify(user_schema.dump(user)), 200

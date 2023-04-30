@@ -6,7 +6,7 @@ from flask_jwt_extended import (jwt_required,
 from src.schemas import UserSchema, UserJWTPayloadSchema, LoginEntrieSchema
 from src.api.v1.wrappers import default_exception_wrapper
 from src.services.jwt_service import jwt_service
-from src.services.user_service import user_service, AlreadyExistsError
+from src.services.user_service import user_service
 from app import basic_auth
 
 auth = Blueprint('auth', __name__)
@@ -25,13 +25,9 @@ def register() -> Response:
         "email": "user@email.com",
         "password": "SD_g151@1af"
     """
-    try:
-        json_data = json.loads(request.data)
-        user = user_service.create_user(json_data)
-        return jsonify(user_schema.dump(user)), 201
-
-    except AlreadyExistsError:
-        return jsonify(message='User with that email already exists.'), 409
+    json_data = json.loads(request.data)
+    user = user_service.create_user(json_data)
+    return jsonify(user_schema.dump(user)), 201
 
 
 @auth.route('/login', methods=('POST',))
