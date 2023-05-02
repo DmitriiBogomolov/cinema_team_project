@@ -14,15 +14,16 @@ from settings import app_settings
 def is_database_available():
     try:
         conn = psycopg2.connect(
-            dbname=app_settings.PG_DB,
-            user=app_settings.PG_USER,
-            password=app_settings.PG_PASSWORD,
-            host=app_settings.PG_HOST,
-            port=app_settings.PG_PORT,
+            dbname=app_settings.POSTGRES_DB,
+            user=app_settings.POSTGRES_USER,
+            password=app_settings.POSTGRES_PASSWORD,
+            host=app_settings.POSTGRES_HOST,
+            port=app_settings.POSTGRES_PORT,
         )
         conn.close()
         return True
-    except psycopg2.OperationalError:
+    except psycopg2.OperationalError as e:
+        print(e)
         return False
 
 

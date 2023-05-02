@@ -59,10 +59,15 @@ class UserService():
         db.session.add(entrie)
         db.session.commit()
 
-    def get_entrie_log(self, user_id: UUID) -> list[LoginEntrie]:
+    def get_entrie_log(self,
+                       user_id: UUID,
+                       page: int,
+                       per_page: int
+                       ) -> list[LoginEntrie]:
         """Get user log-in history"""
-        return (LoginEntrie.query.filter_by(user_id=user_id)
-                                 .order_by(LoginEntrie.created.desc()))
+        return LoginEntrie.query.filter_by(user_id=user_id) \
+            .order_by(LoginEntrie.created.desc()) \
+            .paginate(page=page, per_page=per_page, error_out=True)
 
 
 user_service = UserService()

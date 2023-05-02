@@ -1,5 +1,5 @@
 [flake8]
-exclude = mocks,
+exclude = mocks,auth/migrations/versions/*.py
 max-line-length = 120
 inline-quotes = single
 import-order-style = pep8

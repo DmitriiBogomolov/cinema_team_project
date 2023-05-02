@@ -1,19 +1,19 @@
 import os
 from datetime import timedelta
 
-
 import redis
 import yaml
 from flask import Flask
+from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_swagger_ui import get_swaggerui_blueprint
-
 from flask_cors import CORS
 
+from utils.cli_commands import install_cli_commands
 from settings import app_settings
 from src.pre_configured.jwt import get_jwt_manager
 from src.pre_configured.basic_auth import get_basic_auth
-from src import error_handlers
+from src.error_handlers import register_error_handlers
 from src.models import db
 
 app = Flask(__name__)
@@ -48,6 +48,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = app_settings.POSTGRES_DSN
 
 
 db.init_app(app)
+migrate = Migrate(app, db)
 
 ma = Marshmallow(app)
 jwt = get_jwt_manager(app)
@@ -70,7 +71,5 @@ app.register_blueprint(roles, url_prefix='/api/v1/roles')
 app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 
-error_handlers.register_error_handlers(app)
-
-with app.app_context():
-    db.create_all()
+register_error_handlers(app)
+install_cli_commands(app)

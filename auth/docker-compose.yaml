@@ -10,8 +10,8 @@ services:
     depends_on:
       - db
       - redis
-    command: bash -c "python utils/wait_for_pg.py && python pywsgi.py"
-  
+    command: bash -c "python utils/wait_for_pg.py && flask db upgrade && python pywsgi.py"
+
   db:
     image: postgres:13
     expose:
@@ -20,12 +20,12 @@ services:
       - auth_pg_data:/var/lib/postgresql/data/
     env_file:
       - .env
-  
+
   redis:
     image: redis
     expose:
       - 6379
-  
+
   nginx:
     image: nginx:latest
     volumes:

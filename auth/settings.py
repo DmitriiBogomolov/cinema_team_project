@@ -2,11 +2,11 @@ from pydantic import BaseSettings
 
 
 class AppSettings(BaseSettings):
-    PG_PASSWORD: str
-    PG_USER: str
-    PG_DB: str
-    PG_HOST: str = 'db'
-    PG_PORT: str = 5432
+    POSTGRES_PASSWORD: str
+    POSTGRES_USER: str
+    POSTGRES_DB: str
+    POSTGRES_HOST: str = 'db'
+    POSTGRES_PORT: str = 5432
     JWT_SECRET_KEY: str
     JWT_ACCESS_TOKEN_EXPIRES: int = 15 * (60)  # 15 minutes
     JWT_REFRESH_TOKEN_EXPIRES: int = 30 * (24 * 60 * 60)  # 30 days
@@ -15,11 +15,11 @@ class AppSettings(BaseSettings):
 
     @property
     def POSTGRES_DSN(self) -> str:
-        return 'postgresql://{}:{}@{}:{}/{}'.format(self.PG_USER,
-                                                    self.PG_PASSWORD,
-                                                    self.PG_HOST,
-                                                    self.PG_PORT,
-                                                    self.PG_DB)
+        return 'postgresql://{}:{}@{}:{}/{}'.format(self.POSTGRES_USER,
+                                                    self.POSTGRES_PASSWORD,
+                                                    self.POSTGRES_HOST,
+                                                    self.POSTGRES_PORT,
+                                                    self.POSTGRES_DB)
 
     class Config:
         env_file = '.env'
