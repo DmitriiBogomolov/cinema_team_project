@@ -1,7 +1,8 @@
 from jwt.exceptions import DecodeError, ExpiredSignatureError
 
-from flask import jsonify
+from flask import jsonify, abort
 from marshmallow.exceptions import ValidationError
+from werkzeug.exceptions import NotFound
 
 from src.exceptions import RevokedTokenError, AlreadyExistsError
 from app import db
@@ -23,6 +24,9 @@ def default_exception_wrapper(func):
         except ExpiredSignatureError:
             return jsonify(message='The token has expired.'), 401
 
+        except NotFound:
+            abort(404)
+
         except AlreadyExistsError as e:
             return jsonify(message=str(e)), 409
 
@@ -30,8 +34,7 @@ def default_exception_wrapper(func):
             db.session.rollback()
             return jsonify({'message': e.messages}), 422
 
-        except Exception as e:
-            print(e)
+        except Exception:
             return jsonify(message='Something went wrong.'), 500
 
     wrapper.__name__ = func.__name__

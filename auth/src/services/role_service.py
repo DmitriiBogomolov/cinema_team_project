@@ -38,7 +38,7 @@ class RoleService():
             Role.query.filter_by(id=role_id).update(valid_data)
             db.session.commit()
         except IntegrityError:
-            db.session.rollback
+            db.session.rollback()
             raise AlreadyExistsError('Role with that name already exists')
 
         return role

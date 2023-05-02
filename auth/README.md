@@ -26,10 +26,21 @@
 
 При работающем окружении можно запустить сервер локально:
 1. Установить зависимости.
-2. Выполнить
+2. Применить миграции
+
+        flask db upgrade
+
+3. Создать суперпользователя
+
+        flask createsuperuser username password
+
+4. Запустить сервер
+
+        https://flask.palletsprojects.com/en/2.2.x/cli/
+
+4.1. Monkey patch для gevent
 
         python pywsgi.py
-
 
 
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀

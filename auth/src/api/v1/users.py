@@ -10,6 +10,7 @@ from src.schemas import (UserSchema,
                          ChangePasswordSchema,
                          ProvidedRoleSchema)
 from src.api.v1.wrappers import default_exception_wrapper
+from src.helpers import get_pagination_params, get_pagination_meta
 from src.services.user_service import user_service
 from src.services.role_service import role_service
 
@@ -49,9 +50,15 @@ def update_user_data() -> Response:
 @default_exception_wrapper
 def get_user_history() -> Response:
     """Provides user log-in history"""
-    entries = user_service.get_entrie_log(current_user.id)
+    page, per_page = get_pagination_params(request)
+    entries = user_service.get_entrie_log(
+        current_user.id,
+        page,
+        per_page
+    )
+    meta = get_pagination_meta(entries)
     schema = OutputEntrieSchema(many=True)
-    return jsonify(schema.dump(entries)), 200
+    return jsonify(data=schema.dump(entries), meta=meta), 200
 
 
 @users.route('/me/change_password', methods=('POST',))
