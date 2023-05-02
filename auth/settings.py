@@ -2,9 +2,9 @@ from pydantic import BaseSettings
 
 
 class AppSettings(BaseSettings):
-    PG_PASSWORD: str = '123qwe'
-    PG_USER: str = 'app'
-    PG_DB: str = 'auth_database'
+    PG_PASSWORD: str
+    PG_USER: str
+    PG_DB: str
     PG_HOST: str = 'db'
     PG_PORT: str = 5432
     JWT_SECRET_KEY: str
@@ -22,7 +22,7 @@ class AppSettings(BaseSettings):
                                                     self.PG_DB)
 
     class Config:
-        env_file = '/app/.env'
+        env_file = '.env'
         env_file_encoding = 'utf-8'
 
 
