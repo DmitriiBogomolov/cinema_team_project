@@ -1,5 +1,5 @@
 from uuid import UUID
-
+from http import HTTPStatus
 from flask import abort
 from werkzeug.security import check_password_hash
 from sqlalchemy.exc import IntegrityError
@@ -36,7 +36,7 @@ class UserService():
             User.query.filter_by(id=cur_user.id).update(valid_data)
             db.session.commit()
         except IntegrityError:
-            db.session.rollback
+            db.session.rollback()
             raise AlreadyExistsError('Role with that name already exists')
 
         return cur_user
@@ -44,7 +44,7 @@ class UserService():
     def change_password(self, user: User, old_pass: str, new_pass: str) -> None:
         """Change password if cur_password is valid"""
         if not check_password_hash(user.password, old_pass):
-            abort(401)
+            abort(HTTPStatus.UNAUTHORIZED)
 
         user.password = UserSchema.get_password_hash(new_pass)
         db.session.commit()

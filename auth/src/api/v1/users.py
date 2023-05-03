@@ -1,5 +1,6 @@
 import uuid
-
+from typing import Tuple
+from http import HTTPStatus
 from flask import Blueprint, request, jsonify
 from flask.wrappers import Response
 from flask_jwt_extended import jwt_required, current_user
@@ -26,15 +27,15 @@ provided_role_schema = ProvidedRoleSchema()
 @users.route('/me', methods=('GET',))
 @jwt_required()
 @default_exception_wrapper
-def get_user_data() -> Response:
+def get_user_data() -> Tuple[Response, HTTPStatus]:
     """Test your mind"""
-    return jsonify(user_schema.dump(current_user)), 201
+    return jsonify(user_schema.dump(current_user)), HTTPStatus.CREATED
 
 
 @users.route('/me', methods=('PATCH',))
 @jwt_required()
 @default_exception_wrapper
-def update_user_data() -> Response:
+def update_user_data() -> Tuple[Response, HTTPStatus]:
     """
     Partially updates user data
     Expected: JSON
@@ -42,13 +43,13 @@ def update_user_data() -> Response:
     """
     data = request.get_json()
     user = user_service.update_user(current_user, data)
-    return jsonify(user_schema.dump(user)), 201
+    return jsonify(user_schema.dump(user)), HTTPStatus.CREATED
 
 
 @users.route('/me/history', methods=('GET',))
 @jwt_required()
 @default_exception_wrapper
-def get_user_history() -> Response:
+def get_user_history() -> Tuple[Response, HTTPStatus]:
     """Provides user log-in history"""
     page, per_page = get_pagination_params(request)
     entries = user_service.get_entrie_log(
@@ -58,13 +59,13 @@ def get_user_history() -> Response:
     )
     meta = get_pagination_meta(entries)
     schema = OutputEntrieSchema(many=True)
-    return jsonify(data=schema.dump(entries), meta=meta), 200
+    return jsonify(data=schema.dump(entries), meta=meta), HTTPStatus.OK
 
 
 @users.route('/me/change_password', methods=('POST',))
 @jwt_required()
 @default_exception_wrapper
-def change_password() -> Response:
+def change_password() -> Tuple[Response, HTTPStatus]:
     """
     Do nothing.
     Expected: JSON
@@ -79,13 +80,13 @@ def change_password() -> Response:
         valid_data['password'],
         valid_data['new_password']
     )
-    return jsonify({'message': 'OK'}), 200
+    return jsonify({'message': 'OK'}), HTTPStatus.OK
 
 
 @users.route('/<uuid:user_id>/set_roles', methods=('POST',))
 @jwt_required()
 @default_exception_wrapper
-def set_roles(user_id: uuid.UUID) -> Response:
+def set_roles(user_id: uuid.UUID) -> Tuple[Response, HTTPStatus]:
     """
     Set provided roles to user.       ................
     Expected: JSON
@@ -98,13 +99,13 @@ def set_roles(user_id: uuid.UUID) -> Response:
     valid_data = provided_role_schema.load(data, many=True)
 
     user = role_service.set_roles(user_id, [role['id'] for role in valid_data])
-    return jsonify(user_schema.dump(user)), 200
+    return jsonify(user_schema.dump(user)), HTTPStatus.OK
 
 
 @users.route('/<uuid:user_id>/revoke_roles', methods=('POST',))
 @jwt_required()
 @default_exception_wrapper
-def revoke_roles(user_id: uuid.UUID) -> Response:
+def revoke_roles(user_id: uuid.UUID) -> Tuple[Response, HTTPStatus]:
     """
     Remove provided roles from user.
     Expected: JSON
@@ -117,4 +118,4 @@ def revoke_roles(user_id: uuid.UUID) -> Response:
     valid_data = provided_role_schema.load(data, many=True)
 
     user = role_service.revoke_roles(user_id, [role['id'] for role in valid_data])
-    return jsonify(user_schema.dump(user)), 200
+    return jsonify(user_schema.dump(user)), HTTPStatus.OK

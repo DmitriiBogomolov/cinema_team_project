@@ -1,3 +1,5 @@
+from typing import Tuple
+from http import HTTPStatus
 from flask import Blueprint, request, json, jsonify
 from flask.wrappers import Response
 from flask_jwt_extended import (jwt_required,
@@ -18,7 +20,7 @@ entrie_schema = LoginEntrieSchema()  # repr one record of logins history
 
 @auth.route('/register', methods=('POST',))
 @default_exception_wrapper
-def register() -> Response:
+def register() -> Tuple[Response, HTTPStatus]:
     """
     Register new user.
     Expected: JSON
@@ -27,13 +29,13 @@ def register() -> Response:
     """
     json_data = json.loads(request.data)
     user = user_service.create_user(json_data)
-    return jsonify(user_schema.dump(user)), 201
+    return jsonify(user_schema.dump(user)), HTTPStatus.CREATED
 
 
 @auth.route('/login', methods=('POST',))
 @basic_auth.login_required
 @default_exception_wrapper
-def login() -> Response:
+def login() -> Tuple[Response, HTTPStatus]:
     """
     Provides a token pair using BasicAuth login/password credentials.
     Expected: None
@@ -42,25 +44,25 @@ def login() -> Response:
     tokens = jwt_service.create_jwt_pair(user)
     user_service.save_entrie_log(user.id, request)
 
-    return jsonify(**tokens), 200
+    return jsonify(**tokens), HTTPStatus.OK
 
 
 @auth.route('/refresh', methods=('POST',))
 @default_exception_wrapper
-def refresh() -> Response:
+def refresh() -> Tuple[Response, HTTPStatus]:
     """
     Get new token pair.
     Expected: JSON
         "refresh": "eyJhb...GciOi...JIUzI1"
     """
     refresh = decode_token(json.loads(request.data)['refresh'])
-    return jsonify(**jwt_service.refresh_jwt_pair(refresh)), 200
+    return jsonify(**jwt_service.refresh_jwt_pair(refresh)), HTTPStatus.OK
 
 
 @auth.route('/logout', methods=('POST',))
 @jwt_required()
 @default_exception_wrapper
-def logout() -> Response:
+def logout() -> Tuple[Response, HTTPStatus]:
     """
     Revoke the provided refresh token.
     Expected: JSON
@@ -69,4 +71,4 @@ def logout() -> Response:
     """
     refresh = decode_token(json.loads(request.data)['refresh'])
     jwt_service.revoke_token(refresh)
-    return jsonify(message='Successfully revoked.'), 200
+    return jsonify(message='Successfully revoked.'), HTTPStatus.OK

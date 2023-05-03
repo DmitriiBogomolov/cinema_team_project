@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from flask import jsonify, app
 from flask.wrappers import Response
 from flask_jwt_extended import JWTManager
@@ -17,18 +18,18 @@ def get_jwt_manager(app: app.Flask) -> JWTManager:
 
     @jwt.expired_token_loader
     def expired_token_callback(_jwt_header: dict, _jwt_payload: dict) -> Response:
-        return jsonify(message='Provided JWT expired'), 401
+        return jsonify(message='Provided JWT expired'), HTTPStatus.UNAUTHORIZED
 
     @jwt.invalid_token_loader
     def invalid_token_callback(_jwt_header: dict) -> Response:
-        return jsonify(message='Provided JWT expired is invalid'), 401
+        return jsonify(message='Provided JWT expired is invalid'), HTTPStatus.UNAUTHORIZED
 
     @jwt.token_verification_failed_loader
     def token_verification_failed(_jwt_header: dict) -> Response:
-        return jsonify(message='Get off the site, scammer!'), 401
+        return jsonify(message='Get off the site, scammer!'), HTTPStatus.UNAUTHORIZED
 
     @jwt.unauthorized_loader
     def no_jwt_cb(_jwt_header: dict) -> Response:
-        return jsonify(message='No JWT provided.'), 401
+        return jsonify(message='No JWT provided.'), HTTPStatus.UNAUTHORIZED
 
     return jwt
