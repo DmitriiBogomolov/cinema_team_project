@@ -7,9 +7,6 @@ class AppSettings(BaseSettings):
     POSTGRES_DB: str
     POSTGRES_HOST: str = 'db'
     POSTGRES_PORT: str = 5432
-    JWT_SECRET_KEY: str
-    JWT_ACCESS_TOKEN_EXPIRES: int = 15 * (60)  # 15 minutes
-    JWT_REFRESH_TOKEN_EXPIRES: int = 30 * (24 * 60 * 60)  # 30 days
     REDIS_HOST: str = 'redis'
     REDIS_PORT: int = 6379
 

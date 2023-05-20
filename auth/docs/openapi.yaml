@@ -1,7 +1,15 @@
 openapi: 3.0.3
 info:
-  title: Сервис авторизации для онлайн-кинотеатра.
-  version: 0.0.1
+  title: Микросервис аутентификации для онлайн-кинотеатра.
+  description: |-
+    🌲🌲🍄🌲🍄🍄🌲🍄🌲🍄🌲🌲🍄🌲🍄🌲🍄🍄🍄🌲🍄🍄🌲🍄🌲🌲
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: example@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
 security:
   - BasicAuth: []
   - BearerAuth: []
@@ -9,7 +17,10 @@ servers:
   - url: http://localhost:8000/api/v1
     description: Dev server
 
+
 paths:
+  
+#  -------------- AUTH -------------------- AUTH --------------
 
   /register:
     post:
@@ -31,149 +42,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserData"
+                $ref: "#/components/schemas/UserDataResponse"
         "400":
           $ref: "#/components/responses/400BadRequest"
-        default:
-          $ref: "#/components/responses/UnknownError"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
 
   /login:
     post:
-      summary: Вход
+      summary: Получить пару токенов.
       tags:
         - Auth
       security:
         - BasicAuth: []
-      requestBody:
-        required: true
-        description: Регистрационные данные.
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Credentials"
-      responses:
-        "200":
-          description: Успешный вход
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenPair"
-        "401":
-          $ref: "#/components/responses/401Unauthorized"
-
-  /logout:
-    post:
-      summary: Выход
-      tags:
-        - Auth
-      security:
-        - BearerAuth: []
-      responses:
-        '204':
-          description: No Content
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Успешный выход из аккаунта
-        default:
-          $ref: "#/components/responses/UnknownError"
-
-  /users/me/:
-    get:
-      summary: Профиль пользователя
-      security:
-        - BearerAuth: []
-      tags:
-        - Users
-      operationId: user-profile
-      responses:
-        "200":
-          description: Успешный ответ с данными профиля
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UserData"
-        default:
-          $ref: "#/components/responses/UnknownError"
-    put:
-      summary: Обновление данных профиля
-      tags:
-        - Users
-      operationId: user-update
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserData"
-
-  /users/me/history:
-    get:
-      summary: История входов в аккаунт.
-      security:
-        - BearerAuth: []
-      tags:
-        - Users
-      operationId: user-history
-      parameters:
-        - $ref: "#/components/parameters/AuthParameter"
-      responses:
-        "200":
-          description: Успешный ответ с историей входов в аккаунт.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/AccessEvent"
-        "401":
-          $ref: "#/components/responses/401Unauthorized"
-
-  /users/me/change_password:
-    post:
-      summary: Изменение пароля.
-      tags:
-        - Users
-      operationId: user-password-change
-      requestBody:
-        required: true
-        description: Старые и новые логин/пароль.
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PasswordChange"
-      responses:
-        "200":
-          $ref: "#/components/responses/200Ok"
-        "400":
-          $ref: "#/components/responses/400BadRequest"
-        "401":
-          $ref: "#/components/responses/401Unauthorized"
-        default:
-          $ref: "#/components/responses/UnknownError"
-
-  /jwt/create:
-    post:
-      summary: Аутентификация и получение пары токенов.
-      tags:
-        - JWT
-      operationId: jwt-create
-      security:
-        - BasicAuth: []
-      parameters:
-        - $ref: "#/components/parameters/UserAgent"
-        - $ref: "#/components/parameters/IPAddress"
-      requestBody:
-        required: true
-        description: Логин/пароль.
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Credentials"
       responses:
         "200":
           description: Успешный ответ с access и refresh токенами.
@@ -185,39 +69,427 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "500":
+          $ref: "#/components/responses/500InternalError"
 
-  /jwt/refresh:
+
+  /logout:
     post:
-      summary: Обновить токен.
+      summary: Отозвать refresh токен.
       tags:
-        - JWT
+        - Auth
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        description: Рефреш токен.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshToken"
+      responses:
+        "204":
+          description: No Content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Успешный выход из аккаунта.
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+  
+  
+  /logout_all:
+    post:
+      summary: Отозвать все refresh токены.
+      tags:
+        - Auth
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        description: Рефреш токен.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshToken"
+      responses:
+        "204":
+          description: No Content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Успешный выход из аккаунта
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+  
+  
+  /refresh:
+    post:
+      summary: Обновить пару токенов.
+      tags:
+        - Auth
       operationId: jwt-refresh
       security:
         - BearerAuth: []
-      parameters:
-        - $ref: "#/components/parameters/AuthParameter"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TokenPair"
+              $ref: "#/components/schemas/RefreshToken"
       responses:
         "200":
-          $ref: "#/components/responses/200Ok"
+          description: Успешный ответ с данными профиля.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenPair"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
 
-  /roles/me:
+
+#  -------------- USERS -------------------- USERS --------------
+
+
+  /users/me:
     get:
-      summary: Получить список ролей.
+      summary: Данные профиля текущего пользователя.
       security:
         - BearerAuth: []
       tags:
-        - Roles
+        - Users
+      operationId: user-profile
+      responses:
+        "200":
+          description: Успешный ответ с данными профиля.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDataResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+  
+  
+    patch:
+      summary: Обновить данные профиля текущего пользователя.
+      tags:
+        - Users
+      operationId: user-update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserData"
+      responses:
+        "200":
+          description: Успешный ответ с данными профиля.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDataResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
+
+  /users/me/history:
+    get:
+      summary: История входов в аккаунт текущего пользователя.
+      security:
+        - BearerAuth: []
+      tags:
+        - Users
+      operationId: user-history
+      responses:
+        "200":
+          description: Успешный ответ с историей входов в аккаунт.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccessEvent"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
+
+  /users/me/allowed_devices:
+    get:
+      summary: История входов в аккаунт текущего пользователя.
+      security:
+        - BearerAuth: []
+      tags:
+        - Users
+      operationId: get_allowed_devices
+      responses:
+        "200":
+          description: Успешный ответ с историей входов в аккаунт.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AllowedDevice"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
+
+  /users/me/change_password:
+    post:
+      summary: Изменение пароля текущего пользователя.
+      tags:
+        - Users
+      operationId: user-password-change
+      requestBody:
+        required: true
+        description: Старые и новые пароли.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordChange"
+      responses:
+        "200":
+          $ref: "#/components/responses/200Ok"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+  
+  
+  /users/me/change_email:
+    post:
+      summary: Изменение емейла текущего пользователя.
+      tags:
+        - Users
+      operationId: user-email-change
+      requestBody:
+        required: true
+        description: Новый емейл.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailChange"
+      responses:
+        "200":
+          $ref: "#/components/responses/200Ok"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
+
+  /users/{user_id}:
+    get:
+      summary: Получить данные пользователя.
+      security:
+        - ServiceBearerAuth: []
+      tags:
+        - Users
       operationId: list-roles
       parameters:
-        - $ref: "#/components/parameters/AuthParameter"
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: Успех.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CredentialsFullResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+  
+    patch:
+      summary: Насильственно изменить данные пользователя.
+      security:
+        - ServiceBearerAuth: []
+      tags:
+        - Users
+      operationId: update-user
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CredentialsFull"
+      responses:
+        "200":
+          description: Успешное изменение данных пользователя.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CredentialsFullResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+  
+    delete:
+      summary: Насильственно удалить пользователя.
+      security:
+        - ServiceBearerAuth: []
+      tags:
+        - Users
+      operationId: delete-user
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
+
+  /users/{user_id}/set_roles:
+    post:
+      summary: Назначить роли пользователю.
+      security:
+        - ServiceBearerAuth: []
+      tags:
+        - Users
+      operationId: set_roles
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RolesIdList"
+      responses:
+        "200":
+          description: Успешное назначение ролей.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDataResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
+  
+  /users/{user_id}/revoke_roles:
+    post:
+      summary: Отозвать у пользователя роли.
+      security:
+        - ServiceBearerAuth: []
+      tags:
+        - Users
+      operationId: revoke_roles
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RolesIdList"
+      responses:
+        "200":
+          description: Успешное назначение ролей.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDataResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
+
+#  -------------- ROLES -------------------- ROLES --------------
+
+
+  /roles:
+    get:
+      summary: Получить список ролей.
+      security:
+        - ServiceBearerAuth: []
+      tags:
+        - Roles
+      operationId: get_role_list
       responses:
         "200":
           description: Успех.
@@ -225,19 +497,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RolesListResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
-        "404":
-          $ref: "#/components/responses/404NotFound"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+  
     post:
-      summary: Создание роли.
+      summary: Создать роль.
       security:
-        - BearerAuth: []
+        - ServiceBearerAuth: []
       tags:
         - Roles
       operationId: create-role
-      parameters:
-        - $ref: "#/components/parameters/AuthParameter"
       requestBody:
         required: true
         content:
@@ -255,17 +528,21 @@ paths:
           $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
 
   /roles/{role_id}:
-    put:
-      summary: Изменение роли.
+    patch:
+      summary: Изменить роль.
       security:
-        - BearerAuth: []
+        - ServiceBearerAuth: []
       tags:
         - Roles
       operationId: update-role
       parameters:
-        - $ref: "#/components/parameters/AuthParameter"
         - $ref: "#/components/parameters/RoleId"
       requestBody:
         required: true
@@ -286,45 +563,265 @@ paths:
           $ref: "#/components/responses/401Unauthorized"
         "404":
           $ref: "#/components/responses/404NotFound"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+  
     delete:
-      summary: Удаление роли.
+      summary: Удалить роль.
       security:
-        - BearerAuth: []
+        - ServiceBearerAuth: []
       tags:
         - Roles
       operationId: delete-role
       parameters:
-        - $ref: "#/components/parameters/AuthParameter"
         - $ref: "#/components/parameters/RoleId"
       responses:
-        "200":
-          $ref: "#/components/responses/200Ok"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
         "401":
           $ref: "#/components/responses/401Unauthorized"
         "404":
           $ref: "#/components/responses/404NotFound"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+  
+  
+  /roles/{role_id}/set_permissions:
+    post:
+      summary: Назначить разрешения для роли.
+      security:
+        - ServiceBearerAuth: []
+      tags:
+        - Roles
+      operationId: set_permissions
+      parameters:
+        - $ref: "#/components/parameters/RoleId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/permissionIdList"
+      responses:
+        "200":
+          description: Успешное назначение разрешений.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+  
+  
+  /roles/{role_id}/revoke_permissions:
+    post:
+      summary: Отозвать у роли разрешения.
+      security:
+        - ServiceBearerAuth: []
+      tags:
+        - Roles
+      operationId: revoke_permissions
+      parameters:
+        - $ref: "#/components/parameters/RoleId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/permissionIdList"
+      responses:
+        "200":
+          description: Успешное назначение разрешений.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
+
+#  ------------ PERMISSIONS ------------------ PERMISSIONS ------------
+
+
+  /permissions:
+    get:
+      summary: Получить список разрешений.
+      security:
+        - ServiceBearerAuth: []
+      tags:
+        - Permissions
+      operationId: get_permission_list
+      responses:
+        "200":
+          description: Успех.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/permissionListResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+    post:
+      summary: Создать разрешение.
+      security:
+        - BearerAuth: []
+      tags:
+        - Permissions
+      operationId: create-permission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/permission"
+      responses:
+        "201":
+          description: Успешное создание разрешения.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/permissionResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
+  /permissions/update:
+    post:
+      summary: Обновить разрешения (списком).
+      security:
+        - ServiceBearerAuth: []
+      tags:
+        - Permissions
+      operationId: update-permission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/permissionList"
+      responses:
+        "200":
+          description: Успешное изменение разрешений.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/permissionListResponse"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
+
+  /permissions/{permission_id}:
+    patch:
+      summary: Изменить разрешение.
+      security:
+        - ServiceBearerAuth: []
+      tags:
+        - Permissions
+      operationId: update-permission
+      parameters:
+        - $ref: "#/components/parameters/permissionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/permission"
+      responses:
+        "200":
+          description: Успешное изменение роли.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/permission"
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "422":
+          $ref: "#/components/responses/422UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+  
+    delete:
+      summary: Удалить разрешение.
+      security:
+        - ServiceBearerAuth: []
+      tags:
+        - Permissions
+      operationId: delete-permission
+      parameters:
+        - $ref: "#/components/parameters/permissionId"
+      responses:
+        "400":
+          $ref: "#/components/responses/400BadRequest"
+        "401":
+          $ref: "#/components/responses/401Unauthorized"
+        "404":
+          $ref: "#/components/responses/404NotFound"
+        "500":
+          $ref: "#/components/responses/500InternalError"
+
+
+
+# --------------                            -----------------
+# --------------         COMPONENTS         -----------------
+# --------------                           -----------------
 
 
 components:
-  securitySchemes:
+  securitySchemes: #  ------ RESPONSES --------------------- RESPONSES
     BasicAuth:
       type: http
       scheme: basic
-      description: HTTP Basic Authentication with username and password.
-
+      description: HTTP Basic authentication with username and password.
     BearerAuth:
       type: http
       scheme: bearer
+      description: JWT authentication.
+      bearerFormat: JWT
+    ServiceBearerAuth:
+      type: http
+      scheme: bearer
+      description: JWT authentication (must be a service or manager).
       bearerFormat: JWT
 
-  parameters:
-    AuthParameter:
-      in: header
-      name: Authorization
-      schema:
-        type: string
-        example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-      required: true
+  parameters: #  ------ PARAMETERS --------------------- PARAMETERS
     UserAgent:
       in: header
       name: User-Agent
@@ -357,9 +854,17 @@ components:
       schema:
         type: string
       example:  e1d7fcec-e8d9-4967-8150-ae0996e44713
-
-  responses:
-    UnknownError:
+    permissionId:
+      in: path
+      name: permission_id
+      required: true
+      description: Идентификатор разрешения
+      schema:
+        type: string
+      example:  e1d7fcec-e8d9-4967-8150-ae0996e44713
+  
+  responses: #  ------RESPONSES--------------------- RESPONSES
+    InternalError:
       description: Неизвестная ошибка
       content:
         application/json:
@@ -369,8 +874,7 @@ components:
               message:
                 type: string
                 description: Ошибка
-                example: Произошла неизвестная ошибка
-
+                example: Something went wrong.
     200Ok:
       description: Успешно.
       content:
@@ -378,18 +882,12 @@ components:
           schema:
             type: object
             required:
-              - code
               - message
             properties:
-              code:
-                type: integer
-                description: Статус-код ответа.
-                example: 200
               message:
                 type: string
                 description: Сообщение.
                 example: OK
-
     400BadRequest:
       description: Невалидное тело запроса.
       content:
@@ -397,18 +895,12 @@ components:
           schema:
             type: object
             required:
-              - code
               - message
             properties:
-              code:
-                type: integer
-                description: Статус-код ответа.
-                example: 400
               message:
                 type: string
                 description: Сообщение.
-                example: Wrong requst body.
-
+                example: Bad request.
     401Unauthorized:
       description: Ошибка авторизации.
       content:
@@ -416,18 +908,12 @@ components:
           schema:
             type: object
             required:
-              - code
               - message
             properties:
-              code:
-                type: integer
-                description: Статус-код ответа.
-                example: 401
               message:
                 type: string
                 description: Сообщение.
                 example: Unauthorized or wrong user credentials.
-
     404NotFound:
       description: Запрашиваемый ресурс не найден.
       content:
@@ -435,19 +921,40 @@ components:
           schema:
             type: object
             required:
-              - code
               - message
             properties:
-              code:
-                type: integer
-                description: Статус-код ответа.
-                example: 404
               message:
                 type: string
                 description: Сообщение.
                 example: Not found.
+    422UnprocessableEntity:
+      description: Неподдерживаемое состояние.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
+                description: Сообщение.
+                example: Unprocessable entity.
+    500InternalError:
+      description: Ошибка валидации.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - message
+            properties:
+              message:
+                type: string
+                description: Сообщение.
+                example: Internal Server Error.
 
-  schemas:
+  schemas: #  -------- SCHEMAS --------------------------- SCHEMAS
     Credentials:
       type: object
       required:
@@ -463,19 +970,81 @@ components:
           type: string
           format: password
           example: SD_g151@1af
-
-    UserData:
+  
+    CredentialsFull:
+      type: object
+      required:
+        - email
+        - password
+        - is_active
+        - is_superuser
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@email.com
+          pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        password:
+          type: string
+          format: password
+          example: SD_g151@1af
+        is_active:
+          type: boolean
+          example: True
+        is_superuser:
+          type: boolean
+          example: True
+  
+    CredentialsFullResponse:
       type: object
       required:
         - id
-        - username
+        - email
+        - is_active
+        - is_superuser
         - roles
       properties:
         id:
           type: string
-          format: password
           example: 6931c67c-d85f-11ed-afa1-0242ac120002
-        username:
+        email:
+          type: string
+          format: email
+          example: user@email.com
+          pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        is_active:
+          type: boolean
+          example: True
+        is_superuser:
+          type: boolean
+          example: True
+        roles:
+          type: array
+          example: []
+          description: Роли назначенные пользователю
+          items:
+              type: string
+  
+    UserData:
+      type: object
+      required:
+        - email
+      properties:
+        somefield:
+          type: string
+          example: somefield
+  
+    UserDataResponse:
+      type: object
+      required:
+        - id
+        - email
+        - roles
+      properties:
+        id:
+          type: string
+          example: 6931c67c-d85f-11ed-afa1-0242ac120002
+        email:
           type: string
           format: email
           example: user@email.com
@@ -484,7 +1053,20 @@ components:
           type: array
           example: []
           description: Роли назначенные пользователю
-
+          items:
+              type: string
+  
+    EmailChange:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@email.com
+          pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+  
     PasswordChange:
       type: object
       required:
@@ -501,26 +1083,39 @@ components:
         new_password_re:
           type: string
           example: New@Password123
-
+  
     Token:
       type: string
       maxLength: 0
       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-
+  
     TokenPair:
       type: object
       description: Пара JWT-токенов (access/refersh)
       properties:
         access:
-          description: Access Token
           $ref: "#/components/schemas/Token"
         refresh:
-          description: Refresh Token
           $ref: "#/components/schemas/Token"
-
+  
+    RefreshToken:
+      type: object
+      description: Рефреш токен
+      properties:
+        refresh:
+          $ref: "#/components/schemas/Token"
+  
     AccessEvent:
       type: object
+      required:
+        - id
+        - user_agent
+        - ip_address
+        - datetime
       properties:
+        id:
+          type: string
+          example: 6931c67c-d85f-11ed-afa1-0242ac120002
         user_agent:
           type: string
           example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
@@ -531,7 +1126,20 @@ components:
           type: string
           format: date-time
           example: 2017-07-21T17:32:28Z
-
+  
+    AllowedDevice:
+      type: object
+      required:
+        - id
+        - user_agent
+      properties:
+        id:
+          type: string
+          example: 6931c67c-d85f-11ed-afa1-0242ac120002
+        user_agent:
+          type: string
+          example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
+  
     Role:
       type: object
       required:
@@ -543,7 +1151,7 @@ components:
         description:
           type: string
           example: "Следит за соблюдением правил ресурса в конкретных темах или разделах сетевого ресурса"
-
+  
     RoleId:
       type: object
       required:
@@ -552,12 +1160,21 @@ components:
         id:
           type: string
           example: 6931c67c-d85f-11ed-afa1-0242ac120002
-
+  
+    RolesIdList:
+      type: array
+      items:
+        $ref: "#/components/schemas/RoleId"
+      example:
+        - {"id": "e1d7fcec-e8d9-4967-8150-ae0996e44713"}
+        - {"id": "e1d7fcec-e8d9-4967-8150-ae0996e44713"}
+  
     RoleResponse:
       type: object
       required:
         - id
         - name
+        - permissions
       properties:
         id:
           type: string
@@ -568,8 +1185,67 @@ components:
         description:
           type: string
           example: "Следит за соблюдением правил ресурса в конкретных темах или разделах сетевого ресурса"
+        permissions:
+          type: array
+          example: []
+          description: Разрешения, назначенные для роли
+          items:
+              type: string
+        
 
     RolesListResponse:
       type: array
       items:
         $ref: "#/components/schemas/RoleResponse"
+
+    permission:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "show_18+_films"
+        description:
+          type: string
+          example: "Просматривать фильмы 18+"
+  
+    permissionList:
+      type: array
+      items:
+        $ref: "#/components/schemas/permission"
+  
+    permissionResponse:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "show_18+_films"
+        description:
+          type: string
+          example: "Просматривать фильмы 18+"
+  
+    permissionListResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/permissionResponse"
+  
+    permissionId:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: 6931c67c-d85f-11ed-afa1-0242ac120002
+  
+    permissionIdList:
+      type: array
+      items:
+        $ref: "#/components/schemas/permissionId"
+      example:
+        - {"id": "e1d7fcec-e8d9-4967-8150-ae0996e44713"}
+        - {"id": "e1d7fcec-e8d9-4967-8150-ae0996e44713"}
+  

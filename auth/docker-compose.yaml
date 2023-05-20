@@ -1,41 +1,14 @@
 version: "3"
 
 services:
-  api:
-    build: .
-    expose:
-      - 5000
-    env_file:
-      - .env
-    depends_on:
-      - db
-      - redis
-    command: bash -c "python utils/wait_for_pg.py && flask db upgrade && python pywsgi.py"
-
   db:
     image: postgres:13
-    expose:
-      - 5432
-    volumes:
-      - auth_pg_data:/var/lib/postgresql/data/
+    ports:
+      - "5432-5432"
     env_file:
       - .env
 
   redis:
     image: redis
     expose:
-      - 6379
-
-  nginx:
-    image: nginx:latest
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/configs:/etc/nginx/conf.d:ro
-    depends_on:
-      - api
-    ports:
-      - "8000:8000"
-
-volumes:
-  auth_pg_data:
-    driver: local
+      - "6379-6379"

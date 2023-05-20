@@ -1,74 +1,13 @@
 from typing import Tuple
 from http import HTTPStatus
-from flask import Blueprint, request, json, jsonify
-from flask.wrappers import Response
-from flask_jwt_extended import (jwt_required,
-                                decode_token)
 
-from src.schemas import UserSchema, UserJWTPayloadSchema, LoginEntrieSchema
-from src.api.v1.wrappers import default_exception_wrapper
-from src.services.jwt_service import jwt_service
-from src.services.user_service import user_service
-from app import basic_auth
+from flask import Blueprint
+from flask.wrappers import Response
+
 
 auth = Blueprint('auth', __name__)
 
-user_schema = UserSchema()
-user_payload_schema = UserJWTPayloadSchema()  # repr user data in jwt
-entrie_schema = LoginEntrieSchema()  # repr one record of logins history
 
-
-@auth.route('/register', methods=('POST',))
-@default_exception_wrapper
-def register() -> Tuple[Response, HTTPStatus]:
-    """
-    Register new user.
-    Expected: JSON
-        "email": "user@email.com",
-        "password": "SD_g151@1af"
-    """
-    json_data = json.loads(request.data)
-    user = user_service.create_user(json_data)
-    return jsonify(user_schema.dump(user)), HTTPStatus.CREATED
-
-
-@auth.route('/login', methods=('POST',))
-@basic_auth.login_required
-@default_exception_wrapper
-def login() -> Tuple[Response, HTTPStatus]:
-    """
-    Provides a token pair using BasicAuth login/password credentials.
-    Expected: None
-    """
-    user = basic_auth.current_user()
-    tokens = jwt_service.create_jwt_pair(user)
-    user_service.save_entrie_log(user.id, request)
-
-    return jsonify(**tokens), HTTPStatus.OK
-
-
-@auth.route('/refresh', methods=('POST',))
-@default_exception_wrapper
-def refresh() -> Tuple[Response, HTTPStatus]:
-    """
-    Get new token pair.
-    Expected: JSON
-        "refresh": "eyJhb...GciOi...JIUzI1"
-    """
-    refresh = decode_token(json.loads(request.data)['refresh'])
-    return jsonify(**jwt_service.refresh_jwt_pair(refresh)), HTTPStatus.OK
-
-
-@auth.route('/logout', methods=('POST',))
-@jwt_required()
-@default_exception_wrapper
-def logout() -> Tuple[Response, HTTPStatus]:
-    """
-    Revoke the provided refresh token.
-    Expected: JSON
-        "refresh": "eyJhb...GciOi...JIUzI1"
-    }
-    """
-    refresh = decode_token(json.loads(request.data)['refresh'])
-    jwt_service.revoke_token(refresh)
-    return jsonify(message='Successfully revoked.'), HTTPStatus.OK
+@auth.route('', methods=('GET',))
+def test() -> Tuple[Response, HTTPStatus]:
+    return 'hello world', HTTPStatus.CREATED
