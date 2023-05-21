@@ -9,6 +9,7 @@ class AppSettings(BaseSettings):
     POSTGRES_PORT: str = 5432
     REDIS_HOST: str = 'redis'
     REDIS_PORT: int = 6379
+    SWAGGER_URL: str = '/swagger'
 
     @property
     def POSTGRES_DSN(self) -> str:
