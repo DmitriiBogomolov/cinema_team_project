@@ -57,4 +57,5 @@ class AllowedDevice(db.Model, BasicModel):
     """Represents a record of user log-ins journal"""
     __tablename__ = 'allowed_devices'
 
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     user_agent = db.Column(db.String, nullable=False)
