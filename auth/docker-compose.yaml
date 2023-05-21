@@ -4,11 +4,11 @@ services:
   db:
     image: postgres:13
     ports:
-      - "5432-5432"
+      - "5432:5432"
     env_file:
       - .env
 
   redis:
     image: redis
-    expose:
-      - "6379-6379"
+    ports:
+      - "6379:6379"
