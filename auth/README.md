@@ -15,9 +15,11 @@
 2. Выполнить
 
         docker-compose up
-3. Запустить 
 
-        python app.py
+3. Запустить приложение как хочется, например, так:
+
+        flask --app app run
+
 4. Остановка:
 
         docker-compose down -v

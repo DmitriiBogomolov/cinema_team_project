@@ -1,11 +1,9 @@
 import uuid
 
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy_utils import EmailType, Timestamp
 
-
-db = SQLAlchemy()
+from app.extensions import db
 
 
 user_role = db.Table(

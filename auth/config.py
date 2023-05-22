@@ -1,7 +1,7 @@
 from pydantic import BaseSettings
 
 
-class AppSettings(BaseSettings):
+class Config(BaseSettings):
     POSTGRES_PASSWORD: str
     POSTGRES_USER: str
     POSTGRES_DB: str
@@ -12,7 +12,7 @@ class AppSettings(BaseSettings):
     SWAGGER_URL: str = '/swagger'
 
     @property
-    def POSTGRES_DSN(self) -> str:
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
         return 'postgresql://{}:{}@{}:{}/{}'.format(self.POSTGRES_USER,
                                                     self.POSTGRES_PASSWORD,
                                                     self.POSTGRES_HOST,
@@ -24,4 +24,4 @@ class AppSettings(BaseSettings):
         env_file_encoding = 'utf-8'
 
 
-app_settings = AppSettings()
+config = Config()
