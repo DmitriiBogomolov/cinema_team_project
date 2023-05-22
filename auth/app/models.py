@@ -1,5 +1,6 @@
 import uuid
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy_utils import EmailType, Timestamp
 
@@ -14,8 +15,39 @@ user_role = db.Table(
 
 
 class BasicModel(Timestamp):
-    """Provide standard field: id, created, modified"""
+    """Provide standard fields and methods"""
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+
+    @classmethod
+    def get_by_id(model, id: uuid) -> object:
+        return db.get_or_404(model, id)
+
+    @classmethod
+    def get_list(model) -> object:
+        return db.session.query(model).all()
+
+    @classmethod
+    def update(model, id: uuid, data: dict) -> object:
+        try:
+            model.query.filter_by(id=id).update(data)
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            raise e
+        return model.get_by_id(id)
+
+    def save(self) -> object:
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            raise e
+        return self
+
+    def delete(self) -> object:
+        db.session.delete(self)
+        db.session.commit()
 
 
 class User(db.Model, BasicModel):
