@@ -6,6 +6,7 @@ from http import HTTPStatus
 from flask import Blueprint, jsonify, request
 from flask.wrappers import Response
 from sqlalchemy.exc import IntegrityError
+from werkzeug.security import generate_password_hash
 
 from app.api.v1.catchers import default_exception_catcher
 from app.schemas import UserSchema, BasicUserSchema
@@ -30,7 +31,9 @@ def get_users() -> Tuple[Response, HTTPStatus]:
 @users.route('', methods=('POST',))
 @default_exception_catcher
 def create_user() -> Tuple[Response, HTTPStatus]:
-    user = user_schema.load(request.get_json())
+    respones = request.get_json()
+    respones['password_hash'] = generate_password_hash(respones['password_hash'], 'sha256')
+    user = user_schema.load(respones)
     try:
         result = user_schema.dump(user.save())
     except IntegrityError:
