@@ -56,8 +56,8 @@ class User(db.Model, BasicModel):
 
     email = db.Column(EmailType, unique=True, nullable=False)
     password_hash = db.Column(db.String, nullable=False)
-    is_active = db.Column(db.Boolean, nullable=False)
-    is_superuser = db.Column(db.Boolean, nullable=False)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    is_superuser = db.Column(db.Boolean, nullable=False, default=False)
     roles = db.relationship(
         'Role',
         secondary=user_role,
