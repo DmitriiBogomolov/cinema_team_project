@@ -18,13 +18,16 @@ def default_exception_catcher(func):
             abort(404)
 
         except AlreadyExistsError as e:
+            print(e)
             return jsonify(message=str(e)), HTTPStatus.CONFLICT
 
         except ValidationError as e:
+            print(e)
             db.session.rollback()
             return jsonify({'message': e.messages}), HTTPStatus.UNPROCESSABLE_ENTITY
 
-        except Exception:
+        except Exception as e:
+            print(e)
             return jsonify(message='Something went wrong.'), HTTPStatus.INTERNAL_SERVER_ERROR
 
     wrapper.__name__ = func.__name__
