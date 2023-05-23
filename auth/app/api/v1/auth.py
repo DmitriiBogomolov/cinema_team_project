@@ -4,6 +4,7 @@ from http import HTTPStatus
 from flask import Blueprint, jsonify
 from flask.wrappers import Response
 
+
 auth = Blueprint('auth', __name__)
 
 
