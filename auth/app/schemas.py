@@ -1,4 +1,4 @@
-from marshmallow import post_load
+from marshmallow import post_load, fields
 
 from app.models import Role
 from app.models import User
@@ -21,6 +21,8 @@ class BasicUserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         dump_only = ['id']
+
+    roles = fields.Nested(BasicRoleSchema, many=True, default=[])
 
 
 class UserSchema(BasicUserSchema):
