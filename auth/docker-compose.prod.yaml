@@ -10,7 +10,6 @@ services:
     depends_on:
       - db
       - redis
-    command: bash -c "python utils/wait_for_pg.py && python pywsgi.py"
 
   db:
     image: postgres:13
