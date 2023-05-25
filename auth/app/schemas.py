@@ -1,4 +1,5 @@
 from marshmallow import post_load, fields
+from werkzeug.security import generate_password_hash
 
 from app.models import Role
 from app.models import User
@@ -26,6 +27,11 @@ class BasicUserSchema(ma.SQLAlchemyAutoSchema):
 
 
 class UserSchema(BasicUserSchema):
+    @post_load
+    def hash_password(self, data: dict, **kwargs):
+        data['password'] = generate_password_hash(data['password'], 'sha256')
+        return data
+
     @post_load
     def make_obj(self, data: dict, **kwargs) -> User:
         return User(**data)
