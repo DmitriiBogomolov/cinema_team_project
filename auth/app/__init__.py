@@ -1,5 +1,6 @@
 from flask import Flask
 
+from utils.cli_commands import install_cli_commands
 from config import config
 from app.extensions import db, ma
 
@@ -23,5 +24,7 @@ def create_app(config=config):
 
     with app.app_context():
         db.create_all()
+
+    install_cli_commands(app)
 
     return app

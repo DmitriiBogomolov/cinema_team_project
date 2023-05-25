@@ -28,10 +28,10 @@ class BasicUserSchema(ma.SQLAlchemyAutoSchema):
 
 class UserSchema(BasicUserSchema):
     @post_load
-    def hash_password(self, data: dict, **kwargs):
-        data['password'] = generate_password_hash(data['password'], 'sha256')
-        return data
-
-    @post_load
     def make_obj(self, data: dict, **kwargs) -> User:
+        data['password'] = generate_password_hash(
+            password=data['password'],
+            method='pbkdf2:sha512',
+            salt_length=16
+        )
         return User(**data)

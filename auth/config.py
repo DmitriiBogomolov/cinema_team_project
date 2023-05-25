@@ -10,6 +10,7 @@ class Config(BaseSettings):
     REDIS_HOST: str = 'redis'
     REDIS_PORT: int = 6379
     SWAGGER_URL: str = '/swagger'
+    REFRESH_TOKEN_EXP: int = 60 * 60 * 24 * 15  # 15 days
 
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:

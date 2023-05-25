@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import uuid
 
 from app.extensions import redis_db
+from config import config
 
 
 class AbstractTokenStorage(ABC):
@@ -39,9 +40,10 @@ class AbstractTokenStorage(ABC):
 class RedisTokenStorage(AbstractTokenStorage):
     """Uses {prefix} notation to associate a user with tokens.
         More about notation https://redis.io/topics/cluster-tutorial"""
-    def save_user_token(self, user_id: uuid, token: dict) -> None:
-        key = '{%s}%s' % (user_id, token['jti'])
+    def save_user_token(self, user_id: uuid, jti: str, token: dict) -> None:
+        key = '{%s}%s' % (user_id, jti)
         redis_db.hmset(key, token)
+        redis_db.expire(key, config.REFRESH_TOKEN_EXP)
 
     def check_user_token(self, user_id: uuid, jti: str) -> bool:
         key = '{%s}%s' % (user_id, jti)
