@@ -65,7 +65,7 @@ def set_roles(user_id: uuid.UUID, role_id: uuid.UUID) -> Tuple[Response, HTTPSta
     role = Role.get_by_id(role_id)
     user.roles.append(role)
     db.session.commit()
-    return jsonify(user_schema.dump(user))
+    return jsonify(user_schema.dump(user)), HTTPStatus.OK
 
 
 @users.route('/<uuid:user_id>', methods=('GET',))
@@ -82,4 +82,4 @@ def revoke_roles(user_id: uuid.UUID, role_id: uuid.UUID) -> Tuple[Response, HTTP
     role = Role.get_by_id(role_id)
     user.roles.remove(role)
     db.session.commit()
-    return jsonify(user_schema.dump(user))
+    return jsonify(user_schema.dump(user)), HTTPStatus.OK

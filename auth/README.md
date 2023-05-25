@@ -9,19 +9,30 @@
 5. Ролевая модель разграничения доступов.
 
 
-## Разработка
+## Запуск
 
 1. Переименовать демонстрационнный .env.example в .env
 2. Выполнить
 
-        docker-compose up
+        docker-compose -f docker-compose.prod.yaml up --build
 
-3. Запустить приложение как хочется, например, так:
+3. Остановка:
+
+        docker-compose -f docker-compose.dev.yaml down -v
+
+4. Документация OpenAPI: [http://localhost:5000/swagger/](http://localhost:5000/swagger/)
+
+## Разработка
+
+1. Устанавливаем в .env POSTGRES_HOST и REDIS_HOST в значения localhost
+2. Запускаем
+
+        docker-compose -f docker-compose.dev.yaml up --build
+
+3. Запускаем приложение
 
         flask --app app run
 
-4. Остановка:
+4. Остановка
 
-        docker-compose down -v
-
-5. Документация OpenAPI: [http://localhost:5000/swagger/](http://localhost:5000/swagger/)
+        docker-compose -f docker-compose.dev.yaml down -v
