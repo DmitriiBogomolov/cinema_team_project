@@ -36,3 +36,7 @@
 4. Остановка
 
         docker-compose -f docker-compose.dev.yaml down -v
+
+5. Команда создания суперпользователя
+
+        flask createsuperuser username password
