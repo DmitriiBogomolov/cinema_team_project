@@ -8,7 +8,7 @@ from config import config
 class AbstractTokenStorage(ABC):
     """Token storage"""
     @abstractmethod
-    def save_user_token(user_id: uuid, token: dict) -> None:
+    def save_user_token(user_id: uuid, jti: str, payload: dict) -> None:
         pass
 
     @abstractmethod
@@ -17,12 +17,12 @@ class AbstractTokenStorage(ABC):
         pass
 
     @abstractmethod
-    def get_user_token(user_id: uuid, jti: str) -> dict:
+    def get_user_token(user_id: uuid, payload: str) -> dict:
         """Gets certain user token"""
         pass
 
     @abstractmethod
-    def delete_user_token(user_id: uuid, token: dict) -> bool:
+    def delete_user_token(user_id: uuid, payload: dict) -> bool:
         """Deletes certain user token"""
         pass
 
@@ -32,7 +32,7 @@ class AbstractTokenStorage(ABC):
         pass
 
     @abstractmethod
-    def delete_all_user_tokens(user_id: uuid) -> int:
+    def delete_all_user_tokens(user_id: str) -> int:
         """Deletes all user tokens"""
         pass
 
@@ -40,9 +40,9 @@ class AbstractTokenStorage(ABC):
 class RedisTokenStorage(AbstractTokenStorage):
     """Uses {prefix} notation to associate a user with tokens.
         More about notation https://redis.io/topics/cluster-tutorial"""
-    def save_user_token(self, user_id: uuid, jti: str, token: dict) -> None:
+    def save_user_token(self, user_id: uuid, jti: str, payload: dict) -> None:
         key = '{%s}%s' % (user_id, jti)
-        redis_db.hmset(key, token)
+        redis_db.hset(key, mapping=payload)
         redis_db.expire(key, config.REFRESH_TOKEN_EXP)
 
     def check_user_token(self, user_id: uuid, jti: str) -> bool:

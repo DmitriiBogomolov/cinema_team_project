@@ -1,5 +1,5 @@
 from marshmallow import post_load, fields
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.models import Role
 from app.models import User
@@ -35,3 +35,6 @@ class UserSchema(BasicUserSchema):
             salt_length=16
         )
         return User(**data)
+
+    def verify_hash(self, pwhash: str, password: str) -> bool:
+        return check_password_hash(pwhash, password)
