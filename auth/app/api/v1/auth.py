@@ -76,7 +76,7 @@ def logout() -> Tuple[Response, HTTPStatus]:
         jwt_service.revoke_token(data_user['refresh'])
         return jsonify({'message': 'Успешный выход из аккаунта.'}), HTTPStatus.OK
     else:
-        return jsonify(''), HTTPStatus.CONFLICT
+        raise AlreadyExistsError('Токен недействительный')
 
 
 @auth.route('/logout_all', methods=('POST',))
@@ -86,3 +86,5 @@ def logout_all() -> Tuple[Response, HTTPStatus]:
     if jwt_service.verify_token(data_user['refresh']):
         jwt_service.revoke_token(data_user['refresh'], all=True)
         return jsonify({'message': 'Успешный выход из аккаунта.'}), HTTPStatus.OK
+    else:
+        raise AlreadyExistsError('Токен недействительный')
