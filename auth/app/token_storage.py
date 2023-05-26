@@ -17,12 +17,12 @@ class AbstractTokenStorage(ABC):
         pass
 
     @abstractmethod
-    def get_user_token(user_id: uuid, payload: str) -> dict:
+    def get_user_token(user_id: uuid, jti: str) -> dict:
         """Gets certain user token"""
         pass
 
     @abstractmethod
-    def delete_user_token(user_id: uuid, payload: dict) -> bool:
+    def delete_user_token(user_id: uuid, jti: str) -> bool:
         """Deletes certain user token"""
         pass
 
@@ -32,7 +32,7 @@ class AbstractTokenStorage(ABC):
         pass
 
     @abstractmethod
-    def delete_all_user_tokens(user_id: str) -> int:
+    def delete_all_user_tokens(user_id: uuid) -> int:
         """Deletes all user tokens"""
         pass
 
