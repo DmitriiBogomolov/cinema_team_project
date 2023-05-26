@@ -42,7 +42,7 @@ class RedisTokenStorage(AbstractTokenStorage):
         More about notation https://redis.io/topics/cluster-tutorial"""
     def save_user_token(self, user_id: uuid, jti: str, payload: dict) -> None:
         key = '{%s}%s' % (user_id, jti)
-        redis_db.hset(key, mapping=payload)
+        redis_db.hmset(key, mapping=payload)
         redis_db.expire(key, config.REFRESH_TOKEN_EXP)
 
     def check_user_token(self, user_id: uuid, jti: str) -> bool:
