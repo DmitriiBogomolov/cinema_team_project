@@ -1,0 +1,38 @@
+version: "3"
+
+services:
+  tests:
+    image: python:3.8-slim-buster
+    env_file:
+      - .env
+    entrypoint: >
+      sh -c "pip install -r requirements/dev.txt
+      && python3 utils/wait_for_es.py
+      && python3 utils/wait_for_redis.py
+      && pytest tests/functional/src"
+    depends_on:
+      - db
+      - redis
+      - nginx
+
+  db:
+    image: postgres:13
+    expose:
+      - 5432
+    env_file:
+      - .env
+
+  redis:
+    image: redis
+    expose:
+      - 6379
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/configs:/etc/nginx/conf.d:ro
+    depends_on:
+      - api
+    ports:
+      - "8000:8000"
