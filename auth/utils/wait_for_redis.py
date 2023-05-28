@@ -1,6 +1,12 @@
+import os
+import sys
 import time
 
 from redis import Redis
+
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
 
 from config import config
 
