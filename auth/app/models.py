@@ -26,15 +26,14 @@ class BasicModel(Timestamp):
     def get_list(model) -> object:
         return db.session.query(model).all()
 
-    @classmethod
-    def update(model, id: uuid, data: dict) -> object:
+    def update(self, data: dict) -> object:
         try:
-            model.query.filter_by(id=id).update(data)
+            db.session.query(self.__class__).filter_by(id=self.id).update(data)
             db.session.commit()
         except IntegrityError as e:
             db.session.rollback()
             raise e
-        return model.get_by_id(id)
+        return self
 
     def save(self) -> object:
         try:

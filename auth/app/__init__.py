@@ -16,10 +16,12 @@ def create_app(config=config):
     from app.api.v1.auth import auth
     from app.api.v1.roles import roles
     from app.api.v1.users import users
+    from app.api.v1.my import my
 
     app.register_blueprint(auth, url_prefix='/api/v1')
     app.register_blueprint(roles, url_prefix='/api/v1/roles')
     app.register_blueprint(users, url_prefix='/api/v1/users')
+    app.register_blueprint(my, url_prefix='/api/v1/my')
     app.register_blueprint(swagger, url_prefix=config.SWAGGER_URL)
 
     with app.app_context():

@@ -44,10 +44,11 @@ def create_user() -> Tuple[Response, HTTPStatus]:
 def update_user(id: uuid.UUID) -> Tuple[Response, HTTPStatus]:
     valid_data = user_partial.load(request.get_json())
     try:
-        user = User.update(id, valid_data)
+        user = User.get_by_id(id)
+        user.update(valid_data)
     except IntegrityError:
         raise AlreadyExistsError('Такой пользователь уже существует.')
-    return jsonify(user_schema.dump(user)), HTTPStatus.CREATED
+    return jsonify(user_schema.dump(user)), HTTPStatus.OK
 
 
 @users.route('/<uuid:id>', methods=('DELETE',))
