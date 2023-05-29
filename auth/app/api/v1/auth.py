@@ -4,24 +4,16 @@ from http import HTTPStatus
 from sqlalchemy.exc import IntegrityError
 from flask import Blueprint, jsonify, request
 from flask.wrappers import Response
-from flask_jwt_extended import decode_token
+from flask_jwt_extended import decode_token, jwt_required, get_jwt
 from app.api.v1.catchers import default_exception_catcher
 from app.schemas import UserSchema
 from app.exceptions import AlreadyExistsError
 from app.models import User
 from app.jwt_service import jwt_service
-from pydantic import BaseModel
 
 
 auth = Blueprint('auth', __name__)
 user_schema = UserSchema()
-
-
-# модель заглушка для проверки ручек
-class UserAuth(BaseModel):
-    id: str
-    email: str
-    password: str
 
 
 @auth.route('/register', methods=('POST',))
@@ -40,7 +32,7 @@ def user_registration() -> Tuple[Response, HTTPStatus]:
 def login() -> Tuple[Response, HTTPStatus]:
     user_data = request.get_json()
     query = User.find_by_email(email=user_data['email'])
-    user = UserAuth(**user_schema.dump(query)).dict()
+    user = user_schema.dump(query)
     try:
         if user_schema.verify_hash(user['password'], user_data['password']):
             access_token, refresh_token = jwt_service.create_tokens(user)
@@ -68,23 +60,25 @@ def update_refresh() -> Tuple[Response, HTTPStatus]:
         raise AlreadyExistsError('Токен недействительный')
 
 
-@auth.route('/logout', methods=('POST',))
+@auth.route('/logout', methods=('DELETE',))
+@jwt_required(refresh=True)
 @default_exception_catcher
 def logout() -> Tuple[Response, HTTPStatus]:
-    data_user = request.get_json()
-    if jwt_service.verify_token(data_user['refresh']):
-        jwt_service.revoke_token(data_user['refresh'])
+    jwt = get_jwt()
+    if jwt_service.verify_token(jwt):
+        jwt_service.revoke_token(jwt)
         return jsonify({'message': 'Успешный выход из аккаунта.'}), HTTPStatus.OK
     else:
         raise AlreadyExistsError('Токен недействительный')
 
 
-@auth.route('/logout_all', methods=('POST',))
+@auth.route('/logout_all', methods=('DELETE',))
+@jwt_required(refresh=True)
 @default_exception_catcher
 def logout_all() -> Tuple[Response, HTTPStatus]:
-    data_user = request.get_json()
-    if jwt_service.verify_token(data_user['refresh']):
-        jwt_service.revoke_token(data_user['refresh'], all=True)
+    jwt = get_jwt()
+    if jwt_service.verify_token(jwt):
+        jwt_service.revoke_token(jwt, all=True)
         return jsonify({'message': 'Успешный выход из аккаунта.'}), HTTPStatus.OK
     else:
         raise AlreadyExistsError('Токен недействительный')
