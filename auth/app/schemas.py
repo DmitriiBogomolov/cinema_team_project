@@ -3,7 +3,7 @@ from marshmallow import (post_load,
                          ValidationError,
                          validates_schema)
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.models import Role
 from app.models import User
@@ -46,6 +46,9 @@ class UserSchema(BasicUserSchema):
             data['password']
         )
         return User(**data)
+
+    def verify_hash(self, pwhash: str, password: str) -> bool:
+        return check_password_hash(pwhash, password)
 
 
 class ProfileSchema(SQLAlchemySchema):

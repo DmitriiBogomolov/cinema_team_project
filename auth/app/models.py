@@ -64,6 +64,10 @@ class User(db.Model, BasicModel):
         cascade='all'
     )
 
+    @classmethod
+    def find_by_email(model, email: EmailType) -> object:
+        return model.query.filter_by(email=email).first()
+
 
 class Role(db.Model, BasicModel):
     """Represents users role"""
