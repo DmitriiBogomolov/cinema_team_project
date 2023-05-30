@@ -1,5 +1,5 @@
 from flask import Flask
-
+from flask_jwt_extended import JWTManager
 from utils.cli_commands import install_cli_commands
 from config import config
 from app.extensions import db, ma, migrate
@@ -8,7 +8,8 @@ from app.extensions import db, ma, migrate
 def create_app(config=config):
     app = Flask(__name__)
     app.config.from_object(config)
-
+    app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
+    JWTManager(app)
     db.init_app(app)
     ma.init_app(app)
     migrate.init_app(app, db)
