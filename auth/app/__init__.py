@@ -2,7 +2,7 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from utils.cli_commands import install_cli_commands
 from config import config
-from app.extensions import db, ma
+from app.extensions import db, ma, migrate
 
 
 def create_app(config=config):
@@ -12,6 +12,7 @@ def create_app(config=config):
     JWTManager(app)
     db.init_app(app)
     ma.init_app(app)
+    migrate.init_app(app, db)
 
     from app.api.swagger import swagger
     from app.api.v1.auth import auth
@@ -24,9 +25,6 @@ def create_app(config=config):
     app.register_blueprint(users, url_prefix='/api/v1/users')
     app.register_blueprint(my, url_prefix='/api/v1/my')
     app.register_blueprint(swagger, url_prefix=config.SWAGGER_URL)
-
-    with app.app_context():
-        db.create_all()
 
     install_cli_commands(app)
 
