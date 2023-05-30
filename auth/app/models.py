@@ -80,7 +80,7 @@ class Role(db.Model, BasicModel):
 
 class SingInEntrie(db.Model, BasicModel):
     """Represents a record of user log-ins journal"""
-    __tablename__ = 'sign_in_enries'
+    __tablename__ = 'sign_in_entries'
 
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     user_agent = db.Column(db.String, nullable=False)

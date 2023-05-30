@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+  tests:
+    build:
+      context: ../../
+      dockerfile: tests/functional/Dockerfile
+    expose:
+      - 5000
+    env_file:
+      - ../../.env
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:13
+    expose:
+      - 5432
+    env_file:
+      - ../../.env
+
+  redis:
+    image: redis
+    expose:
+      - 6379
