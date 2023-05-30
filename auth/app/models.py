@@ -63,10 +63,14 @@ class User(db.Model, BasicModel):
         backref='users',
         cascade='all'
     )
-
-    @classmethod
-    def find_by_email(model, email: EmailType) -> object:
-        return model.query.filter_by(email=email).first()
+    sign_in_entries = db.relationship(
+        'SignInEntrie',
+        backref='sing_in_entries'
+    )
+    allowed_devices = db.relationship(
+        'AllowedDevice',
+        backref='allowed_devices'
+    )
 
 
 class Role(db.Model, BasicModel):
@@ -77,7 +81,7 @@ class Role(db.Model, BasicModel):
     description = db.Column(db.String)
 
 
-class SingInEntrie(db.Model, BasicModel):
+class SignInEntrie(db.Model, BasicModel):
     """Represents a record of user log-ins journal"""
     __tablename__ = 'sign_in_entries'
 

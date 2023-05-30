@@ -26,3 +26,5 @@ Werkzeug==2.3.4
 zope.event==4.6
 zope.interface==6.0
 Flask_Migrate==4.0.4
+Flask_JWT_Extended==4.5.2
+Flask_HTTPAuth==4.8.0
