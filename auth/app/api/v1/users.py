@@ -1,6 +1,4 @@
 import uuid
-
-from typing import Tuple
 from http import HTTPStatus
 
 from flask import Blueprint, jsonify, request
@@ -10,7 +8,7 @@ from flask_jwt_extended import jwt_required
 
 from app.api.v1.catchers import default_exception_catcher
 from app.schemas import UserSchema, BasicUserSchema
-from app.exceptions import AlreadyExistsError
+from app.error_handlers.exceptions import UserAlreadyExists
 from app.models import User, Role
 from app.extensions import db
 
@@ -25,7 +23,7 @@ user_partial = BasicUserSchema(partial=True)
 @users.route('/<uuid:user_id>', methods=('GET',))
 @jwt_required()
 @default_exception_catcher
-def get_user(user_id: uuid.UUID) -> Tuple[Response, HTTPStatus]:
+def get_user(user_id: uuid.UUID) -> tuple[Response, HTTPStatus]:
     """Getting all user data"""
     users = User.get_by_id(user_id)
     return jsonify(user_schema.dump(users)), HTTPStatus.OK
@@ -34,7 +32,7 @@ def get_user(user_id: uuid.UUID) -> Tuple[Response, HTTPStatus]:
 @users.route('', methods=('GET',))
 @jwt_required()
 @default_exception_catcher
-def get_users_list() -> Tuple[Response, HTTPStatus]:
+def get_users_list() -> tuple[Response, HTTPStatus]:
     """Getting all users list"""
     users = User.get_list()
     return jsonify(user_schema.dump(users, many=True)), HTTPStatus.OK
@@ -43,7 +41,7 @@ def get_users_list() -> Tuple[Response, HTTPStatus]:
 @users.route('', methods=('POST',))
 @jwt_required()
 @default_exception_catcher
-def create_user() -> Tuple[Response, HTTPStatus]:
+def create_user() -> tuple[Response, HTTPStatus]:
     """
     Extended user creation
     Expected: user model fields JSON
@@ -52,14 +50,14 @@ def create_user() -> Tuple[Response, HTTPStatus]:
     try:
         result = user_schema.dump(user.save())
     except IntegrityError:
-        raise AlreadyExistsError('Такой пользователь уже существует.')
+        raise UserAlreadyExists
     return jsonify(result), HTTPStatus.CREATED
 
 
 @users.route('/<uuid:id>', methods=('PATCH',))
 @jwt_required()
 @default_exception_catcher
-def update_user(id: uuid.UUID) -> Tuple[Response, HTTPStatus]:
+def update_user(id: uuid.UUID) -> tuple[Response, HTTPStatus]:
     """
     Extended user update
     Expected: user model fields JSON
@@ -69,14 +67,14 @@ def update_user(id: uuid.UUID) -> Tuple[Response, HTTPStatus]:
         user = User.get_by_id(id)
         user.update(valid_data)
     except IntegrityError:
-        raise AlreadyExistsError('Такой пользователь уже существует.')
+        raise UserAlreadyExists
     return jsonify(user_schema.dump(user)), HTTPStatus.OK
 
 
 @users.route('/<uuid:id>', methods=('DELETE',))
 @jwt_required()
 @default_exception_catcher
-def delete_user(id: uuid.UUID) -> Tuple[Response, HTTPStatus]:
+def delete_user(id: uuid.UUID) -> tuple[Response, HTTPStatus]:
     user = User.get_by_id(id)
     user.delete()
     return '', HTTPStatus.NO_CONTENT
@@ -85,7 +83,7 @@ def delete_user(id: uuid.UUID) -> Tuple[Response, HTTPStatus]:
 @users.route('/<uuid:user_id>/roles/<uuid:role_id>', methods=('POST',))
 @jwt_required()
 @default_exception_catcher
-def set_role(user_id: uuid.UUID, role_id: uuid.UUID) -> Tuple[Response, HTTPStatus]:
+def set_role(user_id: uuid.UUID, role_id: uuid.UUID) -> tuple[Response, HTTPStatus]:
     """Sets the user to role."""
     user = User.get_by_id(user_id)
     role = Role.get_by_id(role_id)
@@ -97,7 +95,7 @@ def set_role(user_id: uuid.UUID, role_id: uuid.UUID) -> Tuple[Response, HTTPStat
 @users.route('/<uuid:user_id>/roles/<uuid:role_id>', methods=('DELETE',))
 @jwt_required()
 @default_exception_catcher
-def revoke_role(user_id: uuid.UUID, role_id: uuid.UUID) -> Tuple[Response, HTTPStatus]:
+def revoke_role(user_id: uuid.UUID, role_id: uuid.UUID) -> tuple[Response, HTTPStatus]:
     """Revokes a user's role"""
     user = User.get_by_id(user_id)
     role = Role.get_by_id(role_id)

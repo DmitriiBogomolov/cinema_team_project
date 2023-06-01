@@ -10,8 +10,8 @@ db = SQLAlchemy()
 ma = Marshmallow()
 
 redis_db = redis.StrictRedis(
-    host=config.REDIS_HOST,
-    port=config.REDIS_PORT,
+    host=config.redis_host,
+    port=config.redis_port,
     db=0
 )
 

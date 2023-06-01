@@ -2,23 +2,23 @@ from pydantic import BaseSettings
 
 
 class Config(BaseSettings):
-    POSTGRES_PASSWORD: str
-    POSTGRES_USER: str
-    POSTGRES_DB: str
-    POSTGRES_HOST: str = 'db'
-    POSTGRES_PORT: str = 5432
-    REDIS_HOST: str = 'redis'
-    REDIS_PORT: int = 6379
-    SWAGGER_URL: str = '/swagger'
-    REFRESH_TOKEN_EXP: int = 60 * 60 * 24 * 15  # 15 days
+    postgres_password: str
+    postgres_user: str
+    postgres_db: str
+    postgres_host: str = 'db'
+    postgres_port: str = 5432
+    redis_host: str = 'redis'
+    redis_port: int = 6379
+    swagger_url: str = '/swagger'
+    refresh_token_exp: int = 60 * 60 * 24 * 15  # 15 days
 
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> str:
-        return 'postgresql://{}:{}@{}:{}/{}'.format(self.POSTGRES_USER,
-                                                    self.POSTGRES_PASSWORD,
-                                                    self.POSTGRES_HOST,
-                                                    self.POSTGRES_PORT,
-                                                    self.POSTGRES_DB)
+    def sqlalchemy_database_uri(self) -> str:
+        return 'postgresql://{}:{}@{}:{}/{}'.format(self.postgres_user,
+                                                    self.postgres_password,
+                                                    self.postgres_host,
+                                                    self.postgres_port,
+                                                    self.postgres_db)
 
     class Config:
         env_file = '.env'

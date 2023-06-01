@@ -43,7 +43,7 @@ class RedisTokenStorage(AbstractTokenStorage):
     def save_user_token(self, user_id: uuid, jti: str, payload: dict) -> None:
         key = '{%s}%s' % (user_id, jti)
         redis_db.set(key, payload)
-        redis_db.expire(key, config.REFRESH_TOKEN_EXP)
+        redis_db.expire(key, config.refresh_token_exp)
 
     def check_user_token(self, user_id: uuid, jti: str) -> bool:
         key = '{%s}%s' % (user_id, jti)

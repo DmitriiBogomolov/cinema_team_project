@@ -4,7 +4,7 @@ from config import config
 
 
 swagger = get_swaggerui_blueprint(
-    config.SWAGGER_URL,
+    config.swagger_url,
     '/static/openapi.yaml',
     config={
         'app_name': 'Online-cimena auth service'

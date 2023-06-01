@@ -1,10 +1,13 @@
 from http import HTTPStatus
-from flask import jsonify, abort
+from flask import jsonify
 from marshmallow.exceptions import ValidationError
 from werkzeug.exceptions import NotFound
 
-from app.exceptions import AlreadyExistsError
+from app.error_handlers.exceptions import (BaseAlreadyExists,
+                                           BaseUnauthorized,
+                                           NotFoundError)
 from app import db
+from logger import logger
 
 
 def default_exception_catcher(func):
@@ -14,20 +17,26 @@ def default_exception_catcher(func):
         try:
             return func(*args, **kwargs)
 
-        except NotFound:
-            abort(404)
+        except NotFound as e:
+            logger.error(e)
+            e = NotFoundError()
+            return jsonify(message=str(e.message)), HTTPStatus.NOT_FOUND
 
-        except AlreadyExistsError as e:
-            print(e)
+        except BaseAlreadyExists as e:
+            logger.error(e)
             return jsonify(message=str(e)), HTTPStatus.CONFLICT
 
         except ValidationError as e:
-            print(e)
+            logger.error(e)
             db.session.rollback()
             return jsonify({'message': e.messages}), HTTPStatus.UNPROCESSABLE_ENTITY
 
+        except BaseUnauthorized as e:
+            logger.error(e)
+            return jsonify({'message': e.message}), HTTPStatus.UNAUTHORIZED
+
         except Exception as e:
-            print(e)
+            logger.error(e)
             return jsonify(message='Something went wrong.'), HTTPStatus.INTERNAL_SERVER_ERROR
 
     wrapper.__name__ = func.__name__

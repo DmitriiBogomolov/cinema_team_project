@@ -1,0 +1,3 @@
+from .handlers import register_error_handlers
+
+register_error_handlers

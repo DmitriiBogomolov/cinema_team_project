@@ -54,7 +54,7 @@ class User(db.Model, BasicModel):
     __tablename__ = 'users'
 
     email = db.Column(EmailType, unique=True, nullable=False)
-    password = db.Column(db.String, nullable=False)
+    password = db.Column(db.String(300), nullable=False)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     is_superuser = db.Column(db.Boolean, nullable=False, default=False)
     roles = db.relationship(
@@ -65,11 +65,13 @@ class User(db.Model, BasicModel):
     )
     sign_in_entries = db.relationship(
         'SignInEntrie',
-        backref='sing_in_entries'
+        backref='sing_in_entries',
+        cascade='all'
     )
     allowed_devices = db.relationship(
         'AllowedDevice',
-        backref='allowed_devices'
+        backref='allowed_devices',
+        cascade='all'
     )
 
 
@@ -77,8 +79,8 @@ class Role(db.Model, BasicModel):
     """Represents users role"""
     __tablename__ = 'roles'
 
-    name = db.Column(db.String, unique=True, nullable=False)
-    description = db.Column(db.String)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    description = db.Column(db.Text)
 
 
 class SignInEntrie(db.Model, BasicModel):
@@ -86,8 +88,8 @@ class SignInEntrie(db.Model, BasicModel):
     __tablename__ = 'sign_in_entries'
 
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
-    user_agent = db.Column(db.String, nullable=False)
-    remote_addr = db.Column(db.String, nullable=False)
+    user_agent = db.Column(db.Text, nullable=False)
+    remote_addr = db.Column(db.String(100), nullable=False)
 
 
 class AllowedDevice(db.Model, BasicModel):
@@ -95,4 +97,4 @@ class AllowedDevice(db.Model, BasicModel):
     __tablename__ = 'allowed_devices'
 
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
-    user_agent = db.Column(db.String, nullable=False)
+    user_agent = db.Column(db.Text, nullable=False)
