@@ -1,5 +1,5 @@
 import json
-from typing import Tuple
+
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token
 
 from app.token_storage import AbstractTokenStorage, RedisTokenStorage
@@ -14,7 +14,7 @@ class JWTService:
     def __init__(self, storage: AbstractTokenStorage) -> None:
         self.storage = storage
 
-    def create_tokens(self, user: User) -> Tuple[str, str]:
+    def create_tokens(self, user: User) -> tuple[str, str]:
         user_data = profile_schema.dump(user)
         access = create_access_token(user_data)
         refresh = create_refresh_token(user_data)

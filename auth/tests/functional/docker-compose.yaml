@@ -21,6 +21,6 @@ services:
       - ../../.env
 
   redis:
-    image: redis
+    image: redis:6.0
     expose:
       - 6379
