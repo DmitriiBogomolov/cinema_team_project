@@ -5,22 +5,32 @@ services:
     build:
       context: ../../
       dockerfile: tests/functional/Dockerfile
-    expose:
-      - 5000
+    ports:
+      - 8000:5000
     env_file:
       - ../../.env
     depends_on:
       - db
       - redis
+    networks:
+      - service_network
 
   db:
     image: postgres:13
-    expose:
-      - 5432
+    ports:
+      - 5432:5432
     env_file:
       - ../../.env
+    networks:
+      - service_network
 
   redis:
-    image: redis
-    expose:
-      - 6379
+    image: redis:6.0
+    ports:
+      - 6379:6379
+    networks:
+      - service_network
+
+networks:
+  service_network:
+    name: service

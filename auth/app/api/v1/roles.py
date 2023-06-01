@@ -62,7 +62,7 @@ def update_role(id: uuid.UUID) -> Tuple[Response, HTTPStatus]:
         role.update(valid_data)
     except IntegrityError:
         raise AlreadyExistsError('Роль уже существует.')
-    return jsonify(role_schema.dump(role)), HTTPStatus.CREATED
+    return jsonify(role_schema.dump(role)), HTTPStatus.OK
 
 
 @roles.route('/<uuid:id>', methods=('DELETE',))

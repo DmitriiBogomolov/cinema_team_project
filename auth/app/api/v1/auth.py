@@ -45,6 +45,7 @@ def login() -> Tuple[Response, HTTPStatus]:
     Expected: Basic auth in headers
     """
     user = basic_auth.current_user()
+    print(user)
     access, refresh = jwt_service.create_tokens(user)
     jwt_service.save_token(refresh)
     save_signin_entrie(user, request)
