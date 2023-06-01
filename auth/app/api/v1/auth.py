@@ -1,4 +1,3 @@
-from typing import Tuple
 from http import HTTPStatus
 
 from sqlalchemy.exc import IntegrityError
@@ -10,7 +9,7 @@ from flask_jwt_extended import (jwt_required,
 
 from app.api.v1.catchers import default_exception_catcher
 from app.schemas import UserSchema, ProfileSchema, SignInEntrieSchema
-from app.exceptions import AlreadyExistsError
+from app.error_handlers.exceptions import UserAlreadyExists, UnavailableRefresh
 from app.models import User
 from app.jwt_service import jwt_service
 from app.pre_configured.basic_auth import basic_auth
@@ -23,7 +22,7 @@ profile_schema = ProfileSchema()
 
 @auth.route('/register', methods=('POST',))
 @default_exception_catcher
-def user_registration() -> Tuple[Response, HTTPStatus]:
+def user_registration() -> tuple[Response, HTTPStatus]:
     """
     Expected: JSON
         "email": "user@email.com",
@@ -33,14 +32,14 @@ def user_registration() -> Tuple[Response, HTTPStatus]:
     try:
         user.save()
     except IntegrityError:
-        raise AlreadyExistsError('Адрес электронной почты уже используется.')
+        raise UserAlreadyExists
     return jsonify(profile_schema.dump(user)), HTTPStatus.CREATED
 
 
 @auth.route('/login', methods=('POST',))
 @basic_auth.login_required
 @default_exception_catcher
-def login() -> Tuple[Response, HTTPStatus]:
+def login() -> tuple[Response, HTTPStatus]:
     """
     Expected: Basic auth in headers
     """
@@ -65,7 +64,7 @@ def save_signin_entrie(user: User, request: request):
 @auth.route('/refresh', methods=('POST',))
 @jwt_required(refresh=True)
 @default_exception_catcher
-def refresh() -> Tuple[Response, HTTPStatus]:
+def refresh() -> tuple[Response, HTTPStatus]:
     """
     Updates token pair
     Expected: Refresh token in header (Bearer refresh)
@@ -77,13 +76,13 @@ def refresh() -> Tuple[Response, HTTPStatus]:
         jwt_service.save_token(refresh)
 
         return jsonify({'acsess': access, 'refresh': refresh}), HTTPStatus.OK
-    raise AlreadyExistsError('Токен уже был использован ранее.')
+    raise UnavailableRefresh
 
 
 @auth.route('/logout', methods=('DELETE',))
 @jwt_required(refresh=True)
 @default_exception_catcher
-def logout() -> Tuple[Response, HTTPStatus]:
+def logout() -> tuple[Response, HTTPStatus]:
     """
     Logouts from current device.
     Expected: Refresh token in header (Bearer refresh)
@@ -92,13 +91,13 @@ def logout() -> Tuple[Response, HTTPStatus]:
     if jwt_service.verify_token(refresh):
         jwt_service.revoke_token(refresh)
         return jsonify({'message': 'Успешный выход из аккаунта.'}), HTTPStatus.OK
-    return jsonify({'message': 'Токен уже был использован ранее.'}), HTTPStatus.OK
+    raise UnavailableRefresh
 
 
 @auth.route('/logout_all', methods=('DELETE',))
 @jwt_required()
 @default_exception_catcher
-def logout_all() -> Tuple[Response, HTTPStatus]:
+def logout_all() -> tuple[Response, HTTPStatus]:
     """
     Logouts from all devices.
     Expected: Access token in header (Bearer access)
