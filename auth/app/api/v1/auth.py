@@ -4,81 +4,104 @@ from http import HTTPStatus
 from sqlalchemy.exc import IntegrityError
 from flask import Blueprint, jsonify, request
 from flask.wrappers import Response
-from flask_jwt_extended import decode_token, jwt_required, get_jwt
+from flask_jwt_extended import (jwt_required,
+                                get_jwt,
+                                current_user)
+
 from app.api.v1.catchers import default_exception_catcher
-from app.schemas import UserSchema
+from app.schemas import UserSchema, ProfileSchema, SignInEntrieSchema
 from app.exceptions import AlreadyExistsError
 from app.models import User
 from app.jwt_service import jwt_service
+from app.pre_configured.basic_auth import basic_auth
 
 
 auth = Blueprint('auth', __name__)
 user_schema = UserSchema()
+profile_schema = ProfileSchema()
 
 
 @auth.route('/register', methods=('POST',))
 @default_exception_catcher
 def user_registration() -> Tuple[Response, HTTPStatus]:
-    user = user_schema.load(request.get_json())
+    """
+    Expected: JSON
+        "email": "user@email.com",
+        "password": "SD_g151@1af"
+    """
+    user = profile_schema.load(request.get_json())
     try:
-        result = user_schema.dump(user.save())
+        user.save()
     except IntegrityError:
-        raise AlreadyExistsError('Такой пользователь уже существует.')
-    return jsonify(result), HTTPStatus.CREATED
+        raise AlreadyExistsError('Адрес электронной почты уже используется.')
+    return jsonify(profile_schema.dump(user)), HTTPStatus.CREATED
 
 
 @auth.route('/login', methods=('POST',))
+@basic_auth.login_required
 @default_exception_catcher
 def login() -> Tuple[Response, HTTPStatus]:
-    user_data = request.get_json()
-    query = User.find_by_email(email=user_data['email'])
-    user = user_schema.dump(query)
-    try:
-        if user_schema.verify_hash(user['password'], user_data['password']):
-            access_token, refresh_token = jwt_service.create_tokens(user)
-            jwt_service.save_token(refresh_token)
-        else:
-            raise AlreadyExistsError('Неверный пароль')
-    except KeyError:
-        raise AlreadyExistsError('Пользователь не найден')
-    return jsonify({'acsess_token': access_token, 'refresh_token': refresh_token}), HTTPStatus.OK
+    """
+    Expected: Basic auth in headers
+    """
+    user = basic_auth.current_user()
+    access, refresh = jwt_service.create_tokens(user)
+    jwt_service.save_token(refresh)
+    save_signin_entrie(user, request)
+    return jsonify({'acsess': access, 'refresh': refresh}), HTTPStatus.OK
+
+
+def save_signin_entrie(user: User, request: request):
+    """Save a record to user log-in history"""
+    schema = SignInEntrieSchema()
+    entrie = schema.load({
+        'user_id': user.id,
+        'user_agent': request.user_agent.string,
+        'remote_addr': request.environ['REMOTE_ADDR']
+    })
+    entrie.save()
 
 
 @auth.route('/refresh', methods=('POST',))
+@jwt_required(refresh=True)
 @default_exception_catcher
-def update_refresh() -> Tuple[Response, HTTPStatus]:
-    data_user = request.get_json()
-    user = decode_token(data_user['refresh'])['sub']
+def refresh() -> Tuple[Response, HTTPStatus]:
+    """
+    Updates token pair
+    Expected: Refresh token in header (Bearer refresh)
+    """
+    refresh = get_jwt()
+    if jwt_service.verify_token(refresh):
+        jwt_service.revoke_token(refresh)
+        access, refresh = jwt_service.create_tokens(current_user)
+        jwt_service.save_token(refresh)
 
-    if jwt_service.verify_token(data_user['refresh']):
-        jwt_service.revoke_token(data_user['refresh'])
-        access_token, refresh_token = jwt_service.create_tokens(user)
-        jwt_service.save_token(refresh_token)
-
-        return jsonify({'acsess_token': access_token, 'refresh_token': refresh_token}), HTTPStatus.OK
-    else:
-        raise AlreadyExistsError('Токен недействительный')
+        return jsonify({'acsess': access, 'refresh': refresh}), HTTPStatus.OK
+    raise AlreadyExistsError('Токен уже был использован ранее.')
 
 
 @auth.route('/logout', methods=('DELETE',))
 @jwt_required(refresh=True)
 @default_exception_catcher
 def logout() -> Tuple[Response, HTTPStatus]:
-    jwt = get_jwt()
-    if jwt_service.verify_token(jwt):
-        jwt_service.revoke_token(jwt)
+    """
+    Logouts from current device.
+    Expected: Refresh token in header (Bearer refresh)
+    """
+    refresh = get_jwt()
+    if jwt_service.verify_token(refresh):
+        jwt_service.revoke_token(refresh)
         return jsonify({'message': 'Успешный выход из аккаунта.'}), HTTPStatus.OK
-    else:
-        raise AlreadyExistsError('Токен недействительный')
+    return jsonify({'message': 'Токен уже был использован ранее.'}), HTTPStatus.OK
 
 
 @auth.route('/logout_all', methods=('DELETE',))
-@jwt_required(refresh=True)
+@jwt_required()
 @default_exception_catcher
 def logout_all() -> Tuple[Response, HTTPStatus]:
-    jwt = get_jwt()
-    if jwt_service.verify_token(jwt):
-        jwt_service.revoke_token(jwt, all=True)
-        return jsonify({'message': 'Успешный выход из аккаунта.'}), HTTPStatus.OK
-    else:
-        raise AlreadyExistsError('Токен недействительный')
+    """
+    Logouts from all devices.
+    Expected: Access token in header (Bearer access)
+    """
+    jwt_service.revoke_user_tokens(User)
+    return jsonify({'message': 'Успешный выход из со всех устройств.'}), HTTPStatus.OK
