@@ -9,14 +9,15 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 from config import config
-
+from logger import logger
 
 if __name__ == '__main__':
     redis_client = Redis(
-        host=config.REDIS_HOST,
-        port=config.REDIS_PORT
+        host=config.redis_host,
+        port=config.redis_port
     )
     while True:
         if redis_client.ping():
+            logger.info('Database redis is available.')
             break
         time.sleep(1)

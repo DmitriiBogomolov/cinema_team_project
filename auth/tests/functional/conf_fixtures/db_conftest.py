@@ -1,17 +1,10 @@
-from dataclasses import dataclass
-
 import pytest
 import psycopg2
-from psycopg2.extensions import connection, cursor
 from redis import Redis
 
 from config import config
-
-
-@dataclass
-class PSQL:
-    conn: connection
-    cursor: cursor
+from tests.functional.models import PSQL
+from tests.conftest import clear_db, clear_redis
 
 
 @pytest.fixture(scope='session')
@@ -51,12 +44,3 @@ def clean_up(db: PSQL, redis: Redis) -> None:
 def pg_data(db: PSQL, clean_up) -> None:
     db.cursor.execute(open('tests/functional/sql/load_data.sql', 'r').read())
     db.conn.commit()
-
-
-def clear_db(db: PSQL) -> None:
-    db.cursor.execute(open('tests/functional/sql/truncate.sql', 'r').read())
-    db.conn.commit()
-
-
-def clear_redis(redis: Redis) -> None:
-    redis.flushall()
