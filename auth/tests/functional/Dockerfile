@@ -5,13 +5,13 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
 
-COPY . .
+COPY ../ .
 
 RUN pip install --upgrade pip && pip install -r requirements/dev.txt
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python utils/wait_for_pg.py & \
-                  python utils/wait_for_redis.py & \
-                  flask db upgrade & \
+CMD ["sh", "-c", "python utils/wait_for_pg.py && \
+                  python utils/wait_for_redis.py && \
+                  flask db upgrade && \
                   pytest"]

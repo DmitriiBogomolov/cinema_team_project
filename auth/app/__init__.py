@@ -36,7 +36,7 @@ def create_app(config=config):
     install_cli_commands(app)
     register_error_handlers(app)
 
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
 
     return app
