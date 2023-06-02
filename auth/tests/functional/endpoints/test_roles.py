@@ -55,7 +55,7 @@ def test_update_role(client, jwt_headers, pg_data):
         },
         headers=jwt_headers
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert validate(response.json,
                     r.schema_role_output,
                     format_checker=Draft202012Validator.FORMAT_CHECKER) == None

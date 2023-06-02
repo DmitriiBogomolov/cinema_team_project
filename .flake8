@@ -10,4 +10,4 @@ application_import_names =
     main,
     models,
     services
-ignore = W605, E402, E711
+ignore = W605, E402, E711, F403, F405

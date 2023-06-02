@@ -92,7 +92,7 @@ def set_role(user_id: uuid.UUID, role_id: uuid.UUID) -> tuple[Response, HTTPStat
     return jsonify(user_schema.dump(user)), HTTPStatus.OK
 
 
-@users.route('/<uuid:user_id>/roles/<uuid:role_id>', methods=('DELETE',))
+@users.route('/<uuid:user_id>/roles_revoke/<uuid:role_id>', methods=('DELETE',))
 @jwt_required()
 @default_exception_catcher
 def revoke_role(user_id: uuid.UUID, role_id: uuid.UUID) -> tuple[Response, HTTPStatus]:
