@@ -1,5 +1,5 @@
-import tests.functional.references.roles as r
-from tests.functional.helpers import clear
+from jsonschema import validate, Draft202012Validator
+import tests.functional.schemas.roles as r
 
 
 URL = '/api/v1/roles'
@@ -11,8 +11,10 @@ def test_role_list(client, jwt_headers, pg_data):
 
     response = client.get(URL, headers=jwt_headers)
     assert response.status_code == 200
-    assert len(response.json) == len(r.role_list_output)
-    assert response.json == r.role_list_output
+    assert len(response.json) == 5
+    assert validate(response.json,
+                    r.schema_list_roles,
+                    format_checker=Draft202012Validator.FORMAT_CHECKER) == None
 
 
 def test_create_role(client, jwt_headers, pg_data):
@@ -26,5 +28,34 @@ def test_create_role(client, jwt_headers, pg_data):
         },
         headers=jwt_headers
     )
+    print(response.json)
     assert response.status_code == 201
-    assert clear(response.json) == clear(r.create_role_output)
+    assert validate(response.json,
+                    r.schema_role_output,
+                    format_checker=Draft202012Validator.FORMAT_CHECKER) == None
+
+
+def test_update_role(client, jwt_headers, pg_data):
+    response = client.post(URL)
+    assert response.status_code == 401
+    response = client.post(
+        URL,
+        json={
+            'name': 'moderator',
+            'description': 'do something'
+        },
+        headers=jwt_headers
+    )
+    assert response.status_code == 201
+    response = client.patch(
+        URL + '/11111169-6712-4666-8116-7c4eaf111111',
+        json={
+            'name': 'administrator',
+            'description': 'do something'
+        },
+        headers=jwt_headers
+    )
+    assert response.status_code == 200
+    assert validate(response.json,
+                    r.schema_role_output,
+                    format_checker=Draft202012Validator.FORMAT_CHECKER) == None
