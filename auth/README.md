@@ -17,7 +17,7 @@
 
         docker-compose -f docker-compose.dev.yaml down -v
 
-4. Документация OpenAPI: [http://localhost:5000/swagger/](http://localhost:5000/swagger/)
+4. Документация OpenAPI: [http://localhost:5000/swagger/doc](http://localhost:5000/swagger/doc)
 
 ## Разработка
 
