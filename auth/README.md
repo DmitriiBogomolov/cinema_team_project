@@ -32,7 +32,7 @@
 
 4. Создать суперпользователя
 
-        flask createsuperuser username password
+        flask createsuperuser superuser@inbox.com supassword
 
 5. Запустить приложение
 

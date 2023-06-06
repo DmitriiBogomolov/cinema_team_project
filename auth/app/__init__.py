@@ -3,7 +3,7 @@ from flask import Flask
 from utils.cli_commands import install_cli_commands
 from config import config
 from app.extensions import db, ma, migrate
-from app.pre_configured.jwt import init_jwt_manager
+from app.pre_configured.jwt_manager import init_jwt_manager
 from app.error_handlers import register_error_handlers
 
 
@@ -21,7 +21,7 @@ def create_app(config=config):
     ma.init_app(app)
     migrate.init_app(app, db)
 
-    from app.api.docs.v1 import docs
+    from docs.v1 import docs
     from app.api.v1.auth import auth
     from app.api.v1.roles import roles
     from app.api.v1.users import users

@@ -1,8 +1,10 @@
 from flask import Blueprint
 from flask_restx import Api
-from app.api.docs.v1.blueprints.auth import namespace as auth
-from app.api.docs.v1.blueprints.users import namespace as users
-from app.api.docs.v1.models import register_models
+from docs.v1.blueprints.auth import namespace as auth
+from docs.v1.blueprints.users import namespace as users
+from docs.v1.blueprints.roles import namespace as roles
+from docs.v1.blueprints.my import namespace as my
+from docs.v1.models import load_models
 
 docs = Blueprint('swagger', __name__)
 
@@ -19,8 +21,9 @@ api_extension = Api(
     doc='/doc',
 )
 
-register_models(api_extension)
-
+load_models(api_extension)
 
 api_extension.add_namespace(auth)
+api_extension.add_namespace(my)
 api_extension.add_namespace(users)
+api_extension.add_namespace(roles)
