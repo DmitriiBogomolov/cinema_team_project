@@ -3,7 +3,7 @@
 schema_user_output = {
     '$schema': 'https://json-schema.org/draft/2020-12/schema',
     'type': 'object',
-    'required': ['id', 'email', 'password', 'is_active', 'is_superuser', 'roles', 'created', 'updated'],
+    'required': ['id', 'email', 'is_active', 'is_superuser', 'roles', 'created', 'updated'],
     'properties': {
         'created': {
             'type': 'string',
@@ -12,9 +12,6 @@ schema_user_output = {
         'updated': {
             'type': 'string',
             'pattern': '202[3-9]-\d{2}-\d{2}T\d{2}:\d{2}:\d+'
-        },
-        'password': {
-            'type': 'string'
         },
         'id': {
             'type': 'string',

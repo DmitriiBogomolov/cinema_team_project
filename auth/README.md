@@ -36,7 +36,7 @@
 
 5. Запустить приложение
 
-        flask --app app run
+        flask --app app run --debug
 
 6. Остановка
 

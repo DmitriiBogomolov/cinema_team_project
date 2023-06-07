@@ -13,11 +13,14 @@ schema_data_user = {
             'type': 'string',
             'format': 'email'
         },
+        'is_active': {
+            'type': 'boolean'
+        },
         'roles': {
             'type': 'array',
             'items': {
                 'type': 'object',
-                'required': ['name', 'description', 'id', 'created', 'updated'],
+                'required': ['name', 'description', 'id'],
                 'properties': {
                     'id': {
                         'type': 'string',
@@ -29,14 +32,6 @@ schema_data_user = {
                     'description': {
                         'type': 'string'
                     },
-                    'created': {
-                        'type': 'string',
-                        'pattern': '20[2-9][3-9]-\d{2}-\d{2}T\d{2}:\d{2}:\d+'
-                    },
-                    'updated': {
-                        'type': 'string',
-                        'pattern': '20[2-9][3-9]-\d{2}-\d{2}T\d{2}:\d{2}:\d+'
-                    }
                 }
             }
         }
@@ -53,7 +48,7 @@ schema_history = {
             'type': 'array',
             'items': {
                 'type': 'object',
-                'required': ['id', 'remote_addr', 'user_agent', 'user_id'],
+                'required': ['id', 'remote_addr', 'user_agent', 'user_id', 'created'],
                 'additionalProperties': False,
                 'properties': {
                     'id': {
@@ -70,7 +65,11 @@ schema_history = {
                     'user_id': {
                         'type': 'string',
                         'format': 'uuid'
-                    }
+                    },
+                    'created': {
+                        'type': 'string',
+                        'pattern': '202[3-9]-\d{2}-\d{2}T\d{2}:\d{2}:\d+'
+                    },
                 }
             }
         },
@@ -91,7 +90,7 @@ schema_history = {
     }
 }
 
-schema_allowed_dewaises = {
+schema_allowed_devices = {
     '$schema': 'https://json-schema.org/draft/2020-12/schema',
     'type': 'array',
     'items': {

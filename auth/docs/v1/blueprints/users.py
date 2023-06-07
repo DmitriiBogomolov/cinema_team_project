@@ -10,6 +10,7 @@ namespace = Namespace('Users',
 class UserListHandler(Resource):
     """Получение списка пользователей"""
     @namespace.response(500, 'Some error.')
+    @namespace.doc(security='JWTAuth')
     @namespace.marshal_list_with(user_model)
     def get(self):
         pass
@@ -19,12 +20,14 @@ class UserListHandler(Resource):
 class UserHandler(Resource):
     """Чтение, обновление и удаление отдельно указываемого пользователя"""
     @namespace.response(500, 'Some error.')
+    @namespace.doc(security='JWTAuth')
     @namespace.marshal_with(user_model)
     def get(self, user_id):
         """Получение информации об отдельно указанном пользователе"""
         pass
 
     @namespace.response(500, 'Some error.')
+    @namespace.doc(security='JWTAuth')
     @namespace.expect(user_model, validate=True)
     @namespace.marshal_with(user_model)
     def patch(self, user_id):
@@ -33,6 +36,7 @@ class UserHandler(Resource):
 
     @namespace.response(204, 'Success')
     @namespace.response(500, 'Some error.')
+    @namespace.doc(security='JWTAuth')
     def delete(self, user_id):
         """Удаление отдельно указанного пользователя."""
         pass
@@ -41,11 +45,13 @@ class UserHandler(Resource):
 @namespace.route('/<uuid:user_id>/roles/<uuid:role_id>')
 class RoleHandler(Resource):
     @namespace.response(500, 'Some error.')
+    @namespace.doc(security='JWTAuth')
     @namespace.marshal_with(user_model, code=200)
     def post(self, user_id, role_id):
         pass
 
     @namespace.response(204, 'Success')
     @namespace.response(500, 'Some error.')
+    @namespace.doc(security='JWTAuth')
     def delete(self, user_id, role_id):
         pass

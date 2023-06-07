@@ -84,7 +84,7 @@ class SignInEntrieSchema(ma.SQLAlchemyAutoSchema):
         model = SignInEntrie
         load_instance = True
         dump_only = ['id']
-        fields = ('id', 'user_id', 'user_agent', 'remote_addr')
+        fields = ('id', 'user_id', 'user_agent', 'remote_addr', 'created')
 
 
 class AllowedDeviceSchema(ma.SQLAlchemyAutoSchema):

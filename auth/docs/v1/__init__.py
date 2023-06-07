@@ -8,6 +8,26 @@ from docs.v1.models import load_models
 
 docs = Blueprint('swagger', __name__)
 
+
+authorizations = {
+    'BasicAuth': {
+        'type': 'basic',
+        'description': 'HTTP Basic authentication with username and password.'
+    },
+    'JWTAuth': {
+        'type': 'apiKey',
+        'name': 'Authorization',
+        'in': 'header',
+        'description': 'Enter the token with the `Bearer: ` prefix, e.g. "Bearer abcde12345".'
+    },
+    'RefreshAuth': {
+        'type': 'apiKey',
+        'name': 'Authorization',
+        'in': 'header',
+        'description': 'Enter the refresh token with the `Bearer: ` prefix, e.g. "Bearer abcde12345".'
+    },
+}
+
 api_extension = Api(
     docs,
     title='Сервис аутентификации онлайн-кинотеатра',
@@ -19,6 +39,7 @@ api_extension = Api(
                 '<li>храним Json Web Tokens в Redis;</li>'
                 '<li>ролевая модель разграничения доступов.</li></ul>',
     doc='/doc',
+    authorizations=authorizations
 )
 
 load_models(api_extension)
