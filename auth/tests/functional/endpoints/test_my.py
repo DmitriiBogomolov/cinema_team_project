@@ -62,7 +62,7 @@ def test_allowed_devices(client, jwt_headers, pg_data):
     response = client.get(URL + 'allowed_devices', headers=jwt_headers)
     assert response.status_code == 200
     assert validate(response.json,
-                    m.schema_allowed_dewaises,
+                    m.schema_allowed_devices,
                     format_checker=Draft202012Validator.FORMAT_CHECKER) == None
 
     response = client.post(URL + 'allowed_devices',
@@ -71,5 +71,5 @@ def test_allowed_devices(client, jwt_headers, pg_data):
     assert response.status_code == 201
     assert len(response.json) == 2
     assert validate(response.json,
-                    m.schema_allowed_dewaises,
+                    m.schema_allowed_devices,
                     format_checker=Draft202012Validator.FORMAT_CHECKER) == None

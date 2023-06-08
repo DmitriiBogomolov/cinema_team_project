@@ -47,10 +47,10 @@ def test_user_set_role(client, jwt_headers, pg_data):
 
 
 def test_user_revoke_role(client, jwt_headers, pg_data):
-    response = client.delete(URL + '/roles_revoke/11111169-6712-4666-8116-7c4eaf111111')
+    response = client.delete(URL + '/roles/11111169-6712-4666-8116-7c4eaf111111')
     assert response.status_code == 401
     response = client.delete(
-        URL + '/roles_revoke/11111169-6712-4666-8116-7c4eaf111111',
+        URL + '/roles/11111169-6712-4666-8116-7c4eaf111111',
         headers=jwt_headers
     )
     assert response.status_code == 200

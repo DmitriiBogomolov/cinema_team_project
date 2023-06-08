@@ -17,7 +17,7 @@
 
         docker-compose -f docker-compose.dev.yaml down -v
 
-4. Документация OpenAPI: [http://localhost:5000/swagger/](http://localhost:5000/swagger/)
+4. Документация OpenAPI: [http://localhost:5000/swagger/doc](http://localhost:5000/swagger/doc)
 
 ## Разработка
 
@@ -32,11 +32,11 @@
 
 4. Создать суперпользователя
 
-        flask createsuperuser username password
+        flask createsuperuser superuser@inbox.com supassword
 
 5. Запустить приложение
 
-        flask --app app run
+        flask --app app run --debug
 
 6. Остановка
 

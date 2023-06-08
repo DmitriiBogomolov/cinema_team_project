@@ -5,12 +5,12 @@ from http import HTTPStatus
 from flask import Blueprint, jsonify, request
 from flask.wrappers import Response
 from sqlalchemy.exc import IntegrityError
-from flask_jwt_extended import jwt_required
 
 from app.api.v1.catchers import default_exception_catcher
 from app.schemas import RoleSchema, BasicRoleSchema
 from app.error_handlers.exceptions import BaseAlreadyExists
 from app.models import Role
+from app.pre_configured.jwt_wrappers import jwt_roles_required
 
 
 roles = Blueprint('roles', __name__)
@@ -21,7 +21,7 @@ role_partial = BasicRoleSchema(partial=True)
 
 
 @roles.route('', methods=('GET',))
-@jwt_required()
+@jwt_roles_required('manager')
 @default_exception_catcher
 def get_roles() -> tuple[Response, HTTPStatus]:
     """Getting all roles"""
@@ -30,7 +30,7 @@ def get_roles() -> tuple[Response, HTTPStatus]:
 
 
 @roles.route('', methods=('POST',))
-@jwt_required()
+@jwt_roles_required('manager')
 @default_exception_catcher
 def create_role() -> tuple[Response, HTTPStatus]:
     """
@@ -47,7 +47,7 @@ def create_role() -> tuple[Response, HTTPStatus]:
 
 
 @roles.route('/<uuid:id>', methods=('PATCH',))
-@jwt_required()
+@jwt_roles_required('manager')
 @default_exception_catcher
 def update_role(id: uuid.UUID) -> tuple[Response, HTTPStatus]:
     """
@@ -65,7 +65,7 @@ def update_role(id: uuid.UUID) -> tuple[Response, HTTPStatus]:
 
 
 @roles.route('/<uuid:id>', methods=('DELETE',))
-@jwt_required()
+@jwt_roles_required('manager')
 @default_exception_catcher
 def delete_role(id: uuid.UUID) -> tuple[Response, HTTPStatus]:
     role = Role.get_by_id(id)

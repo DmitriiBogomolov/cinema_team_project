@@ -3,7 +3,7 @@ from flask import Flask
 from utils.cli_commands import install_cli_commands
 from config import config
 from app.extensions import db, ma, migrate
-from app.pre_configured.jwt import init_jwt_manager
+from app.pre_configured.jwt_manager import init_jwt_manager
 from app.error_handlers import register_error_handlers
 
 
@@ -21,7 +21,7 @@ def create_app(config=config):
     ma.init_app(app)
     migrate.init_app(app, db)
 
-    from app.api.swagger import swagger
+    from docs.v1 import docs
     from app.api.v1.auth import auth
     from app.api.v1.roles import roles
     from app.api.v1.users import users
@@ -31,7 +31,7 @@ def create_app(config=config):
     app.register_blueprint(roles, url_prefix='/api/v1/roles')
     app.register_blueprint(users, url_prefix='/api/v1/users')
     app.register_blueprint(my, url_prefix='/api/v1/my')
-    app.register_blueprint(swagger, url_prefix=config.swagger_url)
+    app.register_blueprint(docs, url_prefix=config.swagger_url)
 
     install_cli_commands(app)
     register_error_handlers(app)
