@@ -1,3 +1,4 @@
+from sqlalchemy import and_
 from marshmallow import (post_load,
                          fields,
                          ValidationError,
@@ -57,8 +58,9 @@ class ProfileSchema(ma.SQLAlchemyAutoSchema, AutoHashed):
         )
         return User(**data)
 
-    def query_by_email(self, data: dict) -> User:
-        return User.query.filter_by(email=data['default_email']).first()
+    @classmethod
+    def get_by_email(cls, email: str) -> User:
+        return User.query.filter_by(email=email).first()
 
 
 class ChangePasswordSchema(SQLAlchemySchema):
@@ -110,12 +112,17 @@ class RoleSchema(BasicRoleSchema):
         load_instance = True
 
 
-class SocialSchemaYandex(ma.SQLAlchemyAutoSchema):
+class SocialAccountSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = SocialAccount
         load_instance = True
         dump_only = ['id']
         fields = ('id', 'user_id', 'social_id', 'social_name')
 
-    def verifi_account(self, data):
-        return SocialAccount.query.filter_by(social_id=data['id']).filter_by(social_name='yandex').first()
+    @classmethod
+    def verifi_account(cls, social_id: str, social_name: str):
+        social_account = SocialAccount.query.filter(and_(SocialAccount.social_id == social_id,
+                                                         SocialAccount.social_name == social_name)).first()
+        if social_account:
+            return True
+        return False
