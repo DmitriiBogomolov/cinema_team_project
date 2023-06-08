@@ -27,11 +27,11 @@ def test_login(client, pg_data):
     response = client.post(URL + 'login', auth=('111@email.com', 'ytrewq321'))
 
     assert response.status_code == 200
-    assert list(response.json.keys()) == ['acsess', 'refresh']
+    assert list(response.json.keys()) == ['access', 'refresh']
 
 
 def test_refresh(client, pg_data):
     response = client.post(URL + 'refresh', headers=login_user(client))
 
     assert response.status_code == 200
-    assert list(response.json.keys()) == ['acsess', 'refresh']
+    assert list(response.json.keys()) == ['access', 'refresh']

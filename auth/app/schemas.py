@@ -32,6 +32,7 @@ class AutoHashed:
 class BasicUserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
+        load_only = ['password']
         dump_only = ['id', 'created', 'modified']
 
     roles = fields.Nested('BasicRoleSchema', many=True, default=[])
@@ -44,11 +45,11 @@ class UserSchema(BasicUserSchema, AutoHashed):
 class ProfileSchema(ma.SQLAlchemyAutoSchema, AutoHashed):
     class Meta:
         model = User
-        fields = ['id', 'email', 'password', 'roles']
-        dump_only = ['id', 'roles']
+        fields = ['id', 'email', 'password', 'roles', 'is_active']
+        dump_only = ['id', 'roles', 'is_active']
         load_only = ['password']
 
-    roles = fields.Nested('BasicRoleSchema', many=True, default=[])
+    roles = fields.Nested('ProfileRoleSchema', many=True, default=[])
     password = auto_field(validate=password_validator)
 
     @post_load
@@ -88,7 +89,7 @@ class SignInEntrieSchema(ma.SQLAlchemyAutoSchema):
         model = SignInEntrie
         load_instance = True
         dump_only = ['id']
-        fields = ('id', 'user_id', 'user_agent', 'remote_addr')
+        fields = ('id', 'user_id', 'user_agent', 'remote_addr', 'created')
 
 
 class AllowedDeviceSchema(ma.SQLAlchemyAutoSchema):
@@ -103,6 +104,12 @@ class BasicRoleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Role
         dump_only = ['id', 'created', 'modified']
+
+
+class ProfileRoleSchema(BasicRoleSchema):
+    class Meta:
+        model = Role
+        fields = ['id', 'name', 'description']
 
 
 class RoleSchema(BasicRoleSchema):

@@ -48,7 +48,7 @@ def login() -> tuple[Response, HTTPStatus]:
     access, refresh = jwt_service.create_tokens(user)
     jwt_service.save_token(refresh)
     save_signin_entrie(user, request)
-    return jsonify({'acsess': access, 'refresh': refresh}), HTTPStatus.OK
+    return jsonify({'access': access, 'refresh': refresh}), HTTPStatus.OK
 
 
 @auth.route('/refresh', methods=('POST',))
@@ -65,7 +65,7 @@ def refresh() -> tuple[Response, HTTPStatus]:
         access, refresh = jwt_service.create_tokens(current_user)
         jwt_service.save_token(refresh)
 
-        return jsonify({'acsess': access, 'refresh': refresh}), HTTPStatus.OK
+        return jsonify({'access': access, 'refresh': refresh}), HTTPStatus.OK
     raise UnavailableRefresh
 
 

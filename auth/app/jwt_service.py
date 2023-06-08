@@ -16,6 +16,8 @@ class JWTService:
 
     def create_tokens(self, user: User) -> tuple[str, str]:
         user_data = profile_schema.dump(user)
+        if user.is_superuser:
+            user_data['top_secret'] = True
         access = create_access_token(user_data)
         refresh = create_refresh_token(user_data)
         return access, refresh

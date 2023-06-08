@@ -4,13 +4,13 @@ from http import HTTPStatus
 from flask import Blueprint, jsonify, request
 from flask.wrappers import Response
 from sqlalchemy.exc import IntegrityError
-from flask_jwt_extended import jwt_required
 
 from app.api.v1.catchers import default_exception_catcher
 from app.schemas import UserSchema, BasicUserSchema
 from app.error_handlers.exceptions import UserAlreadyExists
 from app.models import User, Role
 from app.extensions import db
+from app.pre_configured.jwt_wrappers import jwt_roles_required
 
 
 users = Blueprint('users', __name__)
@@ -20,17 +20,8 @@ user_schema = UserSchema()
 user_partial = BasicUserSchema(partial=True)
 
 
-@users.route('/<uuid:user_id>', methods=('GET',))
-@jwt_required()
-@default_exception_catcher
-def get_user(user_id: uuid.UUID) -> tuple[Response, HTTPStatus]:
-    """Getting all user data"""
-    users = User.get_by_id(user_id)
-    return jsonify(user_schema.dump(users)), HTTPStatus.OK
-
-
 @users.route('', methods=('GET',))
-@jwt_required()
+@jwt_roles_required('manager')
 @default_exception_catcher
 def get_users_list() -> tuple[Response, HTTPStatus]:
     """Getting all users list"""
@@ -38,8 +29,17 @@ def get_users_list() -> tuple[Response, HTTPStatus]:
     return jsonify(user_schema.dump(users, many=True)), HTTPStatus.OK
 
 
+@users.route('/<uuid:user_id>', methods=('GET',))
+@jwt_roles_required('manager')
+@default_exception_catcher
+def get_user(user_id: uuid.UUID) -> tuple[Response, HTTPStatus]:
+    """Getting all user data"""
+    users = User.get_by_id(user_id)
+    return jsonify(user_schema.dump(users)), HTTPStatus.OK
+
+
 @users.route('', methods=('POST',))
-@jwt_required()
+@jwt_roles_required('manager')
 @default_exception_catcher
 def create_user() -> tuple[Response, HTTPStatus]:
     """
@@ -55,7 +55,7 @@ def create_user() -> tuple[Response, HTTPStatus]:
 
 
 @users.route('/<uuid:id>', methods=('PATCH',))
-@jwt_required()
+@jwt_roles_required('manager')
 @default_exception_catcher
 def update_user(id: uuid.UUID) -> tuple[Response, HTTPStatus]:
     """
@@ -72,7 +72,7 @@ def update_user(id: uuid.UUID) -> tuple[Response, HTTPStatus]:
 
 
 @users.route('/<uuid:id>', methods=('DELETE',))
-@jwt_required()
+@jwt_roles_required('manager')
 @default_exception_catcher
 def delete_user(id: uuid.UUID) -> tuple[Response, HTTPStatus]:
     user = User.get_by_id(id)
@@ -81,7 +81,7 @@ def delete_user(id: uuid.UUID) -> tuple[Response, HTTPStatus]:
 
 
 @users.route('/<uuid:user_id>/roles/<uuid:role_id>', methods=('POST',))
-@jwt_required()
+@jwt_roles_required('manager')
 @default_exception_catcher
 def set_role(user_id: uuid.UUID, role_id: uuid.UUID) -> tuple[Response, HTTPStatus]:
     """Sets the user to role."""
@@ -92,8 +92,8 @@ def set_role(user_id: uuid.UUID, role_id: uuid.UUID) -> tuple[Response, HTTPStat
     return jsonify(user_schema.dump(user)), HTTPStatus.OK
 
 
-@users.route('/<uuid:user_id>/roles_revoke/<uuid:role_id>', methods=('DELETE',))
-@jwt_required()
+@users.route('/<uuid:user_id>/roles/<uuid:role_id>', methods=('DELETE',))
+@jwt_roles_required('manager')
 @default_exception_catcher
 def revoke_role(user_id: uuid.UUID, role_id: uuid.UUID) -> tuple[Response, HTTPStatus]:
     """Revokes a user's role"""
