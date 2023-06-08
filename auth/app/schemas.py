@@ -6,7 +6,7 @@ from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from werkzeug.security import generate_password_hash
 
 from app.models import Role, AllowedDevice, SignInEntrie
-from app.models import User
+from app.models import User, SocialAccount
 from app.validators import password_validator
 from app import ma
 
@@ -57,6 +57,9 @@ class ProfileSchema(ma.SQLAlchemyAutoSchema, AutoHashed):
         )
         return User(**data)
 
+    def query_by_email(self, data: dict) -> User:
+        return User.query.filter_by(email=data['default_email']).first()
+
 
 class ChangePasswordSchema(SQLAlchemySchema):
     class Meta:
@@ -105,3 +108,14 @@ class RoleSchema(BasicRoleSchema):
         model = Role
         dump_only = ['id']
         load_instance = True
+
+
+class SocialSchemaYandex(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = SocialAccount
+        load_instance = True
+        dump_only = ['id']
+        fields = ('id', 'user_id', 'social_id', 'social_name')
+
+    def verifi_account(self, data):
+        return SocialAccount.query.filter_by(social_id=data['id']).filter_by(social_name='yandex').first()
