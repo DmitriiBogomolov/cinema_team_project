@@ -73,6 +73,11 @@ class User(db.Model, BasicModel):
         backref='allowed_devices',
         cascade='all'
     )
+    social_account = db.relationship(
+        'SocialAccount',
+        backref='social_accounts',
+        cascade='all'
+    )
 
 
 class Role(db.Model, BasicModel):
@@ -98,3 +103,14 @@ class AllowedDevice(db.Model, BasicModel):
 
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
     user_agent = db.Column(db.Text, nullable=False)
+
+
+class SocialAccount(db.Model, BasicModel):
+    """Represents social account"""
+    __tablename__ = 'social_account'
+
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    social_id = db.Column(db.Text, nullable=False)
+    social_name = db.Column(db.Text, nullable=False)
+
+    __table_args__ = (db.UniqueConstraint('social_id', 'social_name', name='social_pk'), )

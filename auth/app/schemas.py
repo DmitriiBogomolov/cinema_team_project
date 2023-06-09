@@ -1,3 +1,4 @@
+from sqlalchemy import and_
 from marshmallow import (post_load,
                          fields,
                          ValidationError,
@@ -6,7 +7,7 @@ from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from werkzeug.security import generate_password_hash
 
 from app.models import Role, AllowedDevice, SignInEntrie
-from app.models import User
+from app.models import User, SocialAccount
 from app.validators import password_validator
 from app import ma
 
@@ -57,6 +58,10 @@ class ProfileSchema(ma.SQLAlchemyAutoSchema, AutoHashed):
             data['password']
         )
         return User(**data)
+
+    @classmethod
+    def get_by_email(cls, email: str) -> User:
+        return User.query.filter_by(email=email).first()
 
 
 class ChangePasswordSchema(SQLAlchemySchema):
@@ -112,3 +117,19 @@ class RoleSchema(BasicRoleSchema):
         model = Role
         dump_only = ['id']
         load_instance = True
+
+
+class SocialAccountSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = SocialAccount
+        load_instance = True
+        dump_only = ['id']
+        fields = ('id', 'user_id', 'social_id', 'social_name')
+
+    @classmethod
+    def verifi_account(cls, social_id: str, social_name: str):
+        social_account = SocialAccount.query.filter(and_(SocialAccount.social_id == social_id,
+                                                         SocialAccount.social_name == social_name)).first()
+        if social_account:
+            return True
+        return False

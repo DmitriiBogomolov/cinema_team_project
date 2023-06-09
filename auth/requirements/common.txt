@@ -26,4 +26,5 @@ zope.event==4.6
 zope.interface==6.0
 Flask_Migrate==4.0.4
 Flask_HTTPAuth==4.8.0
+Authlib==1.2.0
 flask_restx==1.1.0

@@ -8,11 +8,12 @@ from flask_jwt_extended import (jwt_required,
                                 current_user)
 
 from app.api.v1.catchers import default_exception_catcher
-from app.schemas import UserSchema, ProfileSchema, SignInEntrieSchema
+from app.schemas import UserSchema, ProfileSchema
 from app.error_handlers.exceptions import UserAlreadyExists, UnavailableRefresh
 from app.models import User
 from app.jwt_service import jwt_service
 from app.pre_configured.basic_auth import basic_auth
+from app.api.v1.save_history import save_signin_entrie
 
 
 auth = Blueprint('auth', __name__)
@@ -48,17 +49,6 @@ def login() -> tuple[Response, HTTPStatus]:
     jwt_service.save_token(refresh)
     save_signin_entrie(user, request)
     return jsonify({'access': access, 'refresh': refresh}), HTTPStatus.OK
-
-
-def save_signin_entrie(user: User, request: request):
-    """Save a record to user log-in history"""
-    schema = SignInEntrieSchema()
-    entrie = schema.load({
-        'user_id': user.id,
-        'user_agent': request.user_agent.string,
-        'remote_addr': request.environ['REMOTE_ADDR']
-    })
-    entrie.save()
 
 
 @auth.route('/refresh', methods=('POST',))
