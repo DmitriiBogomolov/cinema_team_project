@@ -1,5 +1,5 @@
 from sqlalchemy import and_
-from marshmallow import (post_load, pre_dump,
+from marshmallow import (post_load,
                          fields,
                          ValidationError,
                          validates_schema)
@@ -21,7 +21,6 @@ class AutoHashed:
             salt_length=16
         )
 
-    @pre_dump
     @post_load
     def make_obj(self, data: dict, **kwargs) -> User:
         data['password'] = self.get_password_hash(
@@ -134,17 +133,3 @@ class SocialAccountSchema(ma.SQLAlchemyAutoSchema):
         if social_account:
             return True
         return False
-
-
-class UserCaptchaSchema(ma.SQLAlchemyAutoSchema, AutoHashed):
-    class Meta:
-        model = User
-        fields = ['email', 'password']
-        only = ['email', 'password']
-
-    @pre_dump
-    def make_obj(self, data: dict, **kwargs) -> User:
-        data['password'] = self.get_password_hash(
-            data['password']
-        )
-        return User(**data)
