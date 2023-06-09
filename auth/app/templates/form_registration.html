@@ -1,0 +1,58 @@
+<!-- файл test_app/templates/capcha.html -->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            html,body {height:100%;width:100%;margin:0;}
+            body {display:flex;}
+            form {margin:auto;}
+            #error{color:red;}
+            #captcha{width:200px;}
+            input{width:200px;font-size:150%;margin-top:15px;}
+        </style>
+    </head>
+    <body>
+        <form id="form" method="POST">
+            <!-- При вводе неправильного кода будет появляться надпись -->
+            {% if error %}
+                <h3 id="error">НЕПРАВИЛЬНЫЙ ВВОД!</h3>
+            {% endif %}
+            <!-- сгенерированную капчу подключим как простую картинку -->
+            <!-- так как маршрут определен как route('/captcha.png'...) -->
+            <!-- поле ввода кода с картинки -->
+            <input name="email" type="text" placeholder="email">
+            <br>
+            <input name="password" type="text" placeholder="password">
+            <br>
+            <br>
+            <br>
+            <div id="captcha"><img src="captcha.png"></div>
+            <input name="input_captcha" type="text">
+            <br>
+            <input type="submit" value="Отправить">
+        </form>
+        <!-- сделаем так, чтобы рисунок капчи обновлялся при клике на нее. -->
+        <!-- Для этого подключим jquery по ссылке CDN -->
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js"
+            integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU="
+            crossorigin="anonymous"></script>
+        <!-- обновлять картинку будем AJAX-ом -->
+        <script>
+            function reCaptcha() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/captcha.png',
+                    success: function(data){
+                        $('#captcha').html('<img src="/captcha.png">');
+                    }
+                });
+            }
+            $(document).ready(function() {
+                // По клику на картинке обновляем последнюю
+                $('#captcha').click(function(){
+                    reCaptcha();
+                });
+            });
+        </script>
+    </body>
+</html>
