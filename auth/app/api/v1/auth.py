@@ -1,7 +1,10 @@
 from http import HTTPStatus
+from random import choice
+from io import BytesIO
 
 from sqlalchemy.exc import IntegrityError
 from flask import Blueprint, jsonify, request
+from flask import session, render_template
 from flask.wrappers import Response
 from flask_jwt_extended import (jwt_required,
                                 get_jwt,
@@ -14,6 +17,7 @@ from app.models import User
 from app.jwt_service import jwt_service
 from app.pre_configured.basic_auth import basic_auth
 from app.api.v1.save_history import save_signin_entrie
+from app.utils import generate_captcha
 
 
 auth = Blueprint('auth', __name__)
@@ -21,20 +25,38 @@ user_schema = UserSchema()
 profile_schema = ProfileSchema()
 
 
-@auth.route('/register', methods=('POST',))
-@default_exception_catcher
-def user_registration() -> tuple[Response, HTTPStatus]:
-    """
-    Expected: JSON
-        "email": "user@email.com",
-        "password": "SD_g151@1af"
-    """
-    user = profile_schema.load(request.get_json())
-    try:
-        user.save()
-    except IntegrityError:
-        raise UserAlreadyExists
-    return jsonify(profile_schema.dump(user)), HTTPStatus.CREATED
+@auth.route('/captcha.png', methods=['GET'])
+def captcha(width=200, height=100):
+    code = ''.join([choice('QERTYUPLKJHGFDSAZXCVBN23456789') for i in range(5)])
+    # сгенерированный код пишем в сессию
+    session['code'] = code
+    img = generate_captcha(code, width, height)
+    buff = BytesIO()
+    img.save(buff, 'png')
+    return buff.getvalue()
+
+
+@auth.route('/register', methods=('GET', 'POST'))
+def user_registration():
+    error = False
+    if request.method == 'POST':
+        # получаем данные формы
+        data = request.values.to_dict()
+        user = profile_schema.load({'email': data['email'], 'password': data['password']})
+        # получаем данные сессии
+        sess_captcha = session.get('code')
+        # сравниваем данные сессии и формы
+        if str(data['input_captcha']).lower() == str(sess_captcha).lower():
+            try:
+                user.save()
+            except IntegrityError:
+                raise UserAlreadyExists
+            return jsonify(profile_schema.dump(user)), HTTPStatus.CREATED
+        else:
+            # при неправильном вводе кода
+            # капчи - показываем надпись
+            error = True
+    return render_template('form_registration.html', error=error), HTTPStatus.OK
 
 
 @auth.route('/login', methods=('POST',))
