@@ -44,6 +44,9 @@ def create_app(config=config):
     install_cli_commands(app)
     register_error_handlers(app)
 
+    with app.app_context():
+        db.create_all()
+
     if not config.debug:
         app.wsgi_app = token_bucket_middleware(app.wsgi_app)
 
