@@ -26,8 +26,8 @@
             <br>
             <br>
             <br>
-            <div id="captcha"><img src="captcha.png"></div>
-            <input name="input_captcha" type="text">
+            <div id="captcha"><img src="/captcha"></div>
+            <input name="captcha" type="text">
             <br>
             <input type="submit" value="Отправить">
         </form>
@@ -53,6 +53,34 @@
                     reCaptcha();
                 });
             });
+
+            async function handleSubmit(event) {
+                event.preventDefault();
+
+                const formData = new FormData(event.target);
+
+                const json = {};
+                formData.forEach(function(value, key) {
+                    json[key] = value;
+                });
+
+                res = await fetch('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(json)
+                })
+                .then(response => response.json())
+                .catch(error => console.error(error));
+
+                document.body.innerHTML = JSON.stringify(res);
+                console.log(res)
+            }
+
+            const form = document.querySelector('form');
+            form.addEventListener('submit', handleSubmit);
+
         </script>
     </body>
 </html>

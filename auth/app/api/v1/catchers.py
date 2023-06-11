@@ -2,10 +2,12 @@ from http import HTTPStatus
 from flask import jsonify
 from marshmallow.exceptions import ValidationError
 from werkzeug.exceptions import NotFound
+import redis
 
 from app.error_handlers.exceptions import (BaseAlreadyExists,
                                            BaseUnauthorized,
-                                           NotFoundError)
+                                           NotFoundError,
+                                           CaptchaError)
 from app import db
 from logger import logger
 
@@ -34,6 +36,13 @@ def default_exception_catcher(func):
         except BaseUnauthorized as e:
             logger.error(e)
             return jsonify({'message': e.message}), HTTPStatus.UNAUTHORIZED
+
+        except CaptchaError as e:
+            logger.error(e)
+            return jsonify({'message': e.message}), HTTPStatus.UNPROCESSABLE_ENTITY
+
+        except redis.exceptions.ConnectionError as e:
+            raise e
 
         except Exception as e:
             logger.error(e)

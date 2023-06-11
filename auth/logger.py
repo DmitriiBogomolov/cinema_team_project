@@ -6,14 +6,14 @@ import sys
 FORMAT = '%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s'
 
 
-def init_logger(name):
+def init_logger(name, filename, backupCount=1, maxBytes=5000):
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
     sh = logging.StreamHandler(sys.stdout)
     sh.setFormatter(logging.Formatter(FORMAT))
     sh.setLevel(logging.DEBUG)
     fh = logging.handlers.RotatingFileHandler(
-        filename='./logs/log.log',
+        filename=filename,
         backupCount=1,
         maxBytes=5000
     )
@@ -26,5 +26,15 @@ def init_logger(name):
 if not os.path.exists('./logs/'):
     os.makedirs('./logs/')
 
-init_logger('app')
+init_logger(
+    'app',
+    './logs/app.log'
+)
+
+init_logger(
+    'middleware',
+    './logs/middleware.log'
+)
+
 logger = logging.getLogger('app')
+middleware_logger = logging.getLogger('middleware')
