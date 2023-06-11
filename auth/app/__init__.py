@@ -6,6 +6,7 @@ from app.extensions import db, ma, migrate
 from app.pre_configured.jwt_manager import init_jwt_manager
 from app.error_handlers import register_error_handlers
 from app.pre_configured.oauth import oauth
+from middlewares.token_bucket import token_bucket_middleware
 
 
 def create_app(config=config):
@@ -43,7 +44,7 @@ def create_app(config=config):
     install_cli_commands(app)
     register_error_handlers(app)
 
-    # with app.app_context():
-    #     db.create_all()
+    if not config.debug:
+        app.wsgi_app = token_bucket_middleware(app.wsgi_app)
 
     return app
