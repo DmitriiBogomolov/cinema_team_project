@@ -11,6 +11,7 @@ class Config(BaseSettings):
     redis_port: int = 6379
     swagger_url: str = '/swagger'
     refresh_token_exp: int = 60 * 60 * 24 * 15  # 15 days
+    debug: bool = False
 
     @property
     def sqlalchemy_database_uri(self) -> str:

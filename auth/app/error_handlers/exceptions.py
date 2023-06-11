@@ -11,6 +11,18 @@ class BaseError(Exception):
         super().__init__(self.message)
 
 
+class CaptchaError(BaseError):
+    pass
+
+
+class NoCaptchaError(CaptchaError):
+    default_message = 'Captcha is required'
+
+
+class WrongCaptchaError(CaptchaError):
+    default_message = 'Wrong captcha provided.'
+
+
 class NotFoundError(BaseError, NotFound):
     """Raises if some entity not found"""
     default_message = 'Requested resource not found.'

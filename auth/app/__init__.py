@@ -20,8 +20,8 @@ def create_app(config=config):
 
     init_jwt_manager(app)
     db.init_app(app)
-    ma.init_app(app)
     migrate.init_app(app, db)
+    ma.init_app(app)
     oauth.init_app(app)
 
     from docs.v1 import docs
@@ -29,8 +29,10 @@ def create_app(config=config):
     from app.api.v1.roles import roles
     from app.api.v1.users import users
     from app.api.v1.my import my
+    from app.api.v1.captcha import captcha
     from app.api.v1.yandex_login import ya
 
+    app.register_blueprint(captcha, url_prefix='/captcha')
     app.register_blueprint(auth, url_prefix='/api/v1')
     app.register_blueprint(roles, url_prefix='/api/v1/roles')
     app.register_blueprint(users, url_prefix='/api/v1/users')
