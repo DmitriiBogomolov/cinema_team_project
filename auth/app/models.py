@@ -1,6 +1,7 @@
 import uuid
 
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import PrimaryKeyConstraint, event, DDL
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy_utils import EmailType, Timestamp
 
@@ -49,6 +50,81 @@ class BasicModel(Timestamp):
         db.session.commit()
 
 
+class Role(db.Model, BasicModel):
+    """Represents users role"""
+    __tablename__ = 'roles'
+
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    description = db.Column(db.Text)
+
+
+class SignInMixin:
+    """Represents a record of user log-ins journal"""
+    id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    user_agent = db.Column(db.Text, nullable=False)
+    remote_addr = db.Column(db.String(100), nullable=False)
+
+
+class SignInEntrie(SignInMixin, db.Model, BasicModel):
+    __tablename__ = 'sign_in_entries'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'created'),
+        {
+            'postgresql_partition_by': 'RANGE (created)',
+        }
+    )
+
+
+class SignInEntrie2023(SignInMixin, db.Model, BasicModel):
+    __tablename__ = 'sign_in_entries_2023'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'created'),
+    )
+
+
+class SignInEntrie2024(SignInMixin, db.Model, BasicModel):
+    __tablename__ = 'sign_in_entries_2024'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'created'),
+    )
+
+
+SignInEntrie2023.__table__.add_is_dependent_on(SignInEntrie.__table__)
+SignInEntrie2024.__table__.add_is_dependent_on(SignInEntrie.__table__)
+event.listen(
+    SignInEntrie2023.__table__,
+    'after_create',
+    DDL("""ALTER TABLE sign_in_entries ATTACH PARTITION sign_in_entries_2023
+           FOR VALUES FROM ('2023-01-01') TO ('2024-01-01');""")
+)
+event.listen(
+    SignInEntrie2024.__table__,
+    'after_create',
+    DDL("""ALTER TABLE sign_in_entries ATTACH PARTITION sign_in_entries_2024
+           FOR VALUES FROM ('2024-01-01') TO ('2025-01-01');""")
+)
+
+
+class AllowedDevice(db.Model, BasicModel):
+    """Represents a record of user log-ins journal"""
+    __tablename__ = 'allowed_devices'
+
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    user_agent = db.Column(db.Text, nullable=False)
+
+
+class SocialAccount(db.Model, BasicModel):
+    """Represents social account"""
+    __tablename__ = 'social_account'
+
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    social_id = db.Column(db.Text, nullable=False)
+    social_name = db.Column(db.Text, nullable=False)
+
+    __table_args__ = (db.UniqueConstraint('social_id', 'social_name', name='social_pk'), )
+
+
 class User(db.Model, BasicModel):
     """Represents user"""
     __tablename__ = 'users'
@@ -78,39 +154,3 @@ class User(db.Model, BasicModel):
         backref='social_accounts',
         cascade='all'
     )
-
-
-class Role(db.Model, BasicModel):
-    """Represents users role"""
-    __tablename__ = 'roles'
-
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    description = db.Column(db.Text)
-
-
-class SignInEntrie(db.Model, BasicModel):
-    """Represents a record of user log-ins journal"""
-    __tablename__ = 'sign_in_entries'
-
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
-    user_agent = db.Column(db.Text, nullable=False)
-    remote_addr = db.Column(db.String(100), nullable=False)
-
-
-class AllowedDevice(db.Model, BasicModel):
-    """Represents a record of user log-ins journal"""
-    __tablename__ = 'allowed_devices'
-
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
-    user_agent = db.Column(db.Text, nullable=False)
-
-
-class SocialAccount(db.Model, BasicModel):
-    """Represents social account"""
-    __tablename__ = 'social_account'
-
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
-    social_id = db.Column(db.Text, nullable=False)
-    social_name = db.Column(db.Text, nullable=False)
-
-    __table_args__ = (db.UniqueConstraint('social_id', 'social_name', name='social_pk'), )
