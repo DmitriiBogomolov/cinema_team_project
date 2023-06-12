@@ -59,10 +59,6 @@ class ProfileSchema(ma.SQLAlchemyAutoSchema, AutoHashed):
         )
         return User(**data)
 
-    @classmethod
-    def get_by_email(cls, email: str) -> User:
-        return User.query.filter_by(email=email).first()
-
 
 class ChangePasswordSchema(SQLAlchemySchema):
     class Meta:
@@ -127,9 +123,15 @@ class SocialAccountSchema(ma.SQLAlchemyAutoSchema):
         fields = ('id', 'user_id', 'social_id', 'social_name')
 
     @classmethod
-    def verifi_account(cls, social_id: str, social_name: str):
-        social_account = SocialAccount.query.filter(and_(SocialAccount.social_id == social_id,
-                                                         SocialAccount.social_name == social_name)).first()
-        if social_account:
-            return True
-        return False
+    def is_account_exists(cls, social_id: str, social_name: str):
+        account = (
+            SocialAccount.query
+            .filter(
+                and_(
+                    SocialAccount.social_id == social_id,
+                    SocialAccount.social_name == social_name
+                )
+            )
+            .first()
+        )
+        return bool(account)

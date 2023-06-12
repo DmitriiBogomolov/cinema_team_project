@@ -25,7 +25,7 @@ from app.models import User
 from app.jwt_service import jwt_service
 from app.pre_configured.basic_auth import basic_auth
 from app.utils import handle_captcha
-from app.api.v1.save_history import save_signin_entrie
+from app.services.sign_in_journal import journal
 
 
 auth = Blueprint('auth', __name__)
@@ -58,7 +58,7 @@ def login() -> tuple[Response, HTTPStatus]:
     user = basic_auth.current_user()
     access, refresh = jwt_service.create_tokens(user)
     jwt_service.save_token(refresh)
-    save_signin_entrie(user, request)
+    journal.save_sign_in_entrie(user, request)
     return jsonify({'access': access, 'refresh': refresh}), HTTPStatus.OK
 
 
