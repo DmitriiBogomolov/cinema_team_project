@@ -14,6 +14,8 @@ class Config(BaseSettings):
     debug: bool = False
     rate_limit_tokens: int = 20  # value of tokens in a bucket
     rate_limit_token_increment: int = 20  # number of accumulated tokens every second
+    jaeger_host: str = 'jaeger'
+    jaeger_port: int = '6831'
 
     @property
     def sqlalchemy_database_uri(self) -> str:

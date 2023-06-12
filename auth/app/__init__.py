@@ -1,4 +1,10 @@
 from flask import Flask
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 
 from utils.cli_commands import install_cli_commands
 from config import config
@@ -9,8 +15,27 @@ from app.pre_configured.oauth import oauth
 from middlewares.token_bucket import token_bucket_middleware
 
 
+def configure_tracer() -> None:
+    resource = Resource(attributes={
+        'service.name': 'auth'
+    })
+    trace.set_tracer_provider(TracerProvider(resource=resource))
+    trace.get_tracer_provider().add_span_processor(
+        BatchSpanProcessor(
+            JaegerExporter(
+                agent_host_name=config.jaeger_host,
+                agent_port=config.jaeger_port,
+            )
+        )
+    )
+    # Чтобы видеть трейсы в консоли
+    # trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+
+
 def create_app(config=config):
+    configure_tracer()
     app = Flask(__name__)
+    FlaskInstrumentor().instrument_app(app)
 
     app.config['SECRET_KEY'] = 'random-secret-key'
     app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'

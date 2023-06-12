@@ -35,6 +35,13 @@ services:
     ports:
       - "8000:8000"
 
+  jaeger:
+    image: jaegertracing/all-in-one:1.46.0
+    expose:
+      - 6831
+    ports:
+      - "16686:16686"
+
 volumes:
   auth_pg_data:
     driver: local
