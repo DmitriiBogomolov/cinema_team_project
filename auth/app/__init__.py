@@ -56,14 +56,16 @@ def create_app(config=config):
     from app.api.v1.users import users
     from app.api.v1.my import my
     from app.api.v1.captcha import captcha
-    from app.api.v1.yandex_login import ya
+    from app.api.v1.oauth_yandex import yandex
+    from app.api.v1.oauth_google import google
 
     app.register_blueprint(captcha, url_prefix='/captcha')
     app.register_blueprint(auth, url_prefix='/api/v1')
     app.register_blueprint(roles, url_prefix='/api/v1/roles')
     app.register_blueprint(users, url_prefix='/api/v1/users')
     app.register_blueprint(my, url_prefix='/api/v1/my')
-    app.register_blueprint(ya, url_prefix='/api/v1/yandex')
+    app.register_blueprint(yandex, url_prefix='/api/v1/yandex')
+    app.register_blueprint(google, url_prefix='/api/v1/google')
     app.register_blueprint(docs, url_prefix=config.swagger_url)
 
     install_cli_commands(app)

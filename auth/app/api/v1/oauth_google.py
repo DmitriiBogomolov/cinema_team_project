@@ -6,52 +6,57 @@ from app.api.v1.catchers import default_exception_catcher
 from app.schemas import SocialAccountSchema, ProfileSchema
 from app.jwt_service import jwt_service
 from app.utils import generate_password
-from app.api.v1.save_history import save_signin_entrie
-from app.pre_configured.oauth import yandex
+from app.pre_configured.oauth import google_client as client
+from app.services.sign_in_journal import journal
+from app.models import User
 
-ya = Blueprint('yandex', __name__)
+google = Blueprint('google', __name__)
 social_schema = SocialAccountSchema()
 profile_schema = ProfileSchema()
 
 
-@ya.route('/login')
+@google.route('/login')
 @default_exception_catcher
 def login():
-    redirect_uri = url_for('yandex.auth', _external=True)
-    return yandex.authorize_redirect(redirect_uri)
+    """Google oauth entriepoint"""
+    redirect_uri = url_for('google.auth', _external=True)
+    return client.authorize_redirect(redirect_uri)
 
 
-@ya.route('/auth')
+@google.route('/auth')
 @default_exception_catcher
 def auth():
-    token = yandex.authorize_access_token()
+    """Callback for google oauth. Login or register user."""
+    token = client.authorize_access_token()
 
-    user_provider = yandex.get('https://login.yandex.ru/info', token=token).json()
-    user_provider['social_name'] = 'yandex'
+    user_provider = client.get(
+        'https://www.googleapis.com/oauth2/v1/userinfo',
+        token=token
+    ).json()
+    user_provider['social_name'] = 'google'
 
-    user = profile_schema.get_by_email(user_provider['default_email'])
+    user = User.get_by_email(user_provider['email'])
 
-    if not social_schema.verifi_account(
+    if not social_schema.is_account_exists(
         user_provider['id'],
         user_provider['social_name']
     ):
         if not user:
-            # save in the users table
             user = profile_schema.load({
-                'email': user_provider['default_email'],
+                'email': user_provider['email'],
                 'password': generate_password()
             })
             user = user.save()
 
-        # save in the social_account table
         social_account = social_schema.load({
             'user_id': user.id,
             'social_id': user_provider['id'],
             'social_name': user_provider['social_name']
         })
-        social_account.save()
+        user.social_account.append(social_account)
+        user.save()
 
     access, refresh = jwt_service.create_tokens(user)
     jwt_service.save_token(refresh)
-    save_signin_entrie(user, request)
+    journal.save_sign_in_entrie(user, request)
     return jsonify({'acsess': access, 'refresh': refresh}), HTTPStatus.OK

@@ -1,7 +1,37 @@
 from pydantic import BaseSettings
 
 
-class Config(BaseSettings):
+class Base(BaseSettings):
+    class Config:
+        env_file = '.env'
+        env_file_encoding = 'utf-8'
+
+
+class YandexOAuthConfig(Base):
+    name: str = 'yandex'
+    client_id: str
+    client_secret: str
+    authorize_url: str = 'https://oauth.yandex.ru/authorize'
+    access_token_url: str = 'https://oauth.yandex.ru/token'
+
+    class Config:
+        env_prefix = 'yandex_'
+
+
+class GoogleOAuthConfig(Base):
+    name: str = 'google'
+    client_id: str
+    client_secret: str
+    authorize_url: str = 'https://accounts.google.com/o/oauth2/auth'
+    access_token_url: str = 'https://accounts.google.com/o/oauth2/token'
+    client_kwargs: dict = {'scope': 'email'}
+    server_metadata_url: str = 'https://accounts.google.com/.well-known/openid-configuration'
+
+    class Config:
+        env_prefix = 'google_'
+
+
+class Config(Base):
     postgres_password: str
     postgres_user: str
     postgres_db: str
@@ -25,9 +55,7 @@ class Config(BaseSettings):
                                                     self.postgres_port,
                                                     self.postgres_db)
 
-    class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
 
-
+yandex_config = YandexOAuthConfig()
+google_config = GoogleOAuthConfig()
 config = Config()
