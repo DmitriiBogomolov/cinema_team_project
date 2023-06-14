@@ -32,9 +32,11 @@ def create_app(config=config):
     from app.api.v1.my import my
     from app.api.v1.captcha import captcha
     from app.api.v1.yandex_login import ya
+    from app.api.v1.auth_2f import auth_2f
 
     app.register_blueprint(captcha, url_prefix='/captcha')
     app.register_blueprint(auth, url_prefix='/api/v1')
+    app.register_blueprint(auth_2f, url_prefix='/api/v1')
     app.register_blueprint(roles, url_prefix='/api/v1/roles')
     app.register_blueprint(users, url_prefix='/api/v1/users')
     app.register_blueprint(my, url_prefix='/api/v1/my')

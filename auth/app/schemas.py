@@ -133,3 +133,9 @@ class SocialAccountSchema(ma.SQLAlchemyAutoSchema):
         if social_account:
             return True
         return False
+
+
+class AddOtpSecretSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+        fields = ('otp_secret', 'is_two_auth')
