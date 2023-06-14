@@ -14,12 +14,12 @@ class JWTService:
     def __init__(self, storage: AbstractTokenStorage) -> None:
         self.storage = storage
 
-    def create_tokens(self, user: User) -> tuple[str, str]:
+    def create_tokens(self, user: User, expires=None) -> tuple[str, str]:
         user_data = profile_schema.dump(user)
         if user.is_superuser:
             user_data['top_secret'] = True
-        access = create_access_token(user_data)
-        refresh = create_refresh_token(user_data)
+        access = create_access_token(user_data, expires_delta=expires)
+        refresh = create_refresh_token(user_data, expires_delta=expires)
         return access, refresh
 
     def save_token(self, token: str | dict) -> None:

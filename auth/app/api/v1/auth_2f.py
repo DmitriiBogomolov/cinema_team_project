@@ -17,7 +17,7 @@ from app.schemas import AddOtpSecretSchema
 from app.models import User
 from app.jwt_service import jwt_service
 from app.pre_configured.basic_auth import basic_auth
-from app.api.v1.save_history import save_signin_entrie
+from app.services.sign_in_journal import journal
 
 
 auth_2f = Blueprint('auth_2f', __name__)
@@ -71,5 +71,5 @@ def check_verify(user_id: str) -> tuple[Response, HTTPStatus]:
 
     access, refresh = jwt_service.create_tokens(user)
     jwt_service.save_token(refresh)
-    save_signin_entrie(user, request)
+    journal.save_sign_in_entrie(user, request)
     return jsonify({'access': access, 'refresh': refresh}), HTTPStatus.OK

@@ -156,3 +156,7 @@ class User(db.Model, BasicModel):
         backref='social_accounts',
         cascade='all'
     )
+
+    @classmethod
+    def get_by_email(cls, email: str):
+        return User.query.filter_by(email=email).first()

@@ -172,8 +172,5 @@ state.json
 
 # Infra
 
-docker-compose.dev.yaml
-filmworks_api/.env-sample-dev
-filmworks_api/tests/functional/.env-sample-dev
 Pipfile
 Pipfile.lock
