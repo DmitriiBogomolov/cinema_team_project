@@ -37,8 +37,8 @@ def create_app(config=config):
     app = Flask(__name__)
     FlaskInstrumentor().instrument_app(app)
 
-    app.config['SECRET_KEY'] = 'random-secret-key'
-    app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
+    app.config['SECRET_KEY'] = config.secret_key
+    app.config['JWT_SECRET_KEY'] = config.jwt_secret_key
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 15 * 60  # 15 minutes
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 14 * (24 * 60 * 60)  # 14 days
     app.config['REFRESH_TOKEN_EXP'] = config.refresh_token_exp

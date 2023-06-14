@@ -16,6 +16,8 @@ class AppConfig(BaseSettings):
     elastic_host: str = 'es01'
     elastic_port: int = 9200
 
+    authjwt_secret_key: str
+
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'

@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi_jwt_auth import AuthJWT
 
 from src.api.v1.common import PaginationParams
 from src.api.v1.response_models import Film, PersonDetail
@@ -14,8 +15,11 @@ router = APIRouter()
 async def persons_search(
     query: str = Query(default='', max_length=100),
     pp: PaginationParams = Depends(),
-    person_service: PersonService = Depends(get_person_service)
+    person_service: PersonService = Depends(get_person_service),
+    Authorize: AuthJWT = Depends()
 ) -> list[PersonDetail | None]:
+
+    Authorize.jwt_required()
 
     params = {
         'query': query,
@@ -34,8 +38,12 @@ async def persons_search(
 async def person_films(
     person_id: str,
     person_service: PersonService = Depends(get_person_service),
-    film_service: FilmService = Depends(get_film_service)
+    film_service: FilmService = Depends(get_film_service),
+    Authorize: AuthJWT = Depends()
 ) -> list[Film | None]:
+
+    Authorize.jwt_required()
+
     person = await person_service.get_by_id(person_id)
     if not person:
         raise HTTPException(
@@ -55,8 +63,11 @@ async def person_films(
 @router.get('/{person_id}', response_model=PersonDetail)
 async def person_details(
     person_id: str,
-    person_service: PersonService = Depends(get_person_service)
+    person_service: PersonService = Depends(get_person_service),
+    Authorize: AuthJWT = Depends()
 ) -> PersonDetail:
+
+    Authorize.jwt_required()
 
     person = await person_service.get_by_id(person_id)
     if not person:

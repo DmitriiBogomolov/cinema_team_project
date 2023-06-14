@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+  etl:
+    depends_on:
+      db:
+        condition: service_started
+      redis:
+        condition: service_started
+      es01:
+        condition: service_healthy
+    build: ../etl
+    network_mode: "host"
+    env_file:
+      - ../etl/.env
+
+  es01:
+    image: elasticsearch:7.17.9
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s http://localhost:9200",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 120
+
+  db:
+    image: postgres:13
+    volumes:
+        - postgres_data:/var/lib/postgresql/data/
+        - ../etl/utils/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    env_file:
+        - ../etl/.env
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+
+volumes:
+  postgres_data:
+    driver: local

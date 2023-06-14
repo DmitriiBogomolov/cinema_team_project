@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash
 from app.models import Role, AllowedDevice, SignInEntrie
 from app.models import User, SocialAccount
 from app.validators import password_validator
-from app import ma
+from app.extensions import ma
 
 
 class AutoHashed:
