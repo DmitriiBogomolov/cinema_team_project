@@ -11,6 +11,7 @@ from src.core import cache
 from src.core.config import cache_config, config
 from src.core.logger import LOGGING  # noqa
 from src.db import elastic, redis
+from src.core.jwt import configure_jwt
 
 app = FastAPI(
     title=config.project_name,
@@ -34,6 +35,8 @@ async def shutdown():
 
 if cache_config.use_caching:
     app.middleware('http')(cache.cache_middleware)
+
+configure_jwt(app)
 
 app.include_router(films.router, prefix='/api/v1/films', tags=['films'])
 app.include_router(genres.router, prefix='/api/v1/genres', tags=['genres'])

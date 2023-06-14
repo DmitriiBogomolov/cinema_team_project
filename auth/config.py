@@ -46,6 +46,8 @@ class Config(Base):
     rate_limit_token_increment: int = 20  # number of accumulated tokens every second
     jaeger_host: str = 'jaeger'
     jaeger_port: int = '6831'
+    secret_key: str
+    jwt_secret_key: str
 
     @property
     def sqlalchemy_database_uri(self) -> str:

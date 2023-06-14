@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_jwt_auth import AuthJWT
 
 from src.api.v1.common import PaginationParams
 from src.api.v1.response_models import Film, FilmDetail
@@ -14,8 +15,11 @@ async def film_list(
     pp: PaginationParams = Depends(),
     genre: str = None,
     sort: str = None,
-    film_service: FilmService = Depends(get_film_service)
+    film_service: FilmService = Depends(get_film_service),
+    Authorize: AuthJWT = Depends()
 ) -> list[Film | None]:
+
+    Authorize.jwt_required()
 
     params = {
         'genre': genre,
@@ -35,8 +39,11 @@ async def film_list(
 async def film_search(
     query: str,
     pp: PaginationParams = Depends(),
-    film_service: FilmService = Depends(get_film_service)
+    film_service: FilmService = Depends(get_film_service),
+    Authorize: AuthJWT = Depends()
 ) -> list[Film | None]:
+
+    Authorize.jwt_required()
 
     params = {
         'query': query,
@@ -52,8 +59,11 @@ async def film_search(
 @router.get('/{film_id}', response_model=FilmDetail)
 async def film_details(
     film_id: str,
-    film_service: FilmService = Depends(get_film_service)
+    film_service: FilmService = Depends(get_film_service),
+    Authorize: AuthJWT = Depends()
 ) -> FilmDetail:
+
+    Authorize.jwt_required()
 
     film = await film_service.get_by_id(film_id)
     if not film:
