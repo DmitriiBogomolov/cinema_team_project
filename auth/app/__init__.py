@@ -52,6 +52,7 @@ def create_app(config=config):
 
     from docs.v1 import docs
     from app.api.v1.auth import auth
+    from app.api.v1.auth_2f import auth_2f
     from app.api.v1.roles import roles
     from app.api.v1.users import users
     from app.api.v1.my import my
@@ -61,6 +62,7 @@ def create_app(config=config):
 
     app.register_blueprint(captcha, url_prefix='/captcha')
     app.register_blueprint(auth, url_prefix='/api/v1')
+    app.register_blueprint(auth_2f, url_prefix='/api/v1')
     app.register_blueprint(roles, url_prefix='/api/v1/roles')
     app.register_blueprint(users, url_prefix='/api/v1/users')
     app.register_blueprint(my, url_prefix='/api/v1/my')

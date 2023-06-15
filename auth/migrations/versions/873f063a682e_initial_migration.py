@@ -35,6 +35,8 @@ def upgrade():
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('is_superuser', sa.Boolean(), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('otp_secret', sa.String(length=32)),
+    sa.Column('is_two_auth', sa.Boolean(), nullable=False),
     sa.Column('created', sa.DateTime(), nullable=False),
     sa.Column('updated', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id'),

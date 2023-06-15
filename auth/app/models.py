@@ -133,6 +133,8 @@ class User(db.Model, BasicModel):
     password = db.Column(db.String(300), nullable=False)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     is_superuser = db.Column(db.Boolean, nullable=False, default=False)
+    otp_secret = db.Column(db.String(32))
+    is_two_auth = db.Column(db.Boolean, nullable=False, default=False)
     roles = db.relationship(
         'Role',
         secondary=user_role,

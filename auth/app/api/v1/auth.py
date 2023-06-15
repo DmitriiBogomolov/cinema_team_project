@@ -48,7 +48,7 @@ def user_registration() -> tuple[Response, HTTPStatus]:
     return render_template('form_registration.html'), HTTPStatus.OK
 
 
-@auth.route('/login', methods=('POST',))
+@auth.route('/login', methods=('POST', 'GET'))
 @basic_auth.login_required
 @default_exception_catcher
 def login() -> tuple[Response, HTTPStatus]:
@@ -56,6 +56,12 @@ def login() -> tuple[Response, HTTPStatus]:
     Expected: Basic auth in headers
     """
     user = basic_auth.current_user()
+    if user.is_two_auth:
+        message = request.args
+        if message:
+            return render_template('form_2F-auth.html', user_id=user.id, message=message['values'])
+        return render_template('form_2F-auth.html', user_id=user.id)
+
     access, refresh = jwt_service.create_tokens(user)
     jwt_service.save_token(refresh)
     journal.save_sign_in_entrie(user, request)
