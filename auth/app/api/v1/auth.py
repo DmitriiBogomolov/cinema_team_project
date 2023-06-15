@@ -17,14 +17,14 @@ from marshmallow import EXCLUDE
 
 from app.api.v1.catchers import default_exception_catcher
 from app.schemas import UserSchema, ProfileSchema
-from app.error_handlers.exceptions import (
+from app.errors.exceptions import (
     UserAlreadyExists,
     UnavailableRefresh,
 )
 from app.models import User
-from app.jwt_service import jwt_service
-from app.pre_configured.basic_auth import basic_auth
-from app.utils import handle_captcha
+from app.services.jwt_service import jwt_service
+from app.core.pre_configured.basic_auth import basic_auth
+from app.helpers.captcha import handle_captcha
 from app.services.sign_in_journal import journal
 
 
@@ -57,6 +57,7 @@ def login() -> tuple[Response, HTTPStatus]:
     """
     user = basic_auth.current_user()
     if user.is_two_auth:
+        #  2-factor auth handler
         message = request.args
         if message:
             return render_template('form_2F-auth.html', user_id=user.id, message=message['values'])

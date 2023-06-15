@@ -1,28 +1,19 @@
-import string
-import secrets
-
 from flask import request, session
 from PIL import ImageFont, ImageDraw, Image
 from itertools import cycle
 
-from app.error_handlers.exceptions import (
+from app.errors.exceptions import (
     NoCaptchaError,
     WrongCaptchaError
 )
-from config import config
-
-
-def generate_password():
-    alphabet = string.ascii_letters + string.digits
-    password = ''.join(secrets.choice(alphabet) for _ in range(10))
-    return password
+from app.core.config import config
 
 
 def generate_captcha(code_captcha: str, width: int, height: int):
     img = Image.new('RGB', (width, height), (255, 255, 255))
     draw = ImageDraw.Draw(img)
     # подгружаем шрифты
-    font = ImageFont.truetype('font/1979_dot_matrix.ttf', size=40)
+    font = ImageFont.truetype('sources/fonts/1979_dot_matrix.ttf', size=40)
     gen_point = cycle([10, 55])
     x, y = 0, 0
     # генерируем каждый символ каптчи по выбранным координатам

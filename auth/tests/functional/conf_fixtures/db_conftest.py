@@ -2,7 +2,7 @@ import pytest
 import psycopg2
 from redis import Redis
 
-from config import config
+from app.core.config import config
 from tests.functional.models import PSQL
 from tests.conftest import clear_db, clear_redis
 

@@ -2,7 +2,7 @@ import json
 
 from flask_jwt_extended import create_access_token, create_refresh_token, decode_token
 
-from app.token_storage import AbstractTokenStorage, RedisTokenStorage
+from app.services.storage.token_storage import AbstractTokenStorage, RedisTokenStorage
 from app.models import User
 from app.schemas import ProfileSchema
 

@@ -8,9 +8,9 @@ from sqlalchemy.exc import IntegrityError
 
 from app.api.v1.catchers import default_exception_catcher
 from app.schemas import RoleSchema, BasicRoleSchema
-from app.error_handlers.exceptions import BaseAlreadyExists
+from app.errors.exceptions import BaseAlreadyExists
 from app.models import Role
-from app.pre_configured.jwt_wrappers import jwt_roles_required
+from app.core.pre_configured.jwt_wrappers import jwt_roles_required
 
 
 roles = Blueprint('roles', __name__)

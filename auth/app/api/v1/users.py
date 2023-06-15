@@ -7,10 +7,10 @@ from sqlalchemy.exc import IntegrityError
 
 from app.api.v1.catchers import default_exception_catcher
 from app.schemas import UserSchema, BasicUserSchema
-from app.error_handlers.exceptions import UserAlreadyExists
+from app.errors.exceptions import UserAlreadyExists
 from app.models import User, Role
-from app.extensions import db
-from app.pre_configured.jwt_wrappers import jwt_roles_required
+from app.core.extensions import db
+from app.core.pre_configured.jwt_wrappers import jwt_roles_required
 
 
 users = Blueprint('users', __name__)

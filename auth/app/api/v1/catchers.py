@@ -4,12 +4,14 @@ from marshmallow.exceptions import ValidationError
 from werkzeug.exceptions import NotFound
 import redis
 
-from app.error_handlers.exceptions import (BaseAlreadyExists,
-                                           BaseUnauthorized,
-                                           NotFoundError,
-                                           CaptchaError)
+from app.errors.exceptions import (
+    BaseAlreadyExists,
+    BaseUnauthorized,
+    NotFoundError,
+    CaptchaError
+)
 from app import db
-from logger import logger
+from app.core.logger import logger
 
 
 def default_exception_catcher(func):

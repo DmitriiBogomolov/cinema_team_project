@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource
-from docs.v1.models import user_model
+from sources.docs.v1.models import user_model
 
 namespace = Namespace('Users',
                       'Ручки для работы с пользователями.',

@@ -4,7 +4,7 @@ from flask import jsonify, app
 import sqlalchemy
 import redis
 
-from logger import logger
+from app.core.logger import logger
 
 
 def _handle_not_found(e: NotFound) -> None:

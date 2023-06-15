@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource
-from docs.v1.models import limited_user_model, register_model, token_model
+from sources.docs.v1.models import limited_user_model, register_model, token_model
 
 namespace = Namespace('Auth',
                       'Основные ручки для аутентификации и авторизации.',

@@ -4,9 +4,9 @@ from flask import Blueprint, jsonify, request, url_for
 
 from app.api.v1.catchers import default_exception_catcher
 from app.schemas import SocialAccountSchema, ProfileSchema
-from app.jwt_service import jwt_service
-from app.utils import generate_password
-from app.pre_configured.oauth import yandex_client as client
+from app.services.jwt_service import jwt_service
+from app.helpers.passwords import generate_password
+from app.core.pre_configured.oauth import yandex_client as client
 from app.services.sign_in_journal import journal
 from app.models import User
 

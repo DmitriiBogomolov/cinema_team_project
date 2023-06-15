@@ -6,7 +6,7 @@ from flask import (
     session,
 )
 
-from app.utils import generate_captcha
+from app.helpers.captcha import generate_captcha
 
 
 captcha = Blueprint('captcha', __name__)

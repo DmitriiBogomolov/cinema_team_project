@@ -4,8 +4,8 @@ import json
 
 from werkzeug.wrappers import Request, Response
 
-from config import config
-from logger import middleware_logger as logger
+from app.core.config import config
+from app.core.logger import middleware_logger as logger
 
 
 class TokenBucket:

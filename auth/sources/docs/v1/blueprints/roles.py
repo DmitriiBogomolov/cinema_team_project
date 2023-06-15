@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource
-from docs.v1.models import role_model
+from sources.docs.v1.models import role_model
 
 namespace = Namespace('Roles',
                       'Ручки для работы с ролями.',

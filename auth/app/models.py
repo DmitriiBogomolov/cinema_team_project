@@ -5,7 +5,7 @@ from sqlalchemy import PrimaryKeyConstraint, event, DDL
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy_utils import EmailType, Timestamp
 
-from app.extensions import db
+from app.core.extensions import db
 
 
 user_role = db.Table(

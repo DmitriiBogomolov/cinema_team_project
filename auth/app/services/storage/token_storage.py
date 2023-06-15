@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 import uuid
 
-from app.extensions import redis_db
-from config import config
+from app.core.extensions import redis_db
+from app.core.config import config
 
 
 class AbstractTokenStorage(ABC):

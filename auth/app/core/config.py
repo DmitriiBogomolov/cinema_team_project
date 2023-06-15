@@ -39,7 +39,6 @@ class Config(Base):
     postgres_port: str = 5432
     redis_host: str = 'redis'
     redis_port: int = 6379
-    swagger_url: str = '/swagger'
     refresh_token_exp: int = 60 * 60 * 24 * 15  # 15 days
     debug: bool = False
     rate_limit_tokens: int = 20  # value of tokens in a bucket

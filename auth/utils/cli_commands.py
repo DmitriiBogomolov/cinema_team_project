@@ -5,9 +5,9 @@ from werkzeug.security import generate_password_hash
 from psycopg2 import OperationalError
 
 from app.models import User
-from app.extensions import db
-from app.jwt_service import jwt_service
-from logger import logger
+from app.core.extensions import db
+from app.services.jwt_service import jwt_service
+from app.core.logger import logger
 
 
 def install_cli_commands(app: app.Flask) -> None:

@@ -8,8 +8,8 @@ from werkzeug.security import generate_password_hash
 
 from app.models import Role, AllowedDevice, SignInEntrie
 from app.models import User, SocialAccount
-from app.validators import password_validator
-from app.extensions import ma
+from app.helpers.validators import password_validator
+from app.core.extensions import ma
 
 
 class AutoHashed:
@@ -32,7 +32,7 @@ class AutoHashed:
 class BasicUserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
-        load_only = ['password']
+        load_only = ['password', 'otp_secret']
         dump_only = ['id', 'created', 'modified']
 
     roles = fields.Nested('BasicRoleSchema', many=True, default=[])

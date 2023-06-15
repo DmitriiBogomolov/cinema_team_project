@@ -9,15 +9,15 @@ from flask_jwt_extended import jwt_required, current_user
 
 from app.api.v1.catchers import default_exception_catcher
 from app.models import AllowedDevice, SignInEntrie
-from app.extensions import db
-from app.error_handlers.exceptions import UserAlreadyExists
+from app.core.extensions import db
+from app.errors.exceptions import UserAlreadyExists
 from app.schemas import (ProfileSchema,
                          ChangePasswordSchema,
                          UserSchema,
                          ChangeEmailSchema,
                          AllowedDeviceSchema,
                          SignInEntrieSchema)
-from app.helpers import get_pagination_params, get_pagination_meta
+from app.helpers.pagination import get_pagination_params, get_pagination_meta
 
 
 my = Blueprint('my', __name__)

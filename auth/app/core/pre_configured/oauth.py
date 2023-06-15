@@ -1,6 +1,6 @@
 from authlib.integrations.flask_client import OAuth
 
-from config import google_config, yandex_config
+from app.core.config import google_config, yandex_config
 
 oauth = OAuth()
 

@@ -27,6 +27,9 @@ schema_user_output = {
         'is_superuser': {
             'type': 'boolean'
         },
+        'is_two_auth': {
+            'type': 'boolean'
+        },
         'roles': {
             'type': 'array',
             'items': {

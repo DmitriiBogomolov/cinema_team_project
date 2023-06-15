@@ -1,10 +1,10 @@
 from flask import Blueprint
 from flask_restx import Api
-from docs.v1.blueprints.auth import namespace as auth
-from docs.v1.blueprints.users import namespace as users
-from docs.v1.blueprints.roles import namespace as roles
-from docs.v1.blueprints.my import namespace as my
-from docs.v1.models import load_models
+from sources.docs.v1.blueprints.auth import namespace as auth
+from sources.docs.v1.blueprints.users import namespace as users
+from sources.docs.v1.blueprints.roles import namespace as roles
+from sources.docs.v1.blueprints.my import namespace as my
+from sources.docs.v1.models import load_models
 
 docs = Blueprint('swagger', __name__)
 

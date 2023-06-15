@@ -7,11 +7,11 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 
 from utils.cli_commands import install_cli_commands
-from config import config
-from app.extensions import db, ma, migrate
-from app.pre_configured.jwt_manager import init_jwt_manager
-from app.error_handlers import register_error_handlers
-from app.pre_configured.oauth import oauth
+from app.core.config import config
+from app.core.extensions import db, ma, migrate
+from app.core.pre_configured.jwt_manager import init_jwt_manager
+from app.errors import register_error_handlers
+from app.core.pre_configured.oauth import oauth
 from middlewares.token_bucket import token_bucket_middleware
 
 
@@ -50,7 +50,7 @@ def create_app(config=config):
     ma.init_app(app)
     oauth.init_app(app)
 
-    from docs.v1 import docs
+    from sources.docs.v1 import docs
     from app.api.v1.auth import auth
     from app.api.v1.auth_2f import auth_2f
     from app.api.v1.roles import roles
@@ -68,7 +68,7 @@ def create_app(config=config):
     app.register_blueprint(my, url_prefix='/api/v1/my')
     app.register_blueprint(yandex, url_prefix='/api/v1/yandex')
     app.register_blueprint(google, url_prefix='/api/v1/google')
-    app.register_blueprint(docs, url_prefix=config.swagger_url)
+    app.register_blueprint(docs, url_prefix='/swagger')
 
     install_cli_commands(app)
     register_error_handlers(app)

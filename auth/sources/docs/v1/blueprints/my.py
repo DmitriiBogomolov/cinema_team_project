@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource
-from docs.v1.models import (
+from sources.docs.v1.models import (
     profile_model,
     change_email_model,
     change_password_model,
