@@ -2,7 +2,7 @@ from flask import Flask
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 
@@ -29,14 +29,20 @@ def configure_tracer() -> None:
         )
     )
     # Чтобы видеть трейсы в консоли
-    # trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+    if config.print_traces:
+        trace.get_tracer_provider().add_span_processor(
+            BatchSpanProcessor(ConsoleSpanExporter())
+        )
 
 
 def create_app(config=config):
-    configure_tracer()
+    if config.enable_tracer:
+        configure_tracer()
+
     app = Flask(__name__)
     FlaskInstrumentor().instrument_app(app)
 
+    app.config['SERVER_NAME'] = config.server_name
     app.config['SECRET_KEY'] = config.secret_key
     app.config['JWT_SECRET_KEY'] = config.jwt_secret_key
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 15 * 60  # 15 minutes
@@ -52,22 +58,20 @@ def create_app(config=config):
 
     from sources.docs.v1 import docs
     from app.api.v1.auth import auth
-    from app.api.v1.auth_2f import auth_2f
+    from app.api.v1.two_factor import two_factor
     from app.api.v1.roles import roles
     from app.api.v1.users import users
     from app.api.v1.my import my
     from app.api.v1.captcha import captcha
-    from app.api.v1.oauth_yandex import yandex
-    from app.api.v1.oauth_google import google
+    from app.api.v1.open_auth import open_auth
 
     app.register_blueprint(captcha, url_prefix='/captcha')
     app.register_blueprint(auth, url_prefix='/api/v1')
-    app.register_blueprint(auth_2f, url_prefix='/api/v1')
+    app.register_blueprint(two_factor, url_prefix='/api/v1')
     app.register_blueprint(roles, url_prefix='/api/v1/roles')
     app.register_blueprint(users, url_prefix='/api/v1/users')
     app.register_blueprint(my, url_prefix='/api/v1/my')
-    app.register_blueprint(yandex, url_prefix='/api/v1/yandex')
-    app.register_blueprint(google, url_prefix='/api/v1/google')
+    app.register_blueprint(open_auth, url_prefix='/api/v1/oauth')
     app.register_blueprint(docs, url_prefix='/swagger')
 
     install_cli_commands(app)

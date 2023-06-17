@@ -57,7 +57,7 @@ def login() -> tuple[Response, HTTPStatus]:
     """
     user = basic_auth.current_user()
     if user.is_two_auth:
-        #  2-factor auth handler
+        #  two factor auth handler
         message = request.args
         if message:
             return render_template('form_2F-auth.html', user_id=user.id, message=message['values'])

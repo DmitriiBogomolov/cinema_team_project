@@ -20,11 +20,11 @@ from app.core.pre_configured.basic_auth import basic_auth
 from app.services.sign_in_journal import journal
 
 
-auth_2f = Blueprint('auth_2f', __name__)
+two_factor = Blueprint('two_factor', __name__)
 otp_secret_shema = AddOtpSecretSchema()
 
 
-@auth_2f.route('/sync', methods=('GET',))
+@two_factor.route('/sync', methods=('GET',))
 @basic_auth.login_required
 @default_exception_catcher
 def sync() -> tuple[Response, HTTPStatus]:
@@ -59,7 +59,7 @@ def sync() -> tuple[Response, HTTPStatus]:
     ), HTTPStatus.OK
 
 
-@auth_2f.route('/sync_check/<user_id>', methods=('POST',))
+@two_factor.route('/sync_check/<user_id>', methods=('POST',))
 @default_exception_catcher
 def sync_check(user_id: str) -> tuple[Response, HTTPStatus]:
     """Checks the TOTP code from sync form"""
@@ -78,7 +78,7 @@ def sync_check(user_id: str) -> tuple[Response, HTTPStatus]:
     ), HTTPStatus.OK
 
 
-@auth_2f.route('/check_verify/<user_id>', methods=('POST', 'GET'))
+@two_factor.route('/check_verify/<user_id>', methods=('POST', 'GET'))
 @default_exception_catcher
 def check_verify(user_id: str) -> tuple[Response, HTTPStatus]:
     """Checks the TOTP code from login form"""

@@ -10,8 +10,8 @@ from app.core.extensions import db
 
 user_role = db.Table(
     'user_roles',
-    db.Column('left_id', db.ForeignKey('users.id')),
-    db.Column('right_id', db.ForeignKey('roles.id')),
+    db.Column('left_id', db.ForeignKey('users.id', ondelete='CASCADE')),
+    db.Column('right_id', db.ForeignKey('roles.id', ondelete='CASCADE')),
 )
 
 
@@ -20,14 +20,14 @@ class BasicModel(Timestamp):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
 
     @classmethod
-    def get_by_id(model, id: uuid) -> object:
+    def get_by_id(model, id: uuid) -> db.Model:
         return db.get_or_404(model, id)
 
     @classmethod
-    def get_list(model) -> object:
+    def get_list(model) -> list[db.Model]:
         return db.session.query(model).all()
 
-    def update(self, data: dict) -> object:
+    def update(self, data: dict) -> db.Model:
         try:
             db.session.query(self.__class__).filter_by(id=self.id).update(data)
             db.session.commit()
@@ -36,7 +36,7 @@ class BasicModel(Timestamp):
             raise e
         return self
 
-    def save(self) -> object:
+    def save(self) -> db.Model:
         try:
             db.session.add(self)
             db.session.commit()
@@ -45,7 +45,7 @@ class BasicModel(Timestamp):
             raise e
         return self
 
-    def delete(self) -> object:
+    def delete(self) -> None:
         db.session.delete(self)
         db.session.commit()
 
@@ -61,7 +61,7 @@ class Role(db.Model, BasicModel):
 class SignInMixin:
     """Represents a record of user log-ins journal"""
     id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, nullable=False)
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user_agent = db.Column(db.Text, nullable=False)
     remote_addr = db.Column(db.String(100), nullable=False)
 
@@ -110,7 +110,7 @@ class AllowedDevice(db.Model, BasicModel):
     """Represents a record of user log-ins journal"""
     __tablename__ = 'allowed_devices'
 
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user_agent = db.Column(db.Text, nullable=False)
 
 
@@ -118,7 +118,7 @@ class SocialAccount(db.Model, BasicModel):
     """Represents social account"""
     __tablename__ = 'social_account'
 
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     social_id = db.Column(db.Text, nullable=False)
     social_name = db.Column(db.Text, nullable=False)
 
@@ -138,23 +138,19 @@ class User(db.Model, BasicModel):
     roles = db.relationship(
         'Role',
         secondary=user_role,
-        backref='users',
-        cascade='all'
+        backref='users'
     )
     sign_in_entries = db.relationship(
         'SignInEntrie',
-        backref='sing_in_entries',
-        cascade='all'
+        backref='sing_in_entries'
     )
     allowed_devices = db.relationship(
         'AllowedDevice',
-        backref='allowed_devices',
-        cascade='all'
+        backref='allowed_devices'
     )
     social_account = db.relationship(
         'SocialAccount',
-        backref='social_accounts',
-        cascade='all'
+        backref='social_accounts'
     )
 
     @classmethod

@@ -6,52 +6,53 @@ from app.api.v1.catchers import default_exception_catcher
 from app.schemas import SocialAccountSchema, ProfileSchema
 from app.services.jwt_service import jwt_service
 from app.helpers.passwords import generate_password
-from app.core.pre_configured.oauth import google_client as client
 from app.services.sign_in_journal import journal
 from app.models import User
+from app.core.pre_configured.oauth import providers
 
-google = Blueprint('google', __name__)
+open_auth = Blueprint('open_auth', __name__)
 social_schema = SocialAccountSchema()
 profile_schema = ProfileSchema()
 
 
-@google.route('/login')
+@open_auth.route('/login')
 @default_exception_catcher
 def login():
-    """Google oauth entriepoint"""
-    redirect_uri = url_for('google.auth', _external=True)
-    return client.authorize_redirect(redirect_uri)
+    """Oauth entriepoint"""
+    provider = providers.get(request.args.get('provider'))
+    redirect_uri = '{}?provider={}'.format(
+        url_for('open_auth.callback', _external=True),
+        provider.name
+    )
+    print('-------------')
+    print(redirect_uri)
+    return provider.client.authorize_redirect(redirect_uri)
 
 
-@google.route('/auth')
+@open_auth.route('/callback')
 @default_exception_catcher
-def auth():
-    """Callback for google oauth. Login or register user."""
-    token = client.authorize_access_token()
+def callback():
+    """Callback for provider oauth. Login or register user."""
+    provider = providers.get(request.args.get('provider'))
+    user_data = provider.get_user_info()
 
-    user_provider = client.get(
-        'https://www.googleapis.com/oauth2/v1/userinfo',
-        token=token
-    ).json()
-    user_provider['social_name'] = 'google'
-
-    user = User.get_by_email(user_provider['email'])
+    user = User.get_by_email(user_data['email'])
 
     if not social_schema.is_account_exists(
-        user_provider['id'],
-        user_provider['social_name']
+        user_data['id'],
+        provider.name
     ):
         if not user:
             user = profile_schema.load({
-                'email': user_provider['email'],
+                'email': user_data['email'],
                 'password': generate_password()
             })
             user = user.save()
 
         social_account = social_schema.load({
             'user_id': user.id,
-            'social_id': user_provider['id'],
-            'social_name': user_provider['social_name']
+            'social_id': user_data['id'],
+            'social_name': provider.name
         })
         user.social_account.append(social_account)
         user.save()

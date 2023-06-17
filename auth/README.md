@@ -34,11 +34,15 @@
 
         flask createsuperuser superuser@inbox.com supassword
 
-5. Запустить приложение
+5. Если необходимо, сгенерировать токены для отладки
+
+        flask givemetokens superuser@inbox.com
+
+6. Запустить приложение
 
         flask --app app run --debug
 
-6. Остановка
+7. Остановка
 
         docker-compose -f docker-compose.dev.yaml down -v
 
