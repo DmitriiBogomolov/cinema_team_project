@@ -24,8 +24,6 @@ def login():
         url_for('open_auth.callback', _external=True),
         provider.name
     )
-    print('-------------')
-    print(redirect_uri)
     return provider.client.authorize_redirect(redirect_uri)
 
 
