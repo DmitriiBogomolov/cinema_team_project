@@ -39,5 +39,3 @@ class ClickhouseSettings(Base):
 
 kafka_settings = KafkaSettings()
 clickhouse_settings = ClickhouseSettings()
-print(kafka_settings)
-print(clickhouse_settings)
