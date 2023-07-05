@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  test:
+    build: ./
+    image: test_etl
+    container_name: test_etl
+    env_file:
+      - ../.env.example
+    networks:
+      - kafka
+      - clickhouse
+
+networks:
+  kafka:
+    name: kafka
+  clickhouse:
+    name: clickhouse
