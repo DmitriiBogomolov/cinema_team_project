@@ -174,3 +174,8 @@ state.json
 
 Pipfile
 Pipfile.lock
+
+# research data
+
+ugc/reserch/clickhouse/*.txt
+ugc/reserch/postgres/*.txt
