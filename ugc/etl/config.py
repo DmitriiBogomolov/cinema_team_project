@@ -13,6 +13,7 @@ class KafkaSettings(Base):
     topic_name: list = ['views']
     auto_offset_reset: str = 'earliest'
     group_id: str = 'clickhouse'
+    enable_auto_commit: bool = False
     batch: int = 10000
 
     class Config:
@@ -23,7 +24,8 @@ class KafkaSettings(Base):
         return {
             'bootstrap_servers': '{}:{}'.format(self.host, self.port),
             'auto_offset_reset': self.auto_offset_reset,
-            'group_id': self.group_id
+            'group_id': self.group_id,
+            'enable_auto_commit': self.enable_auto_commit
         }
 
 
