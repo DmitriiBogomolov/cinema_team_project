@@ -3,8 +3,12 @@ from datetime import datetime
 from clickhouse_driver import Client
 from config import clickhouse_settings
 
+
 client = Client(**clickhouse_settings.dict())
-query = "SELECT * FROM events.views WHERE user_id = %(user_id)s and movie_id = %(movie_id)s"
+query = """
+    SELECT * FROM events.views
+    WHERE user_id = %(user_id)s
+    and movie_id = %(movie_id)s"""
 
 with open('test_insert.csv', 'r') as csvfile:
     reader = csv.reader(csvfile, delimiter=';')
