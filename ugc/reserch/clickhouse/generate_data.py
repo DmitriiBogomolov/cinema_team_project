@@ -5,6 +5,8 @@ import os
 from datetime import datetime
 from random import randint
 
+DATA_SIZE = 1000
+
 
 def generate_test_data(data_size: int) -> Iterable:
 
@@ -12,7 +14,6 @@ def generate_test_data(data_size: int) -> Iterable:
 
         user_id = uuid.uuid4()
         movie_id = uuid.uuid4()
-
         duration = randint(10, 7200)
         lenght_movie = randint(3600, 7200)
         event_time = int(datetime.timestamp(datetime.now()))
@@ -31,4 +32,5 @@ if os.path.exists('data_for_select.csv'):
     os.remove('data_for_select.csv')
 if os.path.exists('data.csv'):
     os.remove('data.csv')
-generate_test_data(30000000)
+
+generate_test_data(DATA_SIZE)
