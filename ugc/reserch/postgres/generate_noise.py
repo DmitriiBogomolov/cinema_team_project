@@ -15,5 +15,5 @@ def generate_noise(len):
             print(datetime.now() - start_time)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     generate_noise(1000000)
