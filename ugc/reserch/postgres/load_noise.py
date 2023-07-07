@@ -11,13 +11,13 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 
-cur.execute('''TRUNCATE views CASCADE''')
+cur.execute('TRUNCATE views CASCADE')
 
 
 i = 1
 for batch in read_lines_in_batches('noise.txt', 1000):
     values = [n.replace('\n', '').split(', ') for n in batch]
-    cur.executemany('''
+    cur.executemany("""
         INSERT INTO views
                     (id,
                     user_id,
@@ -26,7 +26,7 @@ for batch in read_lines_in_batches('noise.txt', 1000):
                     lenght_movie,
                     event_time)
         VALUES (%s, %s, %s, %s, %s, %s)
-    ''', values)
+    """, values)
     conn.commit()
     print(i)
     i += 1
