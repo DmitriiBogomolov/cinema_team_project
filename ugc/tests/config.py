@@ -7,6 +7,10 @@ class Base(BaseSettings):
         env_file_encoding = 'utf-8'
 
 
+class TestSettings(Base):
+    test_token: str
+
+
 class KafkaSettings(Base):
     host: str = 'localhost'
     port: int = 9092
@@ -37,5 +41,6 @@ class ClickhouseSettings(Base):
         env_prefix = 'clickhouse_'
 
 
+test_settings = TestSettings()
 kafka_settings = KafkaSettings()
 clickhouse_settings = ClickhouseSettings()

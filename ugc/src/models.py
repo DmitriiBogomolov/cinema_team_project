@@ -10,7 +10,7 @@ class ViewEventModel(BaseModel):
 
     @validator('duration')
     def must_be_lte_movie_lenght(cls, v, values, **kwargs):
-        if v > values['lenght_movie']:
+        if values.get('lenght_movie') and v > values['lenght_movie']:
             raise ValueError('The current duration must be '
                              'lower or equal total movie lenght.')
         return v
