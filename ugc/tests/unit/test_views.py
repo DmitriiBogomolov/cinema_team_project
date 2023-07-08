@@ -54,7 +54,7 @@ def test_views_post() -> None:
     for case in EVENT_MOCKS:
         response = client.post(
             '/api/v1/views',
-            headers={"Authorization": f"Bearer {token}"},
+            headers={'Authorization': f'Bearer {token}'},
             json=EVENT_MOCKS[case]
         )
 
