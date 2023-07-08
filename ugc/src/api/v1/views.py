@@ -1,25 +1,28 @@
 import json
 from datetime import datetime
+from http import HTTPStatus
 
 from fastapi import APIRouter, Depends
 from async_fastapi_jwt_auth import AuthJWT
 from fastapi.responses import JSONResponse
-from kafka import KafkaProducer
+from aiokafka import AIOKafkaProducer
+from redis.asyncio import Redis
 
 from src.models import ViewEventModel
 from src.core.jwt import access_check
-from src.core.config import kafka_config
+from src.db.kafka import get_kafka_producer
+from src.db.redis import get_redis
 
 
 router = APIRouter()
-
-producer = KafkaProducer(bootstrap_servers=f'{kafka_config.host}:{kafka_config.port}')
 
 
 @router.post('')
 async def load_event(
     view_event: ViewEventModel,
-    authorize: AuthJWT = Depends()
+    authorize: AuthJWT = Depends(),
+    producer: AIOKafkaProducer = Depends(get_kafka_producer),
+    redis: Redis = Depends(get_redis)
 ) -> JSONResponse:
 
     await authorize.jwt_required()
@@ -41,9 +44,10 @@ async def load_event(
         encoding='utf-8'
     )
 
-    producer.send(topic='views', key=key, value=value)
+    await producer.send_and_wait(topic='views', key=key, value=value)
+    await redis.set(key, value)
 
     return JSONResponse(
-        status_code=200,
+        status_code=HTTPStatus.OK,
         content={'message': 'ok'}
     )

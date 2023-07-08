@@ -2,6 +2,7 @@ from diagrams import Diagram, Cluster
 from diagrams.c4 import Container
 from diagrams.onprem.network import Nginx
 from diagrams.onprem.queue import Kafka
+from diagrams.onprem.inmemory import Redis
 from diagrams.aws.engagement import Pinpoint
 
 
@@ -25,3 +26,4 @@ with Diagram('Sprint-8-UGC-decomposition', show=False, direction='TB'):
 
     nginx >> endpoint
     serializer >> Kafka('Kafka')
+    serializer >> Redis('Redis')

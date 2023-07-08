@@ -17,7 +17,7 @@ class AppConfig(Base):
     project_name: str = 'ugc_service'
     redis_host: str = 'redis'
     redis_port: int = 6379
-    redis_db: int = 2
+    redis_db: int = 0
 
     authjwt_secret_key: str
 
