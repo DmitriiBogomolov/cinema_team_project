@@ -14,3 +14,7 @@ class ViewEventModel(BaseModel):
             raise ValueError('The current duration must be '
                              'lower or equal total movie lenght.')
         return v
+
+
+class BookmarkModel(BaseModel):
+    movie_id: UUID

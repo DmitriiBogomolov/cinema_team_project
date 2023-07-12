@@ -42,5 +42,13 @@ class KafkaConfig(Base):
         }
 
 
+class MongoConfig(Base):
+    uri: str
+
+    class Config:
+        env_prefix = 'mongo_'
+
+
 config = AppConfig()
 kafka_config = KafkaConfig()
+mongo_config = MongoConfig()
