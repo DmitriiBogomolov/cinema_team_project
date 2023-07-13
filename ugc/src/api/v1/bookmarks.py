@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from datetime import datetime
 
 from fastapi import APIRouter, Depends
 from async_fastapi_jwt_auth import AuthJWT
@@ -6,6 +7,7 @@ from fastapi.responses import JSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from src.models import BookmarkModel
+from src.response_models import BookmarkResponse
 from src.core.jwt import access_check
 from src.db.mongo import get_mongo_client
 
@@ -13,27 +15,23 @@ from src.db.mongo import get_mongo_client
 router = APIRouter()
 
 
-@router.get('')
-async def get_bookmark(
+@router.get('', response_model=list[BookmarkResponse])
+async def get_bookmarks(
     authorize: AuthJWT = Depends(),
     mongo_client: AsyncIOMotorClient = Depends(get_mongo_client),
-) -> JSONResponse:
+) -> list[BookmarkResponse | None]:
     await authorize.jwt_required()
     current_user = access_check(
         await authorize.get_jwt_subject()
     )
+    collection = mongo_client['ugc_db']['bookmarks']
+    bookmarks = await (
+        collection.find({'user_id': str(current_user['id'])})
+                  .sort('created_at', -1)
+    ).to_list(length=None)
 
-    try:
-        await mongo_client.admin.command('ping')
-        current_user
-        print('Pinged your deployment. You successfully connected to MongoDB!')
-    except Exception as e:
-        print(e)
-
-    return JSONResponse(
-        status_code=HTTPStatus.OK,
-        content={'message': 'ok'}
-    )
+    return [BookmarkResponse(**bookmark)
+            for bookmark in bookmarks]
 
 
 @router.post('')
@@ -60,7 +58,8 @@ async def load_bookmark(
 
     result = await collection.insert_one({
         'user_id': str(current_user['id']),
-        'movie_id': str(bookmark.movie_id)
+        'movie_id': str(bookmark.movie_id),
+        'created_at': str(datetime.now())
     })
 
     return JSONResponse(
