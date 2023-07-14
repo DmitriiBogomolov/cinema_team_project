@@ -1,11 +1,13 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_request_id import get_request_id
 from async_fastapi_jwt_auth import AuthJWT
 
 from src.api.v1.common import PaginationParams
 from src.api.v1.response_models import Film, FilmDetail
 from src.services.film import FilmService, get_film_service
+from src.core.logger import logger
 
 router = APIRouter()
 
@@ -30,6 +32,7 @@ async def film_list(
     films = await film_service.get_list(**params)
 
     if not films:
+        logger.info('films not found!', extra={'request_id': get_request_id()})
         return []
 
     return [Film(**film.dict()) for film in films]
@@ -51,6 +54,7 @@ async def film_search(
     }
     films = await film_service.get_list(**params)
     if not films:
+        logger.info('film not found!', extra={'request_id': get_request_id()})
         return []
 
     return [Film(**film.dict()) for film in films]

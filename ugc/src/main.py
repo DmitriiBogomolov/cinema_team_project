@@ -1,6 +1,8 @@
 import uvicorn
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi_request_id import RequestContextMiddleware
 from redis.asyncio import Redis
 from aiokafka import AIOKafkaProducer
 from contextlib import asynccontextmanager
@@ -11,6 +13,16 @@ from src.core.logger import LOGGING  # noqa
 from src.db import redis
 from src.db import kafka
 from src.core.jwt import configure_jwt
+
+
+sentry_sdk.init(
+    dsn="https://638c9aa0fcb0458aaaf260317f41fe6a@o4505504683655168.ingest.sentry.io/4505505602076672",
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production,
+    traces_sample_rate=1.0,
+)
 
 
 @asynccontextmanager
@@ -40,12 +52,12 @@ app = FastAPI(
 )
 
 configure_jwt(app)
-
+app.add_middleware(RequestContextMiddleware)
 app.include_router(views.router, prefix='/api/v1/views', tags=['views'])
 
 if __name__ == '__main__':
     uvicorn.run(
         'main:app',
         host='0.0.0.0',
-        port=8000,
+        port=5000,
     )

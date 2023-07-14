@@ -1,21 +1,15 @@
-from logging import config as logging_config
-
 from pydantic import BaseSettings
-
-from src.core.logger import LOGGING
-
-logging_config.dictConfig(LOGGING)
 
 
 class Base(BaseSettings):
     class Config:
-        env_file = '.env'
+        env_file = '.env.example'
         env_file_encoding = 'utf-8'
 
 
 class AppConfig(Base):
     project_name: str = 'ugc_service'
-    redis_host: str = 'redis'
+    redis_host: str = 'localhost'
     redis_port: int = 6379
     redis_db: int = 0
 

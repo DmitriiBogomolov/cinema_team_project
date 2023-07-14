@@ -1,17 +1,27 @@
-import logging  # noqa
-
 import uvicorn
+import sentry_sdk
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
+from fastapi_request_id import RequestContextMiddleware
 
 from src.api.v1 import films, genres, persons
 from src.core import cache
 from src.core.config import cache_config, config
-from src.core.logger import LOGGING  # noqa
 from src.db import elastic, redis
 from src.core.jwt import configure_jwt
+
+
+sentry_sdk.init(
+    dsn="https://638c9aa0fcb0458aaaf260317f41fe6a@o4505504683655168.ingest.sentry.io/4505505602076672",
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production,
+    traces_sample_rate=1.0,
+)
+
 
 app = FastAPI(
     title=config.project_name,
@@ -33,6 +43,7 @@ async def shutdown():
     await elastic.es.close()
 
 
+app.add_middleware(RequestContextMiddleware)
 if cache_config.use_caching:
     app.middleware('http')(cache.cache_middleware)
 

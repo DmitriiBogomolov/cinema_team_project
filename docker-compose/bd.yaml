@@ -1,0 +1,55 @@
+version: "3"
+
+services:
+
+  elastic:
+    image: elasticsearch:7.17.9
+    container_name: elastic
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s http://localhost:9200",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 120
+    networks:
+      - bd_network
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    expose:
+      - "5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ../etl/utils/init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - ../etl/.env.example-dev
+    networks:
+      - bd_network
+
+
+  redis:
+    image: redis
+    container_name: redis
+    expose:
+      - "6379"
+    networks:
+      - bd_network
+
+
+volumes:
+  postgres_data:
+    driver: local
+  logstash_data:
+    driver: local
+
+networks:
+  bd_network:
+    name: bd_network

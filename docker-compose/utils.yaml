@@ -1,0 +1,64 @@
+version: "3"
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ../infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../infra/nginx/configs:/etc/nginx/conf.d:ro
+      - /tmp/logs/nginx/:/var/log/nginx/
+    ports:
+      - "80:80"
+      - "8080:8080"
+    networks:
+      - utils_network
+      - servise_network
+
+  filebeat_nginx:
+    image: elastic/filebeat:7.17.11
+    container_name: filebeat_nginx
+    volumes:
+      - /tmp/logs/nginx:/var/log/nginx:ro
+      - ../deploy_conf/filebeat_nginx/filebeat.yml:/usr/share/filebeat/filebeat.yml
+    depends_on:
+      - nginx
+    networks:
+      - servise_network
+      - utils_network
+
+  filebeat_fw:
+    image: elastic/filebeat:7.17.11
+    container_name: filebeat_fw
+    volumes:
+      - /tmp/logs/filmworks/:/var/log/filmworks/:ro
+      - ../deploy_conf/filebeat_fw/filebeat.yml:/usr/share/filebeat/filebeat.yml
+
+    networks:
+      - servise_network
+      - utils_network
+
+  logstash:
+    image: logstash:8.8.1
+    container_name: logstash
+    environment:
+      XPACK_MONITORING_ENABLED: "false"
+      ELASTIC_HOST: "elastic"
+    ports:
+      - "5044:5044/udp"
+    volumes:
+      - ../deploy_conf/logstash.conf:/usr/share/logstash/config/logstash.conf:ro
+    command: logstash -f config/logstash.conf
+    networks:
+      - utils_network
+      - bd_network
+
+networks:
+  utils_network:
+    name: utils_network
+
+  servise_network:
+    name: servise_network
+
+  bd_network:
+    name: bd_network

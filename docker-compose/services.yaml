@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+
+  filmworks_api:
+    build: ../filmworks_api/.
+    container_name: filmworks_api
+    image:
+      api-image:latest
+    volumes:
+      - /tmp/logs/filmworks:/app/logs
+    env_file:
+      - ../filmworks_api/.env
+    networks:
+      - bd_network
+      - servise_network
+
+  ugc:
+    build: ../ugc/.
+    container_name: ugc
+    image:
+      ugc-image:latest
+    volumes:
+      - /tmp/logs/ugs:/app/logs
+    env_file:
+      - ../ugc/.env.example
+    networks:
+      - bd_network
+      - servise_network
+      - kafka
+
+
+networks:
+  bd_network:
+    name: bd_network
+
+  servise_network:
+    name: servise_network
+
+  kafka:
+    name: kafka

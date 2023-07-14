@@ -12,7 +12,7 @@ services:
     build: ../etl
     network_mode: "host"
     env_file:
-      - ../etl/.env
+      - ../etl/.env.example-dev
 
   es01:
     image: elasticsearch:7.17.9
@@ -38,10 +38,10 @@ services:
     ports:
       - "5432:5432"
     env_file:
-        - ../etl/.env
+        - ../etl/.env.example-dev
 
   redis:
-    image: redis
+    image: redis:6.0
     ports:
       - "6379:6379"
 

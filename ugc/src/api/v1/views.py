@@ -3,6 +3,7 @@ from datetime import datetime
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends
+from fastapi_request_id import get_request_id
 from async_fastapi_jwt_auth import AuthJWT
 from fastapi.responses import JSONResponse
 from aiokafka import AIOKafkaProducer
@@ -12,6 +13,7 @@ from src.models import ViewEventModel
 from src.core.jwt import access_check
 from src.db.kafka import get_kafka_producer
 from src.db.redis import get_redis
+from src.core.logger import logger
 
 
 router = APIRouter()
@@ -46,7 +48,7 @@ async def load_event(
 
     await producer.send_and_wait(topic='views', key=key, value=value)
     await redis.set(key, value)
-
+    logger.info('data loading completed', extra={'request_id': get_request_id()})
     return JSONResponse(
         status_code=HTTPStatus.OK,
         content={'message': 'ok'}
