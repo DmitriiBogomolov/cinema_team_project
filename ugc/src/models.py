@@ -1,20 +1,28 @@
-from uuid import UUID
+from uuid import UUID, uuid4
+from datetime import datetime
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 
-class ViewEventModel(BaseModel):
+class BasicModel(BaseModel):
+    id: UUID = Field(uuid4(), alias='_id')
+    created_at: datetime = datetime.now()
+
+
+class LikeModel(BasicModel):
+    entity_id: UUID
+    user_id: UUID
+    rating: int
+
+
+class ReviewModel(BasicModel):
     movie_id: UUID
-    lenght_movie: int = Field(ge=60, le=(24 * 60 * 60))  # total movie lenth
-    duration: int = Field(ge=0)  # last viewed point of the movie (in seconds)
-
-    @validator('duration')
-    def must_be_lte_movie_lenght(cls, v, values, **kwargs):
-        if values.get('lenght_movie') and v > values['lenght_movie']:
-            raise ValueError('The current duration must be '
-                             'lower or equal total movie lenght.')
-        return v
+    author_id: UUID
+    text: str
+    rating: float = 0
+    likes_ids: list[UUID] = []
 
 
-class BookmarkModel(BaseModel):
+class BookmarkModel(BasicModel):
+    user_id: UUID
     movie_id: UUID

@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from aiokafka import AIOKafkaProducer
 from redis.asyncio import Redis
 
-from src.models import ViewEventModel
+from src.request_models import ViewEventRequestModel
 from src.core.jwt import access_check
 from src.db.kafka import get_kafka_producer
 from src.db.redis import get_redis
@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.post('')
 async def load_event(
-    view_event: ViewEventModel,
+    view_event: ViewEventRequestModel,
     authorize: AuthJWT = Depends(),
     producer: AIOKafkaProducer = Depends(get_kafka_producer),
     redis: Redis = Depends(get_redis)
