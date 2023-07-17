@@ -6,9 +6,10 @@ services:
     image: test_etl
     container_name: test_etl
     env_file:
-      - ../.env.example
+      - ../../.env.example
     networks:
       - kafka
+      - clickhouse
 
 networks:
   kafka:

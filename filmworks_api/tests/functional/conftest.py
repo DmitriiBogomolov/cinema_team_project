@@ -143,5 +143,3 @@ async def load_persons(es: AsyncElasticsearch, clear_persons: None) -> None:
         )
 
     await es.indices.refresh(index='persons')
-
-    # return [FilmModel(**item) for item in FILMS_LIST]

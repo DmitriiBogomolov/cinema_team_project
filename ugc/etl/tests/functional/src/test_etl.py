@@ -1,7 +1,7 @@
 import time
 import os
 from dotenv import load_dotenv
-from tests.functional.test_data.generate_date_for_kafka import generate_test_data
+from etl.tests.functional.test_data.generate_date_for_kafka import generate_test_data
 
 load_dotenv()
 
