@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 
 class BasicModel(BaseModel):
-    id: UUID = Field(uuid4(), alias='_id')
+    id: UUID = Field(default_factory=uuid4, alias='_id')
     created_at: datetime = datetime.now()
 
 

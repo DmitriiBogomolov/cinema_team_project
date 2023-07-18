@@ -9,9 +9,3 @@ services:
       - ../.env.example
     networks:
       - kafka
-
-networks:
-  kafka:
-    name: kafka
-  clickhouse:
-    name: clickhouse

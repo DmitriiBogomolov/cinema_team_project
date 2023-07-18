@@ -74,15 +74,14 @@ async def post_movie_review(
     )
 
 
-@router.get('/<review_id>/likes', response_model=list[LikeModel])
+@router.get('/{review_id}/likes', response_model=list[LikeModel])
 async def get_review_likes(
     review_id: UUID,
     authorize: AuthJWT = Depends(),
     mongo_client: AsyncIOMotorClient = Depends(get_mongo_client),
 ) -> list[LikeModel | None]:
     await authorize.jwt_required()
-
-    collection = mongo_client['ugc_db']['review_likes']
+    collection = mongo_client['ugc_db']['reviews_likes']
     movie_likes_raw = await (
         collection.find({'entity_id': str(review_id)})
                   .sort('created_at', -1)
