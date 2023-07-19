@@ -13,14 +13,12 @@ TOKEN = test_config.test_token
 
 
 def test_get_review(mongo_fixtures):
-    response = requests.get(
-        f'{URL}?movie_id={mongo_fixture["reviews"][0]["movie_id"]}'
-    )
+    cur_url = f'{URL}?movie_id={mongo_fixture["reviews"][0]["movie_id"]}'
+    response = requests.get(cur_url)
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
     response = requests.get(
-        f'{URL}?movie_id={mongo_fixture["reviews"][0]["movie_id"]}',
-        headers={'Authorization': f'Bearer {TOKEN}'}
+        cur_url, headers={'Authorization': f'Bearer {TOKEN}'}
     )
 
     assert response.status_code == HTTPStatus.OK
@@ -28,33 +26,34 @@ def test_get_review(mongo_fixtures):
 
 
 def test_post_review():
+    get_url = f'{URL}?movie_id={mongo_fixture["reviews"][0]["movie_id"]}'
+    post_url = URL
+
     response = requests.get(
-        f'{URL}?movie_id={mongo_fixture["reviews"][0]["movie_id"]}',
-        headers={'Authorization': f'Bearer {TOKEN}'}
+        get_url, headers={'Authorization': f'Bearer {TOKEN}'}
     )
 
     assert response.status_code == HTTPStatus.NOT_FOUND
 
     response = requests.post(
-        URL, json=mongo_fixture['reviews'][0]
+        post_url, json=mongo_fixture['reviews'][0]
     )
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
     response = requests.post(
-        URL, json=mongo_fixture['reviews'][0],
+        post_url, json=mongo_fixture['reviews'][0],
         headers={'Authorization': f'Bearer {TOKEN}'}
     )
     assert response.status_code == HTTPStatus.CREATED
 
     response = requests.post(
-        URL, json=mongo_fixture['reviews'][1],
+        post_url, json=mongo_fixture['reviews'][1],
         headers={'Authorization': f'Bearer {TOKEN}'}
     )
     assert response.status_code == HTTPStatus.CREATED
 
     response = requests.get(
-        f'{URL}?movie_id={mongo_fixture["reviews"][0]["movie_id"]}',
-        headers={'Authorization': f'Bearer {TOKEN}'}
+        get_url, headers={'Authorization': f'Bearer {TOKEN}'}
     )
 
     assert response.status_code == HTTPStatus.OK
@@ -62,3 +61,68 @@ def test_post_review():
         response.json()[0],
         mongo_fixture['reviews'][0]
     )
+
+
+def test_get_review_likes(mongo_fixtures):
+    get_url = f'{URL}/{mongo_fixture["reviews_likes"][0]["entity_id"]}/likes'
+
+    response = requests.get(get_url)
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    response = requests.get(
+        get_url, headers={'Authorization': f'Bearer {TOKEN}'}
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == [mongo_fixture['reviews_likes'][0]]
+
+
+def test_post_review_likes():
+    get_url = f'{URL}/{mongo_fixture["reviews_likes"][0]["entity_id"]}/likes'
+    post_url = f'{URL}/likes'
+
+    response = requests.get(
+        get_url, headers={'Authorization': f'Bearer {TOKEN}'}
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == []
+
+    response = requests.post(
+        post_url, json=mongo_fixture['reviews_likes'][0]
+    )
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    response = requests.post(
+        post_url, json=mongo_fixture['reviews_likes'][0],
+        headers={'Authorization': f'Bearer {TOKEN}'}
+    )
+    assert response.status_code == HTTPStatus.CREATED
+
+    response = requests.get(
+        get_url, headers={'Authorization': f'Bearer {TOKEN}'}
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert compare(
+        response.json(),
+        [mongo_fixture['reviews_likes'][0]]
+    )
+
+
+def test_delete_review_like(mongo_fixtures):
+    delete_url = f'{URL}/likes/{mongo_fixture["reviews_likes"][0]["_id"]}'
+    get_url = f'{URL}/{mongo_fixture["reviews_likes"][0]["entity_id"]}/likes'
+
+    response = requests.delete(delete_url)
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    response = requests.delete(
+        delete_url, headers={'Authorization': f'Bearer {TOKEN}'}
+    )
+    assert response.status_code == HTTPStatus.NO_CONTENT
+
+    response = requests.get(
+        get_url, headers={'Authorization': f'Bearer {TOKEN}'}
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == []
