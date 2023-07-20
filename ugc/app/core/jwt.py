@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from async_fastapi_jwt_auth import AuthJWT
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
 
-from src.core.config import AppConfig
+from app.core.config import AppConfig
 
 
 def configure_jwt(app: FastAPI) -> None:

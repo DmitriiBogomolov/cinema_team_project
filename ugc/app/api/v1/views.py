@@ -8,10 +8,10 @@ from fastapi.responses import JSONResponse
 from aiokafka import AIOKafkaProducer
 from redis.asyncio import Redis
 
-from src.request_models import ViewEventRequestModel
-from src.core.jwt import access_check
-from src.db.kafka import get_kafka_producer
-from src.db.redis import get_redis
+from app.request_models import ViewEventRequestModel
+from app.core.jwt import access_check
+from app.db.kafka import get_kafka_producer
+from app.db.redis import get_redis
 
 
 router = APIRouter()

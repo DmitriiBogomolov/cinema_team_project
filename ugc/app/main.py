@@ -7,11 +7,12 @@ from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.server_api import ServerApi
 
-from src.api.v1 import views, bookmarks, reviews, movies_likes
-from src.core.config import config, kafka_config, mongo_config
-from src.core.logger import LOGGING  # noqa
-from src.db import redis, kafka, mongo
-from src.core.jwt import configure_jwt
+from app.api.v1 import views, bookmarks, reviews, movies_likes
+from app.core.config import config, kafka_config, mongo_config
+from app.core.logger import LOGGING  # noqa
+from app.db import redis, kafka, mongo
+from app.core.jwt import configure_jwt
+from app.errors import register_error_handlers
 
 
 @asynccontextmanager
@@ -44,6 +45,8 @@ app = FastAPI(
 )
 
 configure_jwt(app)
+register_error_handlers(app)
+
 app.include_router(views.router, prefix='/api/v1/views', tags=['views'])
 app.include_router(movies_likes.router, prefix='/api/v1/movies_likes', tags=['bookmarks'])
 app.include_router(reviews.router, prefix='/api/v1/reviews', tags=['bookmarks'])
