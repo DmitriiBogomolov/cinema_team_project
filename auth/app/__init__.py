@@ -13,6 +13,8 @@ from app.core.pre_configured.jwt_manager import init_jwt_manager
 from app.errors import register_error_handlers
 from app.core.pre_configured.oauth import oauth
 from middlewares.token_bucket import token_bucket_middleware
+from middlewares.set_header_request_id import init_header_request_id
+from app.services.sdk_servise import init_sdk_service
 
 
 def configure_tracer() -> None:
@@ -39,8 +41,11 @@ def create_app(config=config):
     if config.enable_tracer:
         configure_tracer()
 
+    init_sdk_service()
+
     app = Flask(__name__)
     FlaskInstrumentor().instrument_app(app)
+    init_header_request_id(app)
 
     app.config['SERVER_NAME'] = config.server_name
     app.config['SECRET_KEY'] = config.secret_key

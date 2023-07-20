@@ -26,6 +26,7 @@ from app.services.jwt_service import jwt_service
 from app.core.pre_configured.basic_auth import basic_auth
 from app.helpers.captcha import handle_captcha
 from app.services.sign_in_journal import journal
+from app.core.logger import logger
 
 
 auth = Blueprint('auth', __name__)
@@ -62,7 +63,7 @@ def login() -> tuple[Response, HTTPStatus]:
         if message:
             return render_template('form_2F-auth.html', user_id=user.id, message=message['values'])
         return render_template('form_2F-auth.html', user_id=user.id)
-
+    logger.info(request.headers.get('X-Request-Id'))
     access, refresh = jwt_service.create_tokens(user)
     jwt_service.save_token(refresh)
     journal.save_sign_in_entrie(user, request)

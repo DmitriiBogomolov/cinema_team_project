@@ -11,6 +11,7 @@ services:
     ports:
       - "80:80"
       - "8080:8080"
+      - "8100:8100"
     networks:
       - utils_network
       - servise_network
@@ -33,7 +34,26 @@ services:
     volumes:
       - /tmp/logs/filmworks/:/var/log/filmworks/:ro
       - ../deploy_conf/filebeat_fw/filebeat.yml:/usr/share/filebeat/filebeat.yml
+    networks:
+      - servise_network
+      - utils_network
 
+  filebeat_ugc:
+    image: elastic/filebeat:7.17.11
+    container_name: filebeat_ugc
+    volumes:
+      - /tmp/logs/ugs/:/var/log/ugc/:ro
+      - ../deploy_conf/filebeat_ugc/filebeat.yml:/usr/share/filebeat/filebeat.yml
+    networks:
+      - servise_network
+      - utils_network
+
+  filebeat_auth:
+    image: elastic/filebeat:7.17.11
+    container_name: filebeat_auth
+    volumes:
+      - /tmp/logs/auth/:/var/log/auth/:ro
+      - ../deploy_conf/filebeat_auth/filebeat.yml:/usr/share/filebeat/filebeat.yml
     networks:
       - servise_network
       - utils_network

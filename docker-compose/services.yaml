@@ -7,6 +7,8 @@ services:
     container_name: filmworks_api
     image:
       api-image:latest
+    expose:
+      - 8000
     volumes:
       - /tmp/logs/filmworks:/app/logs
     env_file:
@@ -20,6 +22,8 @@ services:
     container_name: ugc
     image:
       ugc-image:latest
+    expose:
+      - 8001
     volumes:
       - /tmp/logs/ugs:/app/logs
     env_file:
@@ -28,6 +32,21 @@ services:
       - bd_network
       - servise_network
       - kafka
+
+  auth:
+    build: ../auth/.
+    container_name: auth
+    image:
+      auth-image:latest
+    ports:
+      - 8002:8002
+    volumes:
+      - /tmp/logs/auth:/app/logs
+    env_file:
+      - ../auth/.env.example
+    networks:
+      - bd_network
+      - servise_network
 
 
 networks:

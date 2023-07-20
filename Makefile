@@ -27,6 +27,6 @@ run-tests:
 	docker-compose --project-name api_tests -f docker-compose.yaml -f docker-compose.tests.yaml up -d --build
 
 start_all_service:
-	docker-compose -f docker-compose/kafka.yaml -f docker-compose/bd.yaml -f docker-compose/services.yaml -f docker-compose/utils.yaml  up -d
+	docker-compose -f docker-compose/bd.yaml -f docker-compose/services.yaml -f docker-compose/utils.yaml  up -d
 stop_all_service:
-	docker-compose -f docker-compose/utils.yaml -f docker-compose/services.yaml -f docker-compose/bd.yaml -f docker-compose/kafka.yaml   down -v
+	docker-compose -f docker-compose/utils.yaml -f docker-compose/services.yaml -f docker-compose/bd.yaml  down -v
