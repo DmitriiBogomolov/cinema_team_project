@@ -2,7 +2,7 @@ from logging import config as logging_config
 
 from pydantic import BaseSettings
 
-from src.core.logger import LOGGING
+from app.core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
@@ -23,7 +23,7 @@ class AppConfig(Base):
 
 
 class KafkaConfig(Base):
-    host: str = 'localhost'
+    host: str = 'broker'
     port: int = 9092
     topic_name: list = ['views']
     auto_offset_reset: str = 'earliest'
@@ -42,5 +42,13 @@ class KafkaConfig(Base):
         }
 
 
+class MongoConfig(Base):
+    uri: str
+
+    class Config:
+        env_prefix = 'mongo_'
+
+
 config = AppConfig()
 kafka_config = KafkaConfig()
+mongo_config = MongoConfig()

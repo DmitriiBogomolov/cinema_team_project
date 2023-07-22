@@ -37,10 +37,11 @@ services:
 networks:
   app:
     name: app
-  clickhouse:
-    name: clickhouse
   kafka:
     name: kafka
+    external: True
+  clickhouse:
+    name: clickhouse
     external: True
   mongo:
     name: mongo
