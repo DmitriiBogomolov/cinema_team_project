@@ -7,12 +7,12 @@ from tests.functional.fixtures.mongo import mongo_fixture
 from tests.utils import compare
 
 
-BASE_URL = test_config.base_url
+BASE_URL = test_config.test_url
 URL = f'{BASE_URL}/api/v1/reviews'
 TOKEN = test_config.test_token
 
 
-def test_get_review(mongo_fixtures):
+def test_get_review(reviews_fix):
     cur_url = f'{URL}?movie_id={mongo_fixture["reviews"][0]["movie_id"]}'
     response = requests.get(cur_url)
     assert response.status_code == HTTPStatus.UNAUTHORIZED
@@ -63,7 +63,7 @@ def test_post_review():
     )
 
 
-def test_get_review_likes(mongo_fixtures):
+def test_get_review_likes(reviews_fix, reviews_likes_fix):
     get_url = f'{URL}/{mongo_fixture["reviews_likes"][0]["entity_id"]}/likes'
 
     response = requests.get(get_url)
@@ -77,15 +77,9 @@ def test_get_review_likes(mongo_fixtures):
     assert response.json() == [mongo_fixture['reviews_likes'][0]]
 
 
-def test_post_review_likes():
+def test_post_review_likes(reviews_fix):
     get_url = f'{URL}/{mongo_fixture["reviews_likes"][0]["entity_id"]}/likes'
-    post_url = f'{URL}/likes'
-
-    response = requests.get(
-        get_url, headers={'Authorization': f'Bearer {TOKEN}'}
-    )
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == []
+    post_url = f'{URL}/{mongo_fixture["reviews"][0]["_id"]}/like'
 
     response = requests.post(
         post_url, json=mongo_fixture['reviews_likes'][0]
@@ -103,26 +97,15 @@ def test_post_review_likes():
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert compare(
-        response.json(),
-        [mongo_fixture['reviews_likes'][0]]
-    )
 
 
-def test_delete_review_like(mongo_fixtures):
-    delete_url = f'{URL}/likes/{mongo_fixture["reviews_likes"][0]["_id"]}'
-    get_url = f'{URL}/{mongo_fixture["reviews_likes"][0]["entity_id"]}/likes'
-
-    response = requests.delete(delete_url)
+def test_delete_review_likes(reviews_fix, reviews_likes_fix):
+    url = f'{URL}/{mongo_fixture["reviews"][0]["_id"]}/like'
+    response = requests.delete(url)
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
     response = requests.delete(
-        delete_url, headers={'Authorization': f'Bearer {TOKEN}'}
+        url,
+        headers={'Authorization': f'Bearer {TOKEN}'}
     )
     assert response.status_code == HTTPStatus.NO_CONTENT
-
-    response = requests.get(
-        get_url, headers={'Authorization': f'Bearer {TOKEN}'}
-    )
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == []

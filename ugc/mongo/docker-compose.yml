@@ -7,6 +7,8 @@ services:
       - 27017:27017
     expose:
       - "27017"
+    networks:
+      - mongo
 
   mongors1n2:
     container_name: mongors1n2
@@ -16,6 +18,8 @@ services:
       - 27027:27017
     expose:
       - "27017"
+    networks:
+      - mongo
 
   mongors2n1:
     container_name: mongors2n1
@@ -25,6 +29,8 @@ services:
       - 27037:27017
     expose:
       - "27017"
+    networks:
+      - mongo
 
   mongors2n2:
     container_name: mongors2n2
@@ -34,6 +40,8 @@ services:
       - 27047:27017
     expose:
       - "27017"
+    networks:
+      - mongo
 
   mongocfg1:
     container_name: mongocfg1
@@ -41,6 +49,8 @@ services:
     command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
     expose:
       - "27017"
+    networks:
+      - mongo
 
   mongocfg2:
     container_name: mongocfg2
@@ -48,6 +58,8 @@ services:
     command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
     expose:
       - "27017"
+    networks:
+      - mongo
 
   mongos:
     container_name: mongos
@@ -60,3 +72,9 @@ services:
       - 27019:27017
     expose:
       - "27017"
+    networks:
+      - mongo
+
+networks:
+  mongo:
+    name: mongo

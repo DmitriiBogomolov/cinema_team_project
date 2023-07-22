@@ -4,19 +4,17 @@ mongo_fixture = {
             '_id': '901824f8-0d32-4e28-b1fb-66bc69315c26',
             'created_at': '2023-07-18T01:10:30.885335',
             'movie_id': 'a0546844-18d8-11ee-be56-0242ac120003',
-            'author_id': '0991a12a-b1b0-49bc-8ca2-2fca3e40085e',
+            'user_id': '0991a12a-b1b0-49bc-8ca2-2fca3e40085e',
             'text': 'testing test',
-            'rating': 0.0,
-            'likes_ids': []
+            'likes': []
         },
         {
             '_id': '901824f8-0d32-4e28-b1fb-66bc69315c25',
             'created_at': '2023-07-18T01:10:30.885335',
             'movie_id': 'a0546844-18d8-11ee-be56-0242ac120002',
-            'author_id': '0991a12a-b1b0-49bc-8ca2-2fca3e40085e',
+            'user_id': '0991a12a-b1b0-49bc-8ca2-2fca3e40085e',
             'text': 'testing test',
-            'rating': 0.0,
-            'likes_ids': []
+            'likes': []
         }
     ],
     'bookmarks': [
@@ -53,14 +51,14 @@ mongo_fixture = {
         {
             '_id': '71b40d61-3696-4a49-9ea9-963324250e6a',
             'created_at': '2023-07-18T23:29:22.599137',
-            'entity_id': 'a0546844-18d8-11ee-be56-0242ac120002',
+            'entity_id': '901824f8-0d32-4e28-b1fb-66bc69315c26',
             'user_id': '0991a12a-b1b0-49bc-8ca2-2fca3e40085e',
             'rating': 10
         },
         {
             '_id': '71b40d61-3696-4a49-9ea9-963324250e6b',
             'created_at': '2023-07-18T23:29:22.599137',
-            'entity_id': 'a0546844-18d8-11ee-be56-0242ac120003',
+            'entity_id': '901824f8-0d32-4e28-b1fb-66bc69315c25',
             'user_id': '0991a12a-b1b0-49bc-8ca2-2fca3e40085e',
             'rating': 10
         },

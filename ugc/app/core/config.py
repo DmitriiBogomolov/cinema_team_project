@@ -23,7 +23,7 @@ class AppConfig(Base):
 
 
 class KafkaConfig(Base):
-    host: str = 'localhost'
+    host: str = 'broker'
     port: int = 9092
     topic_name: list = ['views']
     auto_offset_reset: str = 'earliest'

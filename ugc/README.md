@@ -96,20 +96,28 @@
 
 ![alt text](https://github.com/DmitriiBogomolov/Cinema-Team-Project/blob/main/architecture/sprint-8-elt-decomposition.png)
 
-## How to use
+## Доступные команды:
 
-### Поднять все
+### Поднять все (клилксаус, кафка, монго, редис, приложение, etl)
 
         make all
 
-### Закрутить приложение
+### Поднять облегченную версию без клилксауса и etl
+
+        run_service
+
+### Запустить только базы данных-зависимости приложения (кафка, монго, редис)
+
+        run_dbs
+
+### Поднять необходимые зависимости и запустить функциональные тесты
+
+        run_test_app
+
+### Остановить все
+
+        make clean
+
+### Запустить приложение локально
 
         uvicorn app.main:app --reload
-
-### Функциональные тесты
-
-        make test_run
-
-### Юнит тесты
-
-        pytest tests/unit/

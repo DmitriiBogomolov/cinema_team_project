@@ -1,3 +1,4 @@
+import json
 from uuid import UUID, uuid4
 from datetime import datetime
 
@@ -8,6 +9,9 @@ class BasicModel(BaseModel):
     id: UUID = Field(default_factory=uuid4, alias='_id')
     created_at: datetime = datetime.now()
 
+    def to_doc(self):
+        return json.loads(self.json(by_alias=True))
+
 
 class LikeModel(BasicModel):
     entity_id: UUID
@@ -17,10 +21,9 @@ class LikeModel(BasicModel):
 
 class ReviewModel(BasicModel):
     movie_id: UUID
-    author_id: UUID
+    user_id: UUID
     text: str
-    rating: float = 0
-    likes_ids: list[UUID] = []
+    likes: list[dict] = []
 
 
 class BookmarkModel(BasicModel):

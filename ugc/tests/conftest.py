@@ -24,8 +24,20 @@ def clean_mongo(db):
 
 
 @pytest.fixture()
-def mongo_fixtures(clean_mongo, db):
+def reviews_fix(clean_mongo, db):
     db['reviews'].insert_many(mongo_fixture['reviews'])
+
+
+@pytest.fixture()
+def bookmarks_fix(clean_mongo, db):
     db['bookmarks'].insert_many(mongo_fixture['bookmarks'])
+
+
+@pytest.fixture()
+def filmworks_likes_fix(clean_mongo, db):
     db['filmworks_likes'].insert_many(mongo_fixture['filmworks_likes'])
+
+
+@pytest.fixture()
+def reviews_likes_fix(clean_mongo, db):
     db['reviews_likes'].insert_many(mongo_fixture['reviews_likes'])

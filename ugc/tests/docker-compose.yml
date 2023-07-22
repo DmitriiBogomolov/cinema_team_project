@@ -6,6 +6,15 @@ services:
     image: test_etl
     container_name: test_etl
     env_file:
-      - ../.env.example
+      - ../.env
     networks:
-      - kafka
+      - app
+      - mongo
+
+networks:
+  app:
+    name: app
+    external: true
+  mongo:
+    name: mongo
+    external: true

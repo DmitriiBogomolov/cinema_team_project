@@ -1,6 +1,8 @@
-run_all: deploy_kafka deploy_mongo deploy_clickhouse create_kafka_topics create_mongo_shards create_clickhouse_shards deploy_etl
+run_all: deploy_kafka deploy_mongo deploy_clickhouse create_kafka_topics create_mongo_shards create_clickhouse_shards deploy_etl deploy_app
 
-run_service: deploy_kafka deploy_mongo create_kafka_topics create_mongo_shards
+run_service: deploy_kafka deploy_mongo create_kafka_topics create_mongo_shards deploy_app
+
+run_dbs: deploy_kafka deploy_mongo create_kafka_topics create_mongo_shards
 
 deploy_kafka:
 	docker-compose -f kafka/docker-compose.yml up -d
@@ -62,6 +64,9 @@ create_clickhouse_shards:
 	docker exec -it clickhouse-node3 clickhouse-client --query="CREATE TABLE replica.views (user_id UUID, movie_id UUID, duration UInt32, lenght_movie UInt32, event_time DateTime) Engine=ReplicatedMergeTree('/clickhouse/tables/1/user_active', 'replica_2') PARTITION BY toYYYYMMDD(event_time) ORDER BY (user_id, movie_id);"
 	docker exec -it clickhouse-node3 clickhouse-client --query="CREATE TABLE events.views (user_id UUID, movie_id UUID, duration UInt32, lenght_movie UInt32, event_time DateTime) ENGINE = Distributed('company_cluster', '', views, rand());"
 
+deploy_app:
+	docker-compose -f docker-compose.yml up -d
+
 .PHONY: etl
 deploy_etl:
 	docker build -t etl etl/.
@@ -74,8 +79,15 @@ test_etl:
 run_test_etl: run_all test_etl clean
 	docker-compose -f etl/tests/docker-compose.yml down -v
 
+test_app:
+	docker-compose -f tests/docker-compose.yml up test
+
+run_test_app: run_service test_app clean docker-compose -f tests/docker-compose.yml down -v --remove-orphans
+
 clean:
 	docker stop etl || true
-	docker-compose -f kafka/docker-compose.yml down -v
-	docker-compose -f mongo/docker-compose.yml down -v
-	docker-compose -f clickhouse/docker-compose.yml down -v
+	docker-compose -f tests/docker-compose.yml down -v --remove-orphans
+	docker-compose -f docker-compose.yml down -v --remove-orphans
+	docker-compose -f kafka/docker-compose.yml down -v --remove-orphans
+	docker-compose -f mongo/docker-compose.yml down -v --remove-orphans
+	docker-compose -f clickhouse/docker-compose.yml down -v --remove-orphans

@@ -1,15 +1,26 @@
-import json
+"""
+Эндпоинты для работы с закладками
+(сохраненными фильмами) пользователя
+"""
+
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status, Response, HTTPException
+from fastapi import (
+    APIRouter, Depends, status, Response
+)
 from async_fastapi_jwt_auth import AuthJWT
 from fastapi.responses import JSONResponse
 
-from app.request_models import BookmarkRequestModel
+from app.request_models import (
+    RequestBookmarkModel
+)
 from app.models import BookmarkModel
-from app.core.jwt import access_check
-from app.services.repository import MongoRepository, get_mongo_repository
+from app.repositories.bookmarks import (
+    get_bookmark_repository,
+    AbstractBookmarkRepository
+)
+from app.core.jwt import authorize_for_roles
 
 
 router = APIRouter()
@@ -17,39 +28,39 @@ router = APIRouter()
 
 @router.get('', response_model=list[BookmarkModel])
 async def get_bookmarks(
-    authorize: AuthJWT = Depends(),
-    mongo: MongoRepository = Depends(get_mongo_repository)
-) -> list[BookmarkModel | None]:
-    await authorize.jwt_required()
-    current_user = access_check(await authorize.get_jwt_subject())
-    search = {'user_id': str(current_user['id'])}
-    docs = await mongo.find(
-        'bookmarks', search, [('created_at', -1)]
+    auth: AuthJWT = Depends(),
+    repository: AbstractBookmarkRepository = (
+        Depends(get_bookmark_repository)
     )
-    return [BookmarkModel(**doc)
-            for doc in docs]
+) -> list[BookmarkModel | None]:
+    """Возвращает закладки текущего пользоваетля"""
+    current_user = await authorize_for_roles(auth)
+
+    return await \
+        repository.get_list_for_user(
+            current_user['id']
+        )
 
 
 @router.post('')
 async def post_bookmark(
-    request_bookmark: BookmarkRequestModel,
-    authorize: AuthJWT = Depends(),
-    mongo: MongoRepository = Depends(get_mongo_repository)
+    request_bookmark: RequestBookmarkModel,
+    auth: AuthJWT = Depends(),
+    repository: AbstractBookmarkRepository = (
+        Depends(get_bookmark_repository)
+    )
 ) -> JSONResponse:
-    await authorize.jwt_required()
-    current_user = access_check(await authorize.get_jwt_subject())
+    """Добавляет закладку текущему пользователю"""
+    current_user = await authorize_for_roles(auth)
 
     bookmark = BookmarkModel(
         user_id=current_user['id'],
         movie_id=request_bookmark.movie_id
     )
-
-    doc = json.loads(bookmark.json(by_alias=True))
-    result = await mongo.load_one('bookmarks', doc)
-
+    result = await repository.add(bookmark)
     return JSONResponse(
         status_code=HTTPStatus.CREATED,
-        content={'inserted': result.inserted_id}
+        content={'inserted': result.target_id}
     )
 
 
@@ -60,16 +71,17 @@ async def post_bookmark(
 )
 async def delete_bookmark(
     bookmark_id: UUID,
-    authorize: AuthJWT = Depends(),
-    mongo: MongoRepository = Depends(get_mongo_repository)
+    auth: AuthJWT = Depends(),
+    repository: AbstractBookmarkRepository = (
+        Depends(get_bookmark_repository)
+    )
 ) -> JSONResponse:
-    await authorize.jwt_required()
-    current_user = access_check(await authorize.get_jwt_subject())
-
-    search = {
-        '_id': str(bookmark_id),
-        'user_id': str(current_user['id'])
-    }
-    result = await mongo.delete_one('bookmarks', search)
-    if not result.deleted_count:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
+    """
+    Удаляет закладку
+    если она пренадлежит текущему пользователю
+    """
+    current_user = await authorize_for_roles(auth)
+    await repository.delete_for_user(
+        bookmark_id,
+        current_user['id']
+    )

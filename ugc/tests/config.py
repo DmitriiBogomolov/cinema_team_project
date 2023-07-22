@@ -3,13 +3,13 @@ from pydantic import BaseSettings
 
 class Base(BaseSettings):
     class Config:
-        env_file = '.env.example'
+        env_file = '.env'
         env_file_encoding = 'utf-8'
 
 
 class TestConfig(Base):
     test_token: str
-    base_url: str = 'http://localhost:8000'
+    test_url: str
 
 
 class MongoConfig(Base):

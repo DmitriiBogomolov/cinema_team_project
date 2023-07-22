@@ -7,12 +7,12 @@ from tests.functional.fixtures.mongo import mongo_fixture
 from tests.utils import compare
 
 
-BASE_URL = test_config.base_url
+BASE_URL = test_config.test_url
 URL = f'{BASE_URL}/api/v1/bookmarks'
 TOKEN = test_config.test_token
 
 
-def test_get_bookmarks(mongo_fixtures):
+def test_get_bookmarks(bookmarks_fix):
     response = requests.get(URL)
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
