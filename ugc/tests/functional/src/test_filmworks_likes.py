@@ -13,7 +13,7 @@ TOKEN = test_config.test_token
 
 
 def test_get_filmwork_likes(filmworks_likes_fix):
-    movie_id = mongo_fixture["filmworks_likes"][0]["entity_id"]
+    movie_id = mongo_fixture['filmworks_likes'][0]['entity_id']
     get_url = f'{URL}/{movie_id}/likes'
 
     response = requests.get(get_url)
@@ -28,7 +28,7 @@ def test_get_filmwork_likes(filmworks_likes_fix):
 
 
 def test_post_filmwork_likes():
-    movie_id = mongo_fixture["filmworks_likes"][0]["entity_id"]
+    movie_id = mongo_fixture['filmworks_likes'][0]['entity_id']
     url = f'{URL}/{movie_id}/likes'
 
     response = requests.get(
@@ -60,7 +60,7 @@ def test_post_filmwork_likes():
 
 
 def test_delete_filmwork_like(filmworks_likes_fix):
-    movie_id = mongo_fixture["filmworks_likes"][0]["entity_id"]
+    movie_id = mongo_fixture['filmworks_likes'][0]['entity_id']
 
     url = f'{URL}/{movie_id}/like'
 
@@ -74,7 +74,7 @@ def test_delete_filmwork_like(filmworks_likes_fix):
 
 
 def test_get_filmwork_likes_count(filmworks_likes_fix):
-    movie_id = mongo_fixture["filmworks_likes"][0]["entity_id"]
+    movie_id = mongo_fixture['filmworks_likes'][0]['entity_id']
     url = f'{URL}/{movie_id}/likes/count'
 
     response = requests.get(url)
@@ -89,7 +89,7 @@ def test_get_filmwork_likes_count(filmworks_likes_fix):
 
 
 def test_get_filmwork_likes_average(filmworks_likes_fix):
-    movie_id = mongo_fixture["filmworks_likes"][0]["entity_id"]
+    movie_id = mongo_fixture['filmworks_likes'][0]['entity_id']
     url = f'{URL}/{movie_id}/likes/average'
 
     response = requests.get(url)
@@ -100,4 +100,4 @@ def test_get_filmwork_likes_average(filmworks_likes_fix):
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {"average": 10.0}
+    assert response.json() == {'average': 10.0}
