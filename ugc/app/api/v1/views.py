@@ -1,3 +1,5 @@
+"""Сохраняет события просмотров"""
+
 import json
 from datetime import datetime
 from http import HTTPStatus
@@ -9,11 +11,11 @@ from fastapi.responses import JSONResponse
 from aiokafka import AIOKafkaProducer
 from redis.asyncio import Redis
 
-from src.models import ViewEventModel
-from src.core.jwt import access_check
-from src.db.kafka import get_kafka_producer
-from src.db.redis import get_redis
-from src.core.logger import logger
+from app.request_models import RequestViewEventModel
+from app.db.kafka import get_kafka_producer
+from app.db.redis import get_redis
+from app.core.jwt import authorize_for_roles
+from app.core.logger import logger
 
 
 router = APIRouter()
@@ -21,16 +23,13 @@ router = APIRouter()
 
 @router.post('')
 async def load_event(
-    view_event: ViewEventModel,
-    authorize: AuthJWT = Depends(),
+    view_event: RequestViewEventModel,
+    auth: AuthJWT = Depends(),
     producer: AIOKafkaProducer = Depends(get_kafka_producer),
     redis: Redis = Depends(get_redis)
 ) -> JSONResponse:
-
-    await authorize.jwt_required()
-    current_user = access_check(
-        await authorize.get_jwt_subject()
-    )
+    """Сохраняет событие просмотра в кафку"""
+    current_user = await authorize_for_roles(auth)
 
     key = bytes(f'{current_user["id"]},{str(view_event.movie_id)}', encoding='utf-8')
     value = bytes(

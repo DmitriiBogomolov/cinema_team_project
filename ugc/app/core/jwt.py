@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from async_fastapi_jwt_auth import AuthJWT
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
 
-from src.core.config import AppConfig
+from app.core.config import AppConfig
 
 
 def configure_jwt(app: FastAPI) -> None:
@@ -19,8 +19,9 @@ def configure_jwt(app: FastAPI) -> None:
         )
 
 
-def access_check(current_user: dict, roles: list = []) -> dict | None:
-    """Проверка достаточности прав доступа для jwt_subject"""
+async def authorize_for_roles(authorize: AuthJWT, roles: list = []) -> dict | None:
+    await authorize.jwt_required()
+    current_user = await authorize.get_jwt_subject()
 
     if not current_user.get('is_active'):
         #  Проверяет, что пользователь активен

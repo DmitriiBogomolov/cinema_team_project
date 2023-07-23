@@ -7,16 +7,11 @@ class Base(BaseSettings):
         env_file_encoding = 'utf-8'
 
 
-class AppConfig(Base):
-    project_name: str = 'ugc_service'
-    redis_host: str = 'localhost'
-    redis_port: int = 6379
-    redis_db: int = 0
-
-    authjwt_secret_key: str
+class TestSettings(Base):
+    test_token: str
 
 
-class KafkaConfig(Base):
+class KafkaSettings(Base):
     host: str = 'localhost'
     port: int = 9092
     topic_name: list = ['views']
@@ -36,5 +31,16 @@ class KafkaConfig(Base):
         }
 
 
-config = AppConfig()
-kafka_config = KafkaConfig()
+class ClickhouseSettings(Base):
+    host: str = 'localhost'
+    port: int = 9000
+    user: str = 'admin'
+    password: str = 123
+
+    class Config:
+        env_prefix = 'clickhouse_'
+
+
+test_settings = TestSettings()
+kafka_settings = KafkaSettings()
+clickhouse_settings = ClickhouseSettings()
