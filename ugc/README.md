@@ -133,19 +133,19 @@
 
 **Схема системы AS-IS**
 
-![alt text|50%](https://github.com/DmitriiBogomolov/Cinema-Team-Project/blob/main/architecture/sprint-8-as-is-architecture.png)
+<img src="https://github.com/DmitriiBogomolov/Cinema-Team-Project/blob/main/architecture/sprint-8-as-is-architecture.png" width="300">
 
 **Схема системы TO-BE**
 
-![alt text|50%](https://github.com/DmitriiBogomolov/Cinema-Team-Project/blob/main/architecture/sprint-8-to-be-architecture.png)
+<img src="https://github.com/DmitriiBogomolov/Cinema-Team-Project/blob/main/architecture/sprint-8-to-be-architecture.png" width="300">
 
 **Декомпозиция сервиса**
 
-![alt text|50%](https://github.com/DmitriiBogomolov/Cinema-Team-Project/blob/main/architecture/sprint-8-ugc-decomposition.png)
+<img src="https://github.com/DmitriiBogomolov/Cinema-Team-Project/blob/main/architecture/sprint-8-ugc-decomposition.png" width="300">
 
 **Декомпозиция компонента etl**
 
-![alt text|50%](https://github.com/DmitriiBogomolov/Cinema-Team-Project/blob/main/architecture/sprint-8-elt-decomposition.png)
+<img src="https://github.com/DmitriiBogomolov/Cinema-Team-Project/blob/main/architecture/sprint-8-elt-decomposition.png" width="300">
 
 ## Доступные команды:
 
