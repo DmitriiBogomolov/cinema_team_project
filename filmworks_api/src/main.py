@@ -14,7 +14,7 @@ from src.core.jwt import configure_jwt
 
 
 sentry_sdk.init(
-    dsn="https://638c9aa0fcb0458aaaf260317f41fe6a@o4505504683655168.ingest.sentry.io/4505505602076672",
+    dsn='https://638c9aa0fcb0458aaaf260317f41fe6a@o4505504683655168.ingest.sentry.io/4505505602076672',
     traces_sample_rate=1.0,
 )
 
