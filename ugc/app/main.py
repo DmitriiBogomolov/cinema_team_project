@@ -18,10 +18,6 @@ from app.errors import register_error_handlers
 
 sentry_sdk.init(
     dsn="https://638c9aa0fcb0458aaaf260317f41fe6a@o4505504683655168.ingest.sentry.io/4505505602076672",
-
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    # We recommend adjusting this value in production,
     traces_sample_rate=1.0,
 )
 
