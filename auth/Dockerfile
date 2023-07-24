@@ -5,13 +5,15 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
 
+COPY requirements/common.txt requirements.txt
+
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
 COPY . .
 
-RUN pip install --upgrade pip && pip install -r requirements/common.txt
-
-EXPOSE 5000
+EXPOSE 8000
 
 CMD ["sh", "-c", "python utils/wait_for_pg.py & \
                   python utils/wait_for_redis.py & \
                   flask db upgrade & \
-                  python pywsgi.py"]
+                  gunicorn -k gevent --bind=0.0.0.0:8000 'run:create_app()'"]

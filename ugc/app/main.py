@@ -1,6 +1,8 @@
 import uvicorn
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi_request_id import RequestContextMiddleware
 from redis.asyncio import Redis
 from aiokafka import AIOKafkaProducer
 from contextlib import asynccontextmanager
@@ -9,10 +11,15 @@ from pymongo.server_api import ServerApi
 
 from app.api.v1 import views, bookmarks, reviews, movies
 from app.core.config import config, kafka_config, mongo_config
-from app.core.logger import LOGGING  # noqa
 from app.db import redis, kafka, mongo
 from app.core.jwt import configure_jwt
 from app.errors import register_error_handlers
+
+
+sentry_sdk.init(
+    dsn='https://638c9aa0fcb0458aaaf260317f41fe6a@o4505504683655168.ingest.sentry.io/4505505602076672',
+    traces_sample_rate=1.0,
+)
 
 
 @asynccontextmanager
@@ -45,8 +52,8 @@ app = FastAPI(
 )
 
 configure_jwt(app)
+app.add_middleware(RequestContextMiddleware)
 register_error_handlers(app)
-
 app.include_router(views.router, prefix='/api/v1/views', tags=['views'])
 app.include_router(movies.router, prefix='/api/v1/movies', tags=['movies'])
 app.include_router(reviews.router, prefix='/api/v1/reviews', tags=['reviews'])

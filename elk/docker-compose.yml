@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+  logstash:
+      image: logstash:8.8.1
+      container_name: logstash
+      environment:
+        XPACK_MONITORING_ENABLED: "false"
+        ELASTIC_HOST: "elastic"
+      ports:
+        - "5044:5044/udp"
+      volumes:
+        - ./logstash/logstash.conf:/usr/share/logstash/config/logstash.conf:ro
+      command: logstash -f config/logstash.conf
+      networks:
+        - elk_network
+
+  elastic:
+    image: elasticsearch:7.17.9
+    container_name: elastic
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s http://localhost:9200",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 120
+    networks:
+      - elk_network
+
+networks:
+  elk_network:
+    name: elk_network

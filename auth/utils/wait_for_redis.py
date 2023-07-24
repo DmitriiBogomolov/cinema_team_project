@@ -8,8 +8,8 @@ current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-from config import config
-from logger import logger
+from app.core.config import config
+from app.core.logger import logger
 
 if __name__ == '__main__':
     redis_client = Redis(

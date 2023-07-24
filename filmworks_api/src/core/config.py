@@ -1,45 +1,42 @@
-from logging import config as logging_config
-
 from pydantic import BaseSettings
 
-from src.core.logger import LOGGING
 
-logging_config.dictConfig(LOGGING)
+class Base(BaseSettings):
+    class Config:
+        env_file = '.env'
+        env_file_encoding = 'utf-8'
 
 
-class AppConfig(BaseSettings):
+class AppConfig(Base):
     project_name: str = 'movies'
-    redis_host: str = 'redis'
+    redis_host: str = 'localhost'
     redis_port: int = 6379
     redis_db: int = 2
 
-    elastic_host: str = 'es01'
+    elastic_host: str = 'http://localhost'
     elastic_port: int = 9200
 
     authjwt_secret_key: str
 
-    class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
 
-
-class PITConfig(BaseSettings):
+class PITConfig(Base):
     pit_max_age: int = 20  # in seconds
     use_pit_rotation: bool = False
 
-    class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
 
-
-class CacheConfig(BaseSettings):
+class CacheConfig(Base):
     use_caching: bool = False
 
+
+class LoggerConfig(Base):
+    host: str = 'localhost'
+    port: int = 5044
+
     class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
+        env_prefix = 'logstash_'
 
 
 config = AppConfig()
 pit_config = PITConfig()
 cache_config = CacheConfig()
+logger_config = LoggerConfig()

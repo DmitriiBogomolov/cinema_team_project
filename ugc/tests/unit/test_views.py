@@ -3,13 +3,13 @@ from http import HTTPStatus
 from fastapi.testclient import TestClient
 
 from tests.unit.mocks.view_events_mocks import EVENT_MOCKS
-from tests.config import test_settings
+from tests.config import test_config
 from app.api.v1.views import get_kafka_producer
 from app.api.v1.views import get_redis
 from app.main import app
 
 
-token = test_settings.test_token
+token = test_config.test_token
 
 
 class MockKafkaProducer:

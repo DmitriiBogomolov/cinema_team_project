@@ -3,9 +3,11 @@ from http import HTTPStatus
 
 from pydantic import ValidationError
 from fastapi import HTTPException
+from fastapi_request_id import get_request_id
 
 from src.services.repository.common import AbstractRepository
 from src.models.common import UUIDModel
+from src.core.logger import logger
 
 
 class BaseService(ABC):
@@ -30,7 +32,8 @@ class BaseService(ABC):
 
         try:
             response = self.model(**instance)
-        except ValidationError:
+        except ValidationError as e:
+            logger.warning(e, extra={'request_id': get_request_id()})
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                 detail='Something went wrong'
@@ -48,7 +51,8 @@ class BaseService(ABC):
 
         try:
             response = [self.model(**instance) for instance in instances]
-        except ValidationError:
+        except ValidationError as e:
+            logger.warning(e, extra={'request_id': get_request_id()})
             raise HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
                 detail='Something went wrong'
