@@ -1,8 +1,5 @@
 import logging
 
-from src.core.log_config import LOGGING
-
-logging.config.dictConfig(LOGGING)
 
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(request_id)s'
 

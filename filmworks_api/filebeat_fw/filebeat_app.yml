@@ -2,7 +2,7 @@ filebeat.inputs:
 - type: log
   enabled: true
   paths:
-    - /var/log/filmworks/*
+    - /var/log/filmwork/*
   json:
     keys_under_root: true
     add_error_key: true

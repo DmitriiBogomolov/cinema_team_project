@@ -1,37 +1,57 @@
 version: "3"
 
 services:
-  etl:
-    depends_on:
-      db:
-        condition: service_started
-      redis:
-        condition: service_started
-      es01:
-        condition: service_healthy
-    build: ../etl
-    network_mode: "host"
+  filmworks_api:
+    build: ./
+    container_name: filmworks_api
+    image:
+      filmwork-image:latest
+    expose:
+      - 6000
+    volumes:
+      - /tmp/logs/filmwork:/app/logs
     env_file:
-      - ../etl/.env.example-dev
+      - ./.env.example
+    networks:
+      - filmwork_network
+      - elk_network
 
-  es01:
-    image: elasticsearch:7.17.9
+  nginx:
+    image: nginx:1.25
+    container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/config:/etc/nginx/conf.d:ro
+      - /tmp/logs/nginx/:/var/log/nginx/
     ports:
-      - "9200:9200"
-    environment:
-      - discovery.type=single-node
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -s http://localhost:9200",
-        ]
-      interval: 5s
-      timeout: 10s
-      retries: 120
+      - "80:80"
+    networks:
+      - filmwork_network
+    depends_on:
+      - filmworks_api
+
+  # elastic:
+  #   image: elasticsearch:7.17.9
+  #   container_name: es
+  #   ports:
+  #     - "9200:9200"
+  #   environment:
+  #     - discovery.type=single-node
+  #   healthcheck:
+  #     test:
+  #       [
+  #         "CMD-SHELL",
+  #         "curl -s http://localhost:9200",
+  #       ]
+  #     interval: 5s
+  #     timeout: 10s
+  #     retries: 120
+  #   networks:
+  #     - filmwork_network
 
   db:
     image: postgres:13
+    container_name: postgres
     volumes:
         - postgres_data:/var/lib/postgresql/data/
         - ../etl/utils/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -39,13 +59,48 @@ services:
       - "5432:5432"
     env_file:
         - ../etl/.env.example-dev
+    networks:
+      - filmwork_network
 
   redis:
     image: redis:6.0
+    container_name: redis
     ports:
       - "6379:6379"
+    networks:
+      - filmwork_network
 
+  filebeat_nginx:
+    image: elastic/filebeat:7.17.11
+    container_name: filebeat_nginx
+    volumes:
+      - /tmp/logs/nginx:/var/log/nginx:ro
+      - ./filebeat_fw/filebeat_nginx.yml:/usr/share/filebeat/filebeat.yml
+    depends_on:
+      - nginx
+    networks:
+      - filmwork_network
+      - elk_network
+
+  filebeat_filmwork:
+    image: elastic/filebeat:7.17.11
+    container_name: filebeat_filmwork
+    volumes:
+      - /tmp/logs/filmwork/:/var/log/filmwork/:ro
+      - ./filebeat_fw/filebeat_app.yml:/usr/share/filebeat/filebeat.yml
+    networks:
+      - filmwork_network
+      - elk_network
+    depends_on:
+      - nginx
 
 volumes:
   postgres_data:
     driver: local
+
+networks:
+  filmwork_network:
+    name: filmwork_network
+  elk_network:
+    name: elk_network
+    external: True
