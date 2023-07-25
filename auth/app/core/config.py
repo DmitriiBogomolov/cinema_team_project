@@ -52,6 +52,7 @@ class Config(Base):
     jaeger_port: int = '6831'
     secret_key: str
     jwt_secret_key: str
+    dsn: str
 
     @property
     def sqlalchemy_database_uri(self) -> str:
