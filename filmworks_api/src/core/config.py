@@ -18,6 +18,8 @@ class AppConfig(Base):
 
     authjwt_secret_key: str
 
+    dsn: str
+
 
 class PITConfig(Base):
     pit_max_age: int = 20  # in seconds
