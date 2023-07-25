@@ -15,6 +15,8 @@ class AppConfig(Base):
 
     authjwt_secret_key: str
 
+    dsn: str
+
 
 class KafkaConfig(Base):
     host: str = 'broker'
