@@ -19,22 +19,23 @@ def configure_jwt(app: FastAPI) -> None:
         )
 
 
-async def authorize_for_roles(authorize: AuthJWT, roles: list = []) -> dict | None:
+async def authorize_for_roles(
+        authorize: AuthJWT,
+        roles: list | None = None
+) -> dict | None:
     await authorize.jwt_required()
     current_user = await authorize.get_jwt_subject()
 
     if not current_user.get('is_active'):
-        #  Проверяет, что пользователь активен
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='The provided user is inactive'
         )
 
     jwt_roles = current_user.get('roles', [])
-
     if roles and not any(role['name'] in roles for role in jwt_roles):
-        #  Проверяет, что в токене пользователя была представлена
-        #  хотя бы одна роль из списка roles (если он был передан)
+        # Проверяет, что в токене пользователя была представлена
+        # хотя бы одна роль из списка roles (если он был передан)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='Insufficient access rights.'
