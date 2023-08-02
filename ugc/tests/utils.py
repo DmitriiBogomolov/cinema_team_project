@@ -1,5 +1,5 @@
 def compare(d1: dict | list, d2: dict | list) -> bool:
-    if type(d1) != type(d2):
+    if not isinstance(d1, d2):
         return False
     elif isinstance(d1, dict):
         return (
