@@ -1,13 +1,13 @@
 def compare(d1: dict | list, d2: dict | list) -> bool:
-    if type(d1) != type(d2):
+    if not isinstance(d1, d2):
         return False
-    elif type(d1) == dict:
+    elif isinstance(d1, dict):
         return (
             {k: v for k, v in d1.items() if k not in ('_id', 'created_at')}
             ==
             {k: v for k, v in d2.items() if k not in ('_id', 'created_at')}
         )
-    elif type(d1) == list:
+    elif isinstance(d1, list):
         d1 = [{k: v for k, v in d.items() if k not in ('_id', 'created_at')}
               for d in d1]
 

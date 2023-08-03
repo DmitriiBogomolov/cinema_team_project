@@ -44,7 +44,7 @@ class JWTService:
         self.storage.delete_all_user_tokens(self, user.id)
 
     def _decode_token(self, token: str | dict) -> dict:
-        if type(token) == str:
+        if isinstance(token, str):
             return decode_token(token)
         return token
 
