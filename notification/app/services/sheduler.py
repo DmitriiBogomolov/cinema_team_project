@@ -3,7 +3,6 @@
 для последующей передачи в очереди уведомлений
 с базой данных разосланных уведомлений
 """
-
 from functools import lru_cache
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
@@ -16,6 +15,7 @@ from app.models import (
     MultipleBookmarksReminder
 )
 from app.services.repository import AbstractRepository, get_repository
+from app.services.rabbit_producer import get_producer, AbstractProducer
 from app.errors import WrongEventException
 
 
@@ -35,8 +35,9 @@ class Sheduler(AbstractSheduler):
     для последующей передачи в очередь на рассылку уведомлений
     """
 
-    def __init__(self, repository: AbstractRepository):
+    def __init__(self, repository: AbstractRepository, producer: AbstractProducer):
         self.repository = repository
+        self.producer = producer
 
     async def handle_single(self, event: _BasicSingleEvent):
         if isinstance(event, SingleNewReviewLike):
@@ -47,6 +48,9 @@ class Sheduler(AbstractSheduler):
             """
             event_name = 'review_like_received'
             event.set_event_name(event_name)
+
+            event_type = 'email'
+            event.set_event_type(event_type)
 
             # проверка на дублирующее событие
             count_1 = await self.repository.count({
@@ -69,6 +73,7 @@ class Sheduler(AbstractSheduler):
                 raise WrongEventException
 
             await self.repository.save_single(event)
+            await self.producer.send_message(event_type, event)
 
     async def handle_multiple(self, event: _BasicMultipleEvent):
         if isinstance(event, MultipleTemplateMailing):
@@ -79,6 +84,9 @@ class Sheduler(AbstractSheduler):
             event_name = 'mail_multiple'
             event.set_event_name(event_name)
 
+            event_type = 'email'
+            event.set_event_type(event_type)
+
             if await self.repository.count({
                 'event_name': event_name,
                 'multiple_event_id': str(event.multiple_event_id),
@@ -86,6 +94,7 @@ class Sheduler(AbstractSheduler):
                 raise WrongEventException
 
             await self.repository.save_multiple(event)
+            await self.producer.send_message(event_type, event)
 
         if isinstance(event, MultipleBookmarksReminder):
             """
@@ -97,11 +106,16 @@ class Sheduler(AbstractSheduler):
             event_name = 'bookmarks_reminder_multiple'
             event.set_event_name(event_name)
 
+            event_type = 'email'
+            event.set_event_type(event_type)
+
             await self.repository.save_multiple(event)
+            await self.producer.send_message(event_type, event)
 
 
 @lru_cache()
 def get_sheduler(
         repository: AbstractRepository = Depends(get_repository),
+        producer: AbstractProducer = Depends(get_producer)
 ) -> AbstractSheduler:
-    return Sheduler(repository)
+    return Sheduler(repository, producer)
