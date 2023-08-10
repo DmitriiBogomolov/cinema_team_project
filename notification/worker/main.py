@@ -6,7 +6,7 @@ connection = pika.BlockingConnection(pika.URLParameters(rabbit_config.uri))
 channel = connection.channel()
 channel.basic_qos(prefetch_count=1)
 # Основная очередь
-channel.queue_declare(queue='email', arguments={"x-max-priority": 10, 'x-message-ttl': 1800000})
+channel.queue_declare(queue='email', arguments={'x-max-priority': 10, 'x-message-ttl': 1800000})
 
 # Обменник и очередь для писем которые получили исключения во время обработки
 channel.exchange_declare(exchange='dlx_exchange', exchange_type='direct')
