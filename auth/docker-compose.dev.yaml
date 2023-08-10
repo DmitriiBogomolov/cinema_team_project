@@ -10,14 +10,14 @@ services:
       - .env
 
   redis:
-    image: redis:latest
+    image: redis:6.0
     container_name: redis
     ports:
       - "6379:6379"
 
   nginx:
-    image: nginx:latest
-    container_name: nginx
+    image: nginx:1.25
+    container_name: nginx_auth
     ports:
       - 80:80
     volumes:

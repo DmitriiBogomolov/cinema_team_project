@@ -7,7 +7,8 @@ WORKDIR /app
 
 COPY requirements/common.txt requirements.txt
 
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN apt update && apt install -y curl &&\
+    pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
 

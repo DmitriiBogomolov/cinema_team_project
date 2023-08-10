@@ -10,8 +10,9 @@ from datetime import datetime, timedelta
 from fastapi import Depends
 
 from app.models import (
-    _BasicSingleEvent, _BasicMultipleEvent,
-    SingleNewReviewLike, MultipleTemplateMailing,
+    _BasicSingleEvent,
+    _BasicMultipleEvent,
+    MultipleTemplateMailing,
     MultipleBookmarksReminder
 )
 from app.services.repository import AbstractRepository, get_repository
@@ -40,40 +41,28 @@ class Sheduler(AbstractSheduler):
         self.producer = producer
 
     async def handle_single(self, event: _BasicSingleEvent):
-        if isinstance(event, SingleNewReviewLike):
-            """
-            Одиночное событие нового лайка на review пользователя
-            Отрпавляем не дублирующие события,
-            по одному в сутки на каждое ревью пользователя
-            """
-            event_name = 'review_like_received'
-            event.set_event_name(event_name)
 
-            event_type = 'email'
-            event.set_event_type(event_type)
+        # проверка на дублирующее событие
+        count_1 = await self.repository.count({
+            'event_name': event.event_name,
+            'recipient_data._id': str(event.recipient_data.id),
+            # 'recipient_data.review_id': str(event.recipient_data.review_id),
+            # 'recipient_data.like_owner_id': str(event.recipient_data.like_owner_id),
+        })
 
-            # проверка на дублирующее событие
-            count_1 = await self.repository.count({
-                'event_name': event_name,
-                'recipient_data._id': str(event.recipient_data.id),
-                'recipient_data.review_id': str(event.recipient_data.review_id),
-                'recipient_data.like_owner_id': str(event.recipient_data.like_owner_id),
-            })
+        # проверка на наличие отправленного уведомления по указанному
+        # review, произошедшее в течении дня
+        count_2 = await self.repository.count({
+            'event_name': event.event_name,
+            'recipient_data._id': str(event.recipient_data.id),
+            'created_at': {'$gte': datetime.now() - timedelta(days=1)}
+        })
 
-            # проверка на наличие отправленного уведомления по указанному
-            # review, произошедшее в течении дня
-            count_2 = await self.repository.count({
-                'event_name': event_name,
-                'recipient_data._id': str(event.recipient_data.id),
-                'recipient_data.review_id': str(event.recipient_data.review_id),
-                'created_at': {'$gte': datetime.now() - timedelta(days=1)}
-            })
+        if count_1 or count_2:
+            raise WrongEventException
 
-            if count_1 or count_2:
-                raise WrongEventException
-
-            await self.repository.save_single(event)
-            await self.producer.send_message(event_type, event)
+        await self.repository.save_single(event)
+        await self.producer.send_message(event.event_type, event)
 
     async def handle_multiple(self, event: _BasicMultipleEvent):
         if isinstance(event, MultipleTemplateMailing):

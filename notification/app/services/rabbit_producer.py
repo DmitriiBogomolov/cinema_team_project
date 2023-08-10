@@ -1,5 +1,4 @@
 """Producer занимается отправкой событий в очередь для далнейшей обработки"""
-
 from typing import Union
 from functools import lru_cache
 from abc import ABC, abstractmethod
@@ -24,12 +23,15 @@ class Producer(AbstractProducer):
 
         if isinstance(messages, list):
             for message in messages:
+                message.event_name = data.event_name
                 await self.exchange.publish(
-                    Message(message.json().encode()), queue_name
+                    Message(message.json().encode(), priority=message.priority), queue_name
                 )
         else:
+            messages.event_name = data.event_name
             await self.exchange.publish(
-                Message(messages.json().encode()), queue_name
+                Message(messages.json().encode(), priority=messages.priority), queue_name,
+
             )
 
 

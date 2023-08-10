@@ -53,6 +53,11 @@ class Config(Base):
     secret_key: str
     jwt_secret_key: str
     dsn: str
+    security_password_salt: str
+    api_host: str
+    api_port: int
+    token_notification: str
+    uri_notification: str
 
     @property
     def sqlalchemy_database_uri(self) -> str:

@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
     conn = await aio_pika.connect(rabbit_config.uri)
     channel = await conn.channel()
     rabbit.rabbit_producer_exchange = await channel.declare_exchange("message", type='direct', auto_delete=True)
-    queue_email = await channel.declare_queue('email', auto_delete=True, arguments={"x-max-priority": 10})
+    queue_email = await channel.declare_queue('email', arguments={"x-max-priority": 10, 'x-message-ttl': 1800000})
     await queue_email.bind(rabbit.rabbit_producer_exchange, 'email')
 
     yield

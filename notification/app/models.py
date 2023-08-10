@@ -74,6 +74,7 @@ class SingleNewReviewLike(_BasicSingleEvent):
     class RecipientData(_Base):
         id: CustomUuid = Field(alias='_id')  # recipient id (those review owner id)
         email: EmailStr
+        event_name: str | None
         priority: int = Field(ge=-1, le=2)
         like_owner_id: CustomUuid  # user who liked
         review_id: CustomUuid
@@ -93,6 +94,7 @@ class MultipleTemplateMailing(_BasicMultipleEvent):
         id: CustomUuid = Field(alias='_id')  # recipient id
         email: EmailStr
         priority: int = Field(ge=-1, le=2)
+        event_name: str | None
     recipient_data: list[RecipientData]
     template: str
 
@@ -113,6 +115,19 @@ class MultipleBookmarksReminder(_BasicMultipleEvent):
         id: CustomUuid = Field(alias='_id')  # recipient id
         email: EmailStr
         priority: int = Field(ge=-1, le=2)
+        event_name: str | None
         bookmarks: list[Bookmark]
 
     recipient_data: list[RecipientData]
+
+
+class ConfirmLetter(_BasicSingleEvent):
+
+    class RecipientData(_Base):
+        id: CustomUuid = Field(alias='_id')  # recipient id
+        email: EmailStr
+        message_data: str
+        priority: int = Field(ge=-1, le=2)
+        event_name: str | None
+
+    recipient_data: RecipientData
