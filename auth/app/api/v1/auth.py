@@ -1,11 +1,14 @@
 from http import HTTPStatus
+import requests
 
 from sqlalchemy.exc import IntegrityError
 from flask import (
     Blueprint,
     jsonify,
     request,
-    render_template
+    render_template,
+    redirect,
+    url_for
 )
 from flask.wrappers import Response
 from flask_jwt_extended import (
@@ -16,7 +19,10 @@ from flask_jwt_extended import (
 from marshmallow import EXCLUDE
 
 from app.api.v1.catchers import default_exception_catcher
-from app.schemas import UserSchema, ProfileSchema
+from app.schemas import (
+    UserSchema,
+    ProfileSchema
+)
 from app.errors.exceptions import (
     UserAlreadyExists,
     UnavailableRefresh,
@@ -27,11 +33,15 @@ from app.core.pre_configured.basic_auth import basic_auth
 from app.helpers.captcha import handle_captcha
 from app.services.sign_in_journal import journal
 from app.core.logger import logger
+from app.helpers.tokens import generate_token, confirm_token
+from app.model_api import ConfirmLetter, RecipientData
+from app.core.config import config
 
 
 auth = Blueprint('auth', __name__)
 user_schema = UserSchema()
 profile_schema = ProfileSchema()
+event_schema = ConfirmLetter()
 
 
 @auth.route('/register', methods=('GET', 'POST'))
@@ -45,6 +55,24 @@ def user_registration() -> tuple[Response, HTTPStatus]:
             user.save()
         except IntegrityError:
             raise UserAlreadyExists
+        else:
+            user = user_schema.dump(user)
+            token = generate_token(user['email'])
+            reference = f'{request.environ["HTTP_ORIGIN"]}/api/v1/confirm_letter/{token}'
+            recipient_data = RecipientData(id=user['id'], email=user['email'], message_data=reference)
+            event_data = ConfirmLetter(recipient_data=recipient_data)
+            try:
+                respone = requests.post(config.uri_notification,
+                                        headers={'Authorization': config.token_notification,
+                                                 'Content-Type': 'application/json',
+                                                 'X-Request-Id': request.headers.get('X-Request-Id')},
+                                        data=event_data.json()
+                                        )
+
+                logger.info(f'{respone.status_code}-{respone.text}')
+            except requests.exceptions.ConnectionError:
+                redirect(url_for('auth.user_registration'))
+
         return jsonify(profile_schema.dump(user)), HTTPStatus.CREATED
     return render_template('form_registration.html'), HTTPStatus.OK
 
@@ -113,3 +141,14 @@ def logout_all() -> tuple[Response, HTTPStatus]:
     """
     jwt_service.revoke_user_tokens(User)
     return jsonify({'message': 'Успешный выход из со всех устройств.'}), HTTPStatus.OK
+
+
+@auth.route('/confirm_letter/<token>', methods=('GET',))
+def confirm_letter(token: str):
+    email = confirm_token(token)
+    user = User.get_by_email(email=email)
+    if user.email == email:
+        user.update({'is_confirm': True})
+    else:
+        return jsonify({'message': 'The confirmation link is invalid or has expired.'})
+    return jsonify({'message': 'success!'}), HTTPStatus.OK

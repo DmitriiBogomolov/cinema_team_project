@@ -21,14 +21,18 @@ class _BasicEvent(_Base):
     """Основная форма хранимого события"""
     id: CustomUuid = Field(default_factory=lambda: str(uuid4()), alias='_id')
     sender_service: str = Field(min_length=0, max_length=255)
-    priority: int = Field(ge=-1, le=2)  # 0 or 1
     trigger_user_id: CustomUuid | None
     description: str = Field(min_length=0, max_length=1020)
     created_at: datetime = Field(default_factory=datetime.now)
+    send_message_datatime: datetime | None
     event_name: str | None
+    event_type: str | None
 
     def set_event_name(self, event_name: str):
         self.event_name = event_name
+
+    def set_event_type(self, event_type: str):
+        self.event_type = event_type
 
 
 class _BasicSingleEvent(_BasicEvent):
@@ -70,6 +74,8 @@ class SingleNewReviewLike(_BasicSingleEvent):
     class RecipientData(_Base):
         id: CustomUuid = Field(alias='_id')  # recipient id (those review owner id)
         email: EmailStr
+        event_name: str | None
+        priority: int = Field(ge=-1, le=2)
         like_owner_id: CustomUuid  # user who liked
         review_id: CustomUuid
         review_movie_id: CustomUuid
@@ -87,6 +93,8 @@ class MultipleTemplateMailing(_BasicMultipleEvent):
     class RecipientData(_Base):
         id: CustomUuid = Field(alias='_id')  # recipient id
         email: EmailStr
+        priority: int = Field(ge=-1, le=2)
+        event_name: str | None
     recipient_data: list[RecipientData]
     template: str
 
@@ -106,6 +114,20 @@ class MultipleBookmarksReminder(_BasicMultipleEvent):
 
         id: CustomUuid = Field(alias='_id')  # recipient id
         email: EmailStr
+        priority: int = Field(ge=-1, le=2)
+        event_name: str | None
         bookmarks: list[Bookmark]
 
     recipient_data: list[RecipientData]
+
+
+class ConfirmLetter(_BasicSingleEvent):
+
+    class RecipientData(_Base):
+        id: CustomUuid = Field(alias='_id')  # recipient id
+        email: EmailStr
+        message_data: str
+        priority: int = Field(ge=-1, le=2)
+        event_name: str | None
+
+    recipient_data: RecipientData

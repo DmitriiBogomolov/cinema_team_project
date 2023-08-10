@@ -50,7 +50,8 @@ pluggy==1.0.0
 protobuf==4.23.2
 psycopg2-binary==2.9.6
 pycparser==2.21
-pydantic==1.10.7
+pydantic==1.10.11
+pydantic[email]==1.10.11
 PyJWT==2.7.0
 pyrsistent==0.19.3
 pyotp==2.8.0

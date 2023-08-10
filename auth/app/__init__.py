@@ -54,6 +54,7 @@ def create_app(config=config):
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 14 * (24 * 60 * 60)  # 14 days
     app.config['REFRESH_TOKEN_EXP'] = config.refresh_token_exp
     app.config['SQLALCHEMY_DATABASE_URI'] = config.sqlalchemy_database_uri
+    app.config['SECURITY_PASSWORD_SALT'] = config.security_password_salt
 
     init_jwt_manager(app)
     db.init_app(app)

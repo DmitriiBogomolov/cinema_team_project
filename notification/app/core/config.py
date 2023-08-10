@@ -24,5 +24,13 @@ class MongoConfig(Base):
         env_prefix = 'mongo_'
 
 
+class RabbitConfig(Base):
+    uri: str
+
+    class Config:
+        env_prefix = 'rabbit_'
+
+
 config = AppConfig()
 mongo_config = MongoConfig()
+rabbit_config = RabbitConfig()

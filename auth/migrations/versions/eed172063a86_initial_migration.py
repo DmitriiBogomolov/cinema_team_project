@@ -33,6 +33,7 @@ def upgrade():
     sa.Column('email', sqlalchemy_utils.types.email.EmailType(length=255), nullable=False),
     sa.Column('password', sa.String(length=300), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('is_confirm', sa.Boolean(), nullable=False),
     sa.Column('is_superuser', sa.Boolean(), nullable=False),
     sa.Column('otp_secret', sa.String(length=32), nullable=True),
     sa.Column('is_two_auth', sa.Boolean(), nullable=False),
