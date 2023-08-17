@@ -60,7 +60,6 @@ def user_registration() -> tuple[Response, HTTPStatus]:
             reference = f'{request.environ["HTTP_ORIGIN"]}/api/v1/confirm_letter/{token}'
             event_data = ConfirmLetter(user_id=user['id'], email=user['email'], text_message=reference)
             url = config.uri_notification
-            print(url)
             headers = {
                 'Authorization': config.token_notification,
                 'Content-Type': 'application/json',
