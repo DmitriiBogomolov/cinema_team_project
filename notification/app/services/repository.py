@@ -8,17 +8,13 @@ from abc import ABC, abstractmethod
 from fastapi import Depends
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 
-from app.models import _BasicSingleEvent, _BasicMultipleEvent
+from app.models import BasicEvent
 from app.db.mongo import get_mongo_client
 
 
 class AbstractRepository(ABC):
     @abstractmethod
-    async def save_single(self, event: _BasicSingleEvent):
-        pass
-
-    @abstractmethod
-    async def save_multiple(self, multiple: _BasicMultipleEvent):
+    async def save_event(self, event: BasicEvent):
         pass
 
     async def search(self, search: dict) -> list:
@@ -44,11 +40,8 @@ class MongoRepository(AbstractRepository):
                       [self.collection_name]
         )
 
-    async def save_single(self, event: _BasicSingleEvent):
+    async def save_event(self, event: BasicEvent):
         await self.collection.insert_one(event.to_mongo())
-
-    async def save_multiple(self, event: _BasicMultipleEvent):
-        await self.collection.insert_many(event.to_mongo())
 
     async def search(self, search: dict, model_class) -> list:
         docs = await (

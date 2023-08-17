@@ -1,11 +1,10 @@
 """Producer занимается отправкой событий в очередь для далнейшей обработки"""
-from typing import Union
 from functools import lru_cache
 from abc import ABC, abstractmethod
 from fastapi import Depends
 from aio_pika import Connection, Message, Exchange
 from app.db.rabbit import get_rabbit_producer
-from app.models import _BasicSingleEvent, _BasicMultipleEvent
+from app.models import BasicEvent
 
 
 class AbstractProducer(ABC):
@@ -18,21 +17,10 @@ class Producer(AbstractProducer):
     def __init__(self, exchange: Exchange) -> None:
         self.exchange = exchange
 
-    async def send_message(self, queue_name: str, data: Union[_BasicSingleEvent, _BasicMultipleEvent]):
-        messages = data.recipient_data
+    async def send_message(self, message: BasicEvent):
 
-        if isinstance(messages, list):
-            for message in messages:
-                message.event_name = data.event_name
-                await self.exchange.publish(
-                    Message(message.json().encode(), priority=message.priority), queue_name
-                )
-        else:
-            messages.event_name = data.event_name
-            await self.exchange.publish(
-                Message(messages.json().encode(), priority=messages.priority), queue_name,
-
-            )
+        await self.exchange.publish(
+            Message(message.json().encode(), priority=message.priority), message.type_delivery)
 
 
 @lru_cache()

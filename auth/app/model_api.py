@@ -23,7 +23,7 @@ class ConfirmLetter:
     text_message: str = None
 
     def __post_init__(self):
-        self.topic_message = "Welcome %s" % (self.email)
+        self.topic_message = 'Welcome %s' % (self.email)
         self.text_message = 'Для подтверждения электронной почты перейдите по ссылке %s' % (self.text_message)
 
     @property

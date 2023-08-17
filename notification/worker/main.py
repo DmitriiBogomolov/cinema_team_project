@@ -1,5 +1,5 @@
 import pika
-from services.worker_email import callback_email
+from services.worker_email import worker_email
 from config.config import rabbit_config
 
 connection = pika.BlockingConnection(pika.URLParameters(rabbit_config.uri))
@@ -13,5 +13,5 @@ channel.exchange_declare(exchange='dlx_exchange', exchange_type='direct')
 channel.queue_declare(queue='dlx_queue')
 channel.queue_bind(exchange='dlx_exchange', queue='dlx_queue', routing_key='')
 
-channel.basic_consume(queue='email', on_message_callback=callback_email, auto_ack=False)
+channel.basic_consume(queue='email', on_message_callback=worker_email.run, auto_ack=False)
 channel.start_consuming()

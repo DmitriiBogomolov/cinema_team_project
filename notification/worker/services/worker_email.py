@@ -1,37 +1,42 @@
 import os
 import sys
+import smtplib
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-import copy
 import datetime
-import smtplib
 import json
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import motor.motor_asyncio
-from email.message import EmailMessage
 from config.config import mongo_config, worker_email_config
-from data_message import TEMPLATE_TEXT
-from prepear.prepear_email_worker import MessageEmail
+from services.abstract_worker import AbstractWorker
 
 
-def callback_email(ch, method, properties, body):
-    message = EmailMessage()
-    message_email = MessageEmail(message)
-    data = json.loads(body)
+class EmailWorker(AbstractWorker):
+    def __init__(self, message=None) -> None:
+        self.message = message
+        self.id = None
+        self.sender = None
+        self.receiver = None
 
-    event = data['event_name']
-    to_email = data['email']
-    path_template = f'templates/{event}.html'
-    template_text = copy.deepcopy(TEMPLATE_TEXT)
-    teplate_message = template_text[event]
-    message = message_email.get_message_email(data, path_template, teplate_message)
+    def get_message(self, body):
+        data = json.loads(body)
+        self.sender = worker_email_config.get_email_from()
+        self.receiver = data['email']
+        self.message['From'] = self.sender
+        self.message['To'] = self.receiver
+        self.message['Subject'] = data['topic_message']
+        self.message.attach(MIMEText(data['text_message'], 'plain'))
 
-    with smtplib.SMTP_SSL(worker_email_config.smtp_host, worker_email_config.smtp_port) as server:
-        server.login(worker_email_config.login, worker_email_config.password)
-
+    def send_message(self, ch, method):
+        smtp_host = worker_email_config.smtp_host
+        smtp_port = worker_email_config.smtp_port
         try:
-            server.sendmail(worker_email_config.get_email_from(), [to_email], message.as_string())
+            with smtplib.SMTP(smtp_host, smtp_port) as server:
+                server.sendmail(self.sender, self.receiver, self.message.as_string())
+
         except smtplib.SMTPException as exc:
             reason = f'{type(exc).__name__}: {exc}'
             print(f'Не удалось отправить письмо. {reason}')
@@ -39,5 +44,13 @@ def callback_email(ch, method, properties, body):
             print('Письмо отправлено!')
             ch.basic_ack(delivery_tag=method.delivery_tag)
             client = motor.motor_asyncio.AsyncIOMotorClient(mongo_config.uri)
-            client.notification.events.update_one({'_id': data['id']},
+            client.notification.events.update_one({'_id': self.id},
                                                   {'$set': {'send_message_date': datetime.datetime.now()}})
+
+    def run(self, ch, method, properties, body):
+        print('Start reading...')
+        self.get_message(body)
+        self.send_message(ch, method)
+
+
+worker_email = EmailWorker(MIMEMultipart())
