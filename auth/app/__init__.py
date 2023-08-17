@@ -70,6 +70,7 @@ def create_app(config=config):
     from app.api.v1.my import my
     from app.api.v1.captcha import captcha
     from app.api.v1.open_auth import open_auth
+    from app.api.v1.service import service
 
     app.register_blueprint(captcha, url_prefix='/captcha')
     app.register_blueprint(auth, url_prefix='/api/v1')
@@ -79,6 +80,7 @@ def create_app(config=config):
     app.register_blueprint(my, url_prefix='/api/v1/my')
     app.register_blueprint(open_auth, url_prefix='/api/v1/oauth')
     app.register_blueprint(docs, url_prefix='/swagger')
+    app.register_blueprint(service, url_prefix='/api/v1/service')
 
     install_cli_commands(app)
     register_error_handlers(app)
