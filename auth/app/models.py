@@ -157,3 +157,18 @@ class User(db.Model, BasicModel):
     @classmethod
     def get_by_email(cls, email: str):
         return User.query.filter_by(email=email).first()
+
+    @classmethod
+    def get_by_list_users(cls, list_id: list):
+        return User.query.filter(User.id.in_(list_id)).all()
+
+
+class ServiceToken(db.Model, BasicModel):
+    __tablename__ = 'service_token'
+
+    token = db.Column(db.String(128), nullable=False)
+    service_name = db.Column(db.String(32), nullable=False)
+
+    @classmethod
+    def get_by_token(cls, token: str):
+        return ServiceToken.query.filter_by(token=token).first()

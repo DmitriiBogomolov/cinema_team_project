@@ -1,4 +1,7 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, EmailStr
+from pydantic.dataclasses import dataclass
+from dataclasses import asdict
+from json import dumps
 
 
 class RecipientData(BaseModel):
@@ -8,11 +11,30 @@ class RecipientData(BaseModel):
     message_data: str
 
 
-class ConfirmLetter(BaseModel):
+@dataclass
+class ConfirmLetter:
     """Основная форма хранимого события"""
+    user_id: str = None
+    email: EmailStr = None
+    priority: int = 1
+    event_name: str = 'Welcome'
+    type_delivery: str = 'email'
+    topic_message: str = None
+    text_message: str = None
 
-    sender_service: str = Field(default='auth_backend')
-    event_name: str = 'welcome'
-    event_type: str = 'email'
-    description: str = Field(default='send a confirmation email')
-    recipient_data: RecipientData | None
+    def __post_init__(self):
+        self.topic_message = 'Welcome %s' % (self.email)
+        self.text_message = 'Для подтверждения электронной почты перейдите по ссылке %s' % (self.text_message)
+
+    @property
+    def __dict__(self):
+        return asdict(self)
+
+    @property
+    def json(self):
+        return dumps(self.__dict__)
+
+
+class ServiceUser(BaseModel):
+    id: str
+    email: str

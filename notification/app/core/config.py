@@ -15,6 +15,8 @@ class AppConfig(Base):
     debug: bool = True
 
     authjwt_secret_key: str
+    auth_url: str
+    auth_token: str
 
 
 class MongoConfig(Base):

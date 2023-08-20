@@ -15,7 +15,6 @@ services:
     networks:
       - service_network
 
-
   db:
     image: postgres:13
     container_name: postgres

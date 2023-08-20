@@ -1,6 +1,5 @@
 from http import HTTPStatus
-import requests
-
+import httpx
 from sqlalchemy.exc import IntegrityError
 from flask import (
     Blueprint,
@@ -34,7 +33,7 @@ from app.helpers.captcha import handle_captcha
 from app.services.sign_in_journal import journal
 from app.core.logger import logger
 from app.helpers.tokens import generate_token, confirm_token
-from app.model_api import ConfirmLetter, RecipientData
+from app.model_api import ConfirmLetter
 from app.core.config import config
 
 
@@ -59,18 +58,17 @@ def user_registration() -> tuple[Response, HTTPStatus]:
             user = user_schema.dump(user)
             token = generate_token(user['email'])
             reference = f'{request.environ["HTTP_ORIGIN"]}/api/v1/confirm_letter/{token}'
-            recipient_data = RecipientData(id=user['id'], email=user['email'], message_data=reference)
-            event_data = ConfirmLetter(recipient_data=recipient_data)
+            event_data = ConfirmLetter(user_id=user['id'], email=user['email'], text_message=reference)
+            url = config.uri_notification
+            headers = {
+                'Authorization': config.token_notification,
+                'Content-Type': 'application/json',
+                'X-Request-Id': request.headers.get('X-Request-Id')
+            }
             try:
-                respone = requests.post(config.uri_notification,
-                                        headers={'Authorization': config.token_notification,
-                                                 'Content-Type': 'application/json',
-                                                 'X-Request-Id': request.headers.get('X-Request-Id')},
-                                        data=event_data.json()
-                                        )
-
-                logger.info(f'{respone.status_code}-{respone.text}')
-            except requests.exceptions.ConnectionError:
+                resp = httpx.post(url, headers=headers, data=event_data.json)
+                logger.info(f'{resp.status_code}-{resp.text}')
+            except httpx.ConnectError:
                 redirect(url_for('auth.user_registration'))
 
         return jsonify(profile_schema.dump(user)), HTTPStatus.CREATED

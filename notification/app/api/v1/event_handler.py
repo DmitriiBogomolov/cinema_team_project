@@ -2,7 +2,7 @@
 Эндпоинты для обработки поступающих событий
 для последующей нотификации
 """
-
+from http import HTTPStatus
 from fastapi import (
     APIRouter, Depends
 )
@@ -10,23 +10,19 @@ from async_fastapi_jwt_auth import AuthJWT
 from fastapi.responses import JSONResponse
 
 from app.core.jwt import authorize_service_token
-from app.models import (
-    SingleNewReviewLike,
-    MultipleTemplateMailing,
-    MultipleBookmarksReminder,
-    ConfirmLetter)
-from app.services.sheduler import AbstractSheduler, get_sheduler
+from app.models import BasicEvent
+from app.services.handler import AbstractHandler, get_handler
 
 
 router = APIRouter()
 
 
-@router.post('/review_like_received')
+@router.post('/single_event')
 async def review_like_received(
-    event: SingleNewReviewLike,
+    event: BasicEvent,
     auth: AuthJWT = Depends(),
-    sheduler: AbstractSheduler = (
-        Depends(get_sheduler)
+    handler: AbstractHandler = (
+        Depends(get_handler)
     )
 ) -> JSONResponse:
     """
@@ -34,55 +30,23 @@ async def review_like_received(
     лайка на review пользователя
     """
     await authorize_service_token(auth)
-    await sheduler.handle_single(event)
+    await handler.handle_single(event)
 
-    return event
-    #  return JSONResponse(
-    #      status_code=HTTPStatus.OK,
-    #      content={'message': 'The event is accepted for processing.'}
-    #  )
+    return JSONResponse(
+        status_code=HTTPStatus.OK,
+        content=event.json()
+    )
 
 
-@router.post('/mail_multiple')
+@router.post('/multi_events')
 async def mail_multiple(
-    event: MultipleTemplateMailing,
+    events: list[BasicEvent],
     auth: AuthJWT = Depends(),
-    sheduler: AbstractSheduler = (
-        Depends(get_sheduler)
+    handler: AbstractHandler = (
+        Depends(get_handler)
     )
 ) -> JSONResponse:
     """Обрабатывает множественную рассылку по предложенному шаблону"""
     await authorize_service_token(auth)
-    await sheduler.handle_multiple(event)
-    return event
-
-
-@router.post('/bookmarks_reminder_multiple')
-async def bookmarks_reminder_multiple(
-    event: MultipleBookmarksReminder,
-    auth: AuthJWT = Depends(),
-    sheduler: AbstractSheduler = (
-        Depends(get_sheduler)
-    )
-) -> JSONResponse:
-    """
-    Обрабатывает множественную рассылку уведомлений
-    об отложенных фильмах
-    """
-    await authorize_service_token(auth)
-    await sheduler.handle_multiple(event)
-    return event
-
-
-@router.post('/confirm_letter')
-async def confirm_letter(
-    event: ConfirmLetter,
-    auth: AuthJWT = Depends(),
-    sheduler: AbstractSheduler = (
-        Depends(get_sheduler)
-    )
-) -> JSONResponse:
-    await authorize_service_token(auth)
-    await sheduler.handle_single(event)
-    print(event)
-    return event
+    await handler.handle_multi(events)
+    return events

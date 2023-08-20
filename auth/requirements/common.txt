@@ -25,6 +25,7 @@ googleapis-common-protos==1.59.0
 greenlet==2.0.2
 grpcio==1.54.2
 gunicorn==21.2.0
+httpx==0.24.1
 idna==3.4
 iniconfig==2.0.0
 itsdangerous==2.1.2
