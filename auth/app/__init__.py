@@ -47,14 +47,14 @@ def create_app(config=config):
     FlaskInstrumentor().instrument_app(app)
     init_header_request_id(app)
 
-    app.config['SERVER_NAME'] = config.server_name
     app.config['SECRET_KEY'] = config.secret_key
+    app.config['SECURITY_PASSWORD_SALT'] = config.security_password_salt
     app.config['JWT_SECRET_KEY'] = config.jwt_secret_key
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 15 * 60  # 15 minutes
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = 14 * (24 * 60 * 60)  # 14 days
     app.config['REFRESH_TOKEN_EXP'] = config.refresh_token_exp
+
     app.config['SQLALCHEMY_DATABASE_URI'] = config.sqlalchemy_database_uri
-    app.config['SECURITY_PASSWORD_SALT'] = config.security_password_salt
 
     init_jwt_manager(app)
     db.init_app(app)
@@ -70,7 +70,6 @@ def create_app(config=config):
     from app.api.v1.my import my
     from app.api.v1.captcha import captcha
     from app.api.v1.open_auth import open_auth
-    from app.api.v1.service import service
 
     app.register_blueprint(captcha, url_prefix='/captcha')
     app.register_blueprint(auth, url_prefix='/api/v1')
@@ -80,7 +79,6 @@ def create_app(config=config):
     app.register_blueprint(my, url_prefix='/api/v1/my')
     app.register_blueprint(open_auth, url_prefix='/api/v1/oauth')
     app.register_blueprint(docs, url_prefix='/swagger')
-    app.register_blueprint(service, url_prefix='/api/v1/service')
 
     install_cli_commands(app)
     register_error_handlers(app)

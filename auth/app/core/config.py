@@ -3,8 +3,7 @@ from pydantic import BaseSettings
 
 class Base(BaseSettings):
     class Config:
-        env_file = '.env'
-        env_file_encoding = 'utf-8'
+        env_file = '.env.example'
 
 
 class YandexOAuthConfig(Base):
@@ -41,7 +40,6 @@ class Config(Base):
     postgres_port: str = 5432
     redis_host: str = 'redis'
     redis_port: int = 6379
-    server_name: str = 'localhost:8100'
     refresh_token_exp: int = 60 * 60 * 24 * 15  # 15 days
     enable_tracer = True
     print_traces = False
@@ -58,6 +56,9 @@ class Config(Base):
     api_port: int
     token_notification: str
     uri_notification: str
+    debug_user: str
+    debug_user_password: str
+    debug_token: str
 
     @property
     def sqlalchemy_database_uri(self) -> str:
