@@ -159,8 +159,8 @@ class User(db.Model, BasicModel):
         return User.query.filter_by(email=email).first()
 
     @classmethod
-    def get_by_list_users(cls, list_id: list):
-        return User.query.filter(User.id.in_(list_id)).all()
+    def get_by_id_list(cls, ids: list):
+        return User.query.filter(User.id.in_(ids)).all()
 
 
 class ServiceToken(db.Model, BasicModel):

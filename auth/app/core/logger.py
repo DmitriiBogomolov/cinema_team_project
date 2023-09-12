@@ -2,16 +2,15 @@ import logging
 import logging.handlers
 import os
 import sys
-from flask import request
 
 
 FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(request_id)s'
 
 
-class RequestIdFilter(logging.Filter):
-    def filter(self, record):
-        record.request_id = request.headers.get('X-Request-Id')
-        return True
+# class RequestIdFilter(logging.Filter):
+#     def filter(self, record):
+#         record.request_id = request.headers.get('X-Request-Id')
+#        return True
 
 
 def init_logger(name, filename, backupCount=1, maxBytes=5000):
@@ -20,7 +19,7 @@ def init_logger(name, filename, backupCount=1, maxBytes=5000):
     sh = logging.StreamHandler(sys.stdout)
     sh.setFormatter(logging.Formatter(FORMAT))
     sh.setLevel(logging.DEBUG)
-    sh.addFilter(RequestIdFilter())
+    #  sh.addFilter(RequestIdFilter())
     fh = logging.handlers.RotatingFileHandler(
         filename=filename,
         backupCount=1,
@@ -28,7 +27,7 @@ def init_logger(name, filename, backupCount=1, maxBytes=5000):
     )
     fh.setLevel(logging.INFO)
     fh.setFormatter(logging.Formatter(FORMAT))
-    fh.addFilter(RequestIdFilter())
+    #  fh.addFilter(RequestIdFilter())
     logger.addHandler(sh)
     logger.addHandler(fh)
 

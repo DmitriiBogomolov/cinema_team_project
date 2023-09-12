@@ -1,13 +1,14 @@
 import click
 from flask import app
-from psycopg2.errors import UniqueViolation
 from werkzeug.security import generate_password_hash
 from psycopg2 import OperationalError
+from sqlalchemy.exc import IntegrityError
 
 from app.models import User
 from app.core.extensions import db
 from app.services.jwt_service import jwt_service
 from app.core.logger import logger
+from app.core.config import config
 
 
 def install_cli_commands(app: app.Flask) -> None:
@@ -30,9 +31,9 @@ def install_cli_commands(app: app.Flask) -> None:
 
             db.session.add(user)
             db.session.commit()
-        except UniqueViolation as e:
+        except IntegrityError:
             db.session.rollback()
-            print(e)
+            print('Already exists')
 
     @app.cli.command('givemetokens')
     @click.argument('email')
@@ -43,9 +44,35 @@ def install_cli_commands(app: app.Flask) -> None:
                 raise OperationalError('No such user')
             access, refresh = jwt_service.create_tokens(user, expires=False)
             jwt_service.save_token(refresh)
-            logger.info('Generating access token')
+            print('Generating access token')
             print(access)
-            logger.info('Generating refresh token')
+            print('Generating refresh token')
             print(refresh)
         except Exception as e:
             logger.error(e)
+
+    @app.cli.command('load_debug_data')
+    def load_debug_data() -> None:
+        try:
+            password = generate_password_hash(
+                password=str(config.debug_user_password),
+                method='pbkdf2:sha512',
+                salt_length=16
+            )
+            user = User(
+                id='faa01cef-2abb-4e27-a956-9dd313e2cfaf',
+                email=str(config.debug_user),
+                password=password,
+                is_superuser=True
+            )
+
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            print('Already exists')
+
+        print('DEBUG DATA WAS LOADED:')
+        print(f'username: {str(config.debug_user)}, password: {str(config.debug_user_password)}')
+        print('token:')
+        print(str(config.debug_token))

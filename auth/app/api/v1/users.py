@@ -11,6 +11,7 @@ from app.errors.exceptions import UserAlreadyExists
 from app.models import User, Role
 from app.core.extensions import db
 from app.core.pre_configured.jwt_wrappers import jwt_roles_required
+from marshmallow.exceptions import ValidationError
 
 
 users = Blueprint('users', __name__)
@@ -24,8 +25,19 @@ user_partial = BasicUserSchema(partial=True)
 @jwt_roles_required('manager')
 @default_exception_catcher
 def get_users_list() -> tuple[Response, HTTPStatus]:
-    """Getting all users list"""
-    users = User.get_list()
+    """Получить список всех пользователей или список пользователей по id"""
+
+    ids = request.args.get('ids')
+
+    if ids:
+        try:
+            ids = [uuid.UUID(x) for x in ids.split(',')]
+        except ValueError as e:
+            raise ValidationError(message=str(e))
+        users = User.get_by_id_list(ids)
+    else:
+        users = User.get_list()
+
     return jsonify(user_schema.dump(users, many=True)), HTTPStatus.OK
 
 

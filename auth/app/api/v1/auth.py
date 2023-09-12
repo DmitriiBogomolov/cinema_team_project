@@ -1,13 +1,10 @@
 from http import HTTPStatus
-import httpx
 from sqlalchemy.exc import IntegrityError
 from flask import (
     Blueprint,
     jsonify,
     request,
-    render_template,
-    redirect,
-    url_for
+    render_template
 )
 from flask.wrappers import Response
 from flask_jwt_extended import (
@@ -29,12 +26,9 @@ from app.errors.exceptions import (
 from app.models import User
 from app.services.jwt_service import jwt_service
 from app.core.pre_configured.basic_auth import basic_auth
-from app.helpers.captcha import handle_captcha
 from app.services.sign_in_journal import journal
-from app.core.logger import logger
-from app.helpers.tokens import generate_token, confirm_token
+from app.helpers.tokens import confirm_token
 from app.model_api import ConfirmLetter
-from app.core.config import config
 
 
 auth = Blueprint('auth', __name__)
@@ -45,7 +39,6 @@ event_schema = ConfirmLetter()
 
 @auth.route('/register', methods=('GET', 'POST'))
 @default_exception_catcher
-@handle_captcha
 def user_registration() -> tuple[Response, HTTPStatus]:
     if request.method == 'POST':
         data = request.get_json()
@@ -54,22 +47,6 @@ def user_registration() -> tuple[Response, HTTPStatus]:
             user.save()
         except IntegrityError:
             raise UserAlreadyExists
-        else:
-            user = user_schema.dump(user)
-            token = generate_token(user['email'])
-            reference = f'{request.environ["HTTP_ORIGIN"]}/api/v1/confirm_letter/{token}'
-            event_data = ConfirmLetter(user_id=user['id'], email=user['email'], text_message=reference)
-            url = config.uri_notification
-            headers = {
-                'Authorization': config.token_notification,
-                'Content-Type': 'application/json',
-                'X-Request-Id': request.headers.get('X-Request-Id')
-            }
-            try:
-                resp = httpx.post(url, headers=headers, data=event_data.json)
-                logger.info(f'{resp.status_code}-{resp.text}')
-            except httpx.ConnectError:
-                redirect(url_for('auth.user_registration'))
 
         return jsonify(profile_schema.dump(user)), HTTPStatus.CREATED
     return render_template('form_registration.html'), HTTPStatus.OK
@@ -84,12 +61,12 @@ def login() -> tuple[Response, HTTPStatus]:
     """
     user = basic_auth.current_user()
     if user.is_two_auth:
-        #  two factor auth handler
+        #  two factor
         message = request.args
         if message:
             return render_template('form_2F-auth.html', user_id=user.id, message=message['values'])
         return render_template('form_2F-auth.html', user_id=user.id)
-    logger.info(request.headers.get('X-Request-Id'))
+
     access, refresh = jwt_service.create_tokens(user)
     jwt_service.save_token(refresh)
     journal.save_sign_in_entrie(user, request)

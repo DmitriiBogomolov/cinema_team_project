@@ -6,55 +6,50 @@
 4. Храним Json Web Tokens в Redis.
 6. Ролевая модель разграничения доступов.
 
-## Запуск
+## How to Use
 
-1. Переименовать демонстрационнный .env.example в .env
-2. Выполнить
+1. Запускам docker-compose
 
-        docker-compose -f docker-compose.prod.yaml up --build
+        docker-compose up --build
 
-3. Остановка:
+2. Остановка:
 
-        docker-compose -f docker-compose.dev.yaml down -v
+        docker-compose down -v
+
+3. Сервис будет доступен по адресу http://localhost:8100, для авторизации используется сервисный токен
 
 4. Документация OpenAPI: [http://localhost:5000/swagger/doc](http://localhost:5000/swagger/doc)
 
-## Разработка
+## Разработка (инструкция для Visual Studio Code)
 
-1. Установить в .env значения для POSTGRES_HOST, REDIS_HOST, API_HOST = localhost
-2. Запустить окружение
+1. В целях удобства разработки используем облегченный [DNS сервер](https://hub.docker.com/r/defreitas/dns-proxy-server). Это позволит получать доступ к любому контейнеру по установленному параметру hostname из docker-compose без какого-либо выставления портов. Запустим DNS сервер командой:
 
-        docker-compose -f docker-compose.dev.yaml up --build
+        docker run --rm --hostname dns.mageddo \
+        --name dns.mageddo \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v /etc/resolv.conf:/etc/resolv.conf \
+        defreitas/dns-proxy-server
 
-3. Применить миграции
+2. Если в VS Code не установлено расширение Dev Containers, необходимо его установить. Расширение используется для удобства разработки внутри контейнера, запущенного из docker-compose, кроме того, для унификации окружения разработки внутри команды.
+
+3. Запустив VS Code из директории с микросервисом (папка auth), редактор определит настройки контейнера разработки (.devcontainer.json). Далее из палитры команд (Ctrl+Shift+P) вызываем "Dev Containers: Rebuild and Reopen in Container". VS Code поднимет docker-compose файл, примонтирует корневую директорию в соответствующий контейнер и перезапустится внутри него.
+
+4. Внутри контейнера применяем миграции
 
         flask db upgrade
 
-4. Создать суперпользователя
+5. Загружаем данные для отладки
 
-        flask createsuperuser superuser@inbox.com supassword
+        flask load_debug_data
 
-5. Если необходимо, сгенерировать токены для отладки
+   теперь можно использовать сервисный токен
 
-        flask givemetokens superuser@inbox.com
+6. Запускаем приложение
 
-6. Запустить приложение
+        flask --app app run --debug --host 0.0.0.0 --port 8000
 
-        flask --app app run --debug
+7. Для остановки контейнеров, запущеных из docker-compose, выбираем "Dev Containers: Reopen Foldier Locally"
 
-7. Остановка
+8. Останавливаем DNS сервер
 
-        docker-compose -f docker-compose.dev.yaml down -v
-
-
-# Тестирование
-
-1. Для запуска функциональных тестов запустить
-
-        docker-compose -f tests/functional/docker-compose.yaml  up --build
-
-2. Для отладки тестов запустить окружение для разработки (см. пункт разработка).
-
-3. Далее выполняем
-
-        pytest
+        docker stop dns.mageddo

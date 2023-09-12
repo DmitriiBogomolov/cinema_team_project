@@ -24,6 +24,7 @@ services:
       - auth_pg_data:/var/lib/postgresql/data/
     env_file:
       - .env.example
+    hostname: auth_postgres
     networks:
       - service_network
 
@@ -49,37 +50,39 @@ services:
     networks:
       - service_network
 
-  jaeger:
-    image: jaegertracing/all-in-one:1.46.0
-    container_name: jaeger
-    expose:
-      - 6831
-    ports:
-      - "16686:16686"
-    networks:
-      - service_network
+  # jaeger:
+  #   image: jaegertracing/all-in-one:1.46.0
+  #   container_name: jaeger
+  #   expose:
+  #     - 6831
+  #   ports:
+  #     - "16686:16686"
+  #   networks:
+  #     - service_network
 
-  filebeat_nginx:
-    image: elastic/filebeat:7.17.11
-    container_name: filebeat_nginx
-    volumes:
-      - /tmp/logs/nginx:/var/log/nginx:ro
-      - ./filebeat/filebeat_nginx.yml:/usr/share/filebeat/filebeat.yml
-    depends_on:
-      - nginx
-    networks:
-      - service_network
-      - elk_network
+  # filebeat_nginx:
+  #   image: elastic/filebeat:7.17.11
+  #   container_name: filebeat_nginx
+  #   volumes:
+  #     - /tmp/logs/nginx:/var/log/nginx:ro
+  #     - ./filebeat/filebeat_nginx.yml:/usr/share/filebeat/filebeat.yml
+  #   depends_on:
+  #     - nginx
+  #   command: filebeat -e -strict.perms=false
+  #   networks:
+  #     - service_network
+  #     - elk_network
 
-  filebeat_auth:
-    image: elastic/filebeat:7.17.11
-    container_name: filebeat_auth
-    volumes:
-      - /tmp/logs/auth/:/var/log/auth/:ro
-      - ./filebeat/filebeat_app.yml:/usr/share/filebeat/filebeat.yml
-    networks:
-      - service_network
-      - elk_network
+  # filebeat_auth:
+  #   image: elastic/filebeat:7.17.11
+  #   container_name: filebeat_auth
+  #   volumes:
+  #     - /tmp/logs/auth/:/var/log/auth/:ro
+  #     - ./filebeat/filebeat_app.yml:/usr/share/filebeat/filebeat.yml
+  #   command: filebeat -e -strict.perms=false
+  #   networks:
+  #     - service_network
+  #     - elk_network
 
 volumes:
   auth_pg_data:
