@@ -5,6 +5,7 @@
 """
 from functools import lru_cache
 from abc import ABC, abstractmethod
+from typing import Union, List
 import httpx
 import json
 
@@ -18,7 +19,7 @@ from app.core.config import config
 
 class AbstractHandler(ABC):
     @abstractmethod
-    def handle_single(event: BasicEvent):
+    def handle_event(event: BasicEvent):
         pass
 
 
@@ -32,34 +33,33 @@ class Handler(AbstractHandler):
         self.repository = repository
         self.producer = producer
 
-    async def handle_single(self, event: BasicEvent):
-        url = f'{config.auth_url}/{event.type_delivery}'
+    async def handle_event(self, event: Union[BasicEvent, List[BasicEvent]]):
         headers = {'Authorization': config.auth_token, 'Content-Type': 'application/json'}
 
-        if not event.email:
-            data = json.dumps({'ids': str(event.user_id)})
+        if isinstance(event, list):
+            type_delivery = set([ev.type_delivery for ev in event])
+            for type in type_delivery:
+                url = f'{config.auth_url}/{type}'
+                event_type = [ev for ev in event if ev.type_delivery == type]
+                ids = [ev.user_id for ev in event_type]
+                data = json.dumps({'ids': ids})
 
-            respone = httpx.post(url=url, headers=headers, data=data)
-            event.email = respone.json().get('email')
+                respone = httpx.post(url=url, headers=headers, data=data)
+                dict_id_email = {elem['id']: elem['email'] for elem in respone.json()}
+                for ev in event_type:
+                    ev.email = dict_id_email[str(ev.user_id)]
+                    await self.repository.save_event(ev)
+                    await self.producer.send_message(ev)
+        else:
+            url = f'{config.auth_url}/{event.type_delivery}'
+            if not event.email:
+                data = json.dumps({'ids': str(event.user_id)})
 
-        await self.repository.save_event(event)
-        await self.producer.send_message(event)
+                respone = httpx.post(url=url, headers=headers, data=data)
+                event.email = respone.json().get('email')
 
-    async def handle_multi(self, events: list[BasicEvent]):
-        type_delivery = set([event.type_delivery for event in events])
-        headers = {'Authorization': config.auth_token, 'Content-Type': 'application/json'}
-        for type in type_delivery:
-            url = f'{config.auth_url}/{type}'
-            event_type = [event for event in events if event.type_delivery == type]
-            ids = [event.user_id for event in event_type]
-            data = json.dumps({'ids': ids})
-
-            respone = httpx.post(url=url, headers=headers, data=data)
-            dict_id_email = {elem['id']: elem['email'] for elem in respone.json()}
-            for event in event_type:
-                event.email = dict_id_email[str(event.user_id)]
-                await self.repository.save_event(event)
-                await self.producer.send_message(event)
+            await self.repository.save_event(event)
+            await self.producer.send_message(event)
 
 
 @lru_cache()
