@@ -10,43 +10,28 @@ from async_fastapi_jwt_auth import AuthJWT
 from fastapi.responses import JSONResponse
 
 from app.core.jwt import authorize_service_token
-from app.models import BasicEvent
-from app.services.handler import AbstractHandler, get_handler
+from app.base_models import BasicEvent
+from app.event_resolver import get_event_handler
 
 
 router = APIRouter()
 
 
-@router.post('/single_event')
-async def review_like_received(
-    event: BasicEvent,
-    auth: AuthJWT = Depends(),
-    handler: AbstractHandler = (
-        Depends(get_handler)
-    )
+@router.post('')
+async def load_events(
+    event_data: BasicEvent,
+    auth: AuthJWT = Depends()
 ) -> JSONResponse:
     """
-    Обрабатывает одиночное событие нового
-    лайка на review пользователя
+    Для отправки пачки однородных событий 
     """
     await authorize_service_token(auth)
-    await handler.handle_single(event)
+
+    handler = get_event_handler(event_data.event_name)
+
+    await handler.handle(event_data)
 
     return JSONResponse(
         status_code=HTTPStatus.OK,
-        content=event.json()
+        content={'message': 'ok'}
     )
-
-
-@router.post('/multi_events')
-async def mail_multiple(
-    events: list[BasicEvent],
-    auth: AuthJWT = Depends(),
-    handler: AbstractHandler = (
-        Depends(get_handler)
-    )
-) -> JSONResponse:
-    """Обрабатывает множественную рассылку по предложенному шаблону"""
-    await authorize_service_token(auth)
-    await handler.handle_multi(events)
-    return events

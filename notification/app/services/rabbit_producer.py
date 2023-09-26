@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from fastapi import Depends
 from aio_pika import Connection, Message, Exchange
 from app.db.rabbit import get_rabbit_producer
-from app.models import BasicEvent
+from app.base_models import BasicEvent
 
 
 class AbstractProducer(ABC):

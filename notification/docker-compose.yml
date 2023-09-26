@@ -3,38 +3,38 @@ version: '3.1'
 
 services:
 
-  notification:
-    build:
-      dockerfile: notification_app
-    container_name: notification_app
-    restart: always
-    image:
-      notification-image:latest
-    expose:
-      - 8000
-    env_file:
-      - ./.env.example
-    networks:
-      - notification_network
-      - service_network
-    depends_on:
-      - mongo
-      - mongo-express
-      - rabbitmq
+  # notification:
+  #   build:
+  #     dockerfile: notification_app
+  #   container_name: notification_app
+  #   restart: always
+  #   image:
+  #     notification-image:latest
+  #   expose:
+  #     - 8000
+  #   env_file:
+  #     - ./.env.example
+  #   networks:
+  #     - notification_network
+  #     - service_network
+  #   depends_on:
+  #     - mongo
+  #     - mongo-express
+  #     - rabbitmq
 
-  notification_worker:
-    build:
-      dockerfile: notification_worker
-    container_name: notification_worker
-    restart: always
-    image:
-      notification-worker-image:latest
-    env_file:
-      - ./.env.example
-    networks:
-      - notification_network
-    depends_on:
-      - rabbitmq
+  # notification_worker:
+  #   build:
+  #     dockerfile: notification_worker
+  #   container_name: notification_worker
+  #   restart: always
+  #   image:
+  #     notification-worker-image:latest
+  #   env_file:
+  #     - ./.env.example
+  #   networks:
+  #     - notification_network
+  #   depends_on:
+  #     - rabbitmq
 
   mongo:
     image: mongo
@@ -57,28 +57,28 @@ services:
     networks:
       - notification_network
 
-  rabbitmq:
-    image: rabbitmq:3.10.7-management
-    container_name: rabbitmq
-    hostname: rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: 'admin'
-      RABBITMQ_DEFAULT_PASS: 'qwe123'
-    ports:
-      - 15672:15672
-    expose:
-      - 5672
-    networks:
-      - notification_network
+  # rabbitmq:
+  #   image: rabbitmq:3.10.7-management
+  #   container_name: rabbitmq
+  #   hostname: rabbitmq
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: 'admin'
+  #     RABBITMQ_DEFAULT_PASS: 'qwe123'
+  #   ports:
+  #     - 15672:15672
+  #   expose:
+  #     - 5672
+  #   networks:
+  #     - notification_network
 
-  smtp-server:
-    image: 42bv/mailhog:latest
-    container_name: smpt-server
-    ports:
-      - 8025:8025
-      - 587:587
-    networks:
-      - notification_network
+  # smtp-server:
+  #   image: 42bv/mailhog:latest
+  #   container_name: smpt-server
+  #   ports:
+  #     - 8025:8025
+  #     - 587:587
+  #   networks:
+  #     - notification_network
 
 
 

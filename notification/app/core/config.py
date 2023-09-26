@@ -1,5 +1,30 @@
+from enum import Enum
+
 from pydantic import BaseSettings
 
+from app.errors import WrongEventException
+from app.handlers.review_comment_received import get_review_comment_received_handler
+#from app.events import EventNames
+
+"""
+class EventNames(str, Enum):
+    REVIEW_COMMENT_RECEIVED = 'review_comment_received'
+
+
+class ServiceNames(str, Enum):
+    AUTH_SERVICE = 'auth_service'
+
+
+def get_event_handler(event_name):
+    event_handlers = {
+        EventNames.REVIEW_COMMENT_RECEIVED: get_review_comment_received_handler()
+    }
+
+    handler = event_handlers.get(event_name)
+    if not handler:
+        raise WrongEventException
+    return handler
+"""
 
 class Base(BaseSettings):
     class Config:

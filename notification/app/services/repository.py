@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from fastapi import Depends
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 
-from app.models import BasicEvent
+from app.base_models import BasicEvent
 from app.db.mongo import get_mongo_client
 
 
