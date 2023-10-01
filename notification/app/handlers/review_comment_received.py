@@ -2,74 +2,104 @@
 Предоставляет обработчик для события "получен новый комментарий к ревью"
 """
 from functools import lru_cache
-from abc import ABC, abstractmethod
-import httpx
-import json
-from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import Depends
 import jinja2
-from pydantic import ValidationError
-from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.repository import AbstractRepository, get_repository
 from app.services.rabbit_producer import get_producer, AbstractProducer
 from app.handlers.common import AbstractHandler
 from app.errors import WrongTemplateException
-from app.base_models import BasicEvent
+from app.models.core import ChannelNames
+from app.models.core import EventBase
+from app.template_engine import render_email
+from app.db.postgres import get_pg_session
+from app.models.models import EmailTemlate, Notification, User
 
 
-str_template = (
-    '''
-    Hello, {{user.email}}!
-    '''
-)
+#########################################################
+### для отработки в postgresql нужно добавить шаблон для события
+# event_name: 'review_comment_received'
+# topic_message: любое
+# template_str: 'Hello, {{user.email}}!'
+#########################################################
+#########################################################
 
-class User(BaseModel):
-    id: UUID
-    email: str
 
-user = User(id='41e7bfbd-c0bc-4de2-902f-ba0f0c1eb501', email='hello@yandex.ru')
+class ReviewCommentReceivedEvent(EventBase):
+    """Дополнительно настрает сигнатуру обработчика"""
+    user_ids: list[UUID]
 
 
 class ReviewCommentReceivedHandler(AbstractHandler):
     """
-    Обработчик для события "получен новый комментарий к ревью"
+    Обработчик для события \"получен новый комментарий к ревью\"
+    Ожидается, что через ручку пройдет:
+    {
+        "initiating_service_name": "auth_service",
+        "initiating_user_id": "6b7aae84-517d-11ee-be56-0242ac120002",
+        "description": "some_description",
+        "event_name": "review_comment_received",
+        "priority": 0,
+        "user_ids": ["6b7aae84-517d-11ee-be56-0242ac120002"]
+    }
     """
-
-    def __init__(self, repository: AbstractRepository, producer: AbstractProducer):
+    def __init__(
+            self,
+            repository: AbstractRepository,
+            producer: AbstractProducer,
+            pg_session: AsyncSession
+    ):
         self.repository = repository
         self.producer = producer
-
-    async def handle(self, event: BasicEvent):
-        #url = f'{config.auth_url}/{event.type_delivery}'
-        #headers = {'Authorization': config.auth_token, 'Content-Type': 'application/json'}
-
-        # if not event.email:
-        #     data = json.dumps({'ids': str(event.user_id)})
-
-        #     respone = httpx.post(url=url, headers=headers, data=data)
-        #     event.email = respone.json().get('email')
+        self.pg_session = pg_session
 
 
-        # достаем шаблон из бд по имени, рендерим его
+    async def handle(self, event: ReviewCommentReceivedEvent):
 
-        template = jinja2.Template(str_template)
-        try:    
-            print(template.render({'user': user}))
-        except jinja2.exceptions.UndefinedError:
+        # Получаем шаблон и тему из БД
+        email_template = await self.pg_session.get(EmailTemlate, event.event_name)
+        if not email_template:
             raise WrongTemplateException
+        email_teplate_str = email_template.template
+        email_topic_message = email_template.topic_message
+    
+        # Подготавливаем данные для рендера (вместо этого будем регать auth)
+        mock_user = User(id='41e7bfbd-c0bc-4de2-902f-ba0f0c1eb501', email='hello@yandex.ru')
+        users = [mock_user for _ in event.user_ids]
+        render_data = [{'user': user.dict()} for user in users]
 
+        # Рендерим уведомления
+        email_body_list = await render_email(
+            render_data,
+            email_teplate_str
+        )
 
-        #await self.repository.save_event(event)
-        #await self.producer.send_message(event)
+        # создаем нотификации
+        notifications = [
+            Notification(
+                recipient=user,
+                topic_message=email_topic_message,
+                text_message=message,
+                **event.dict()
+            ) for user, message in zip(users, email_body_list)
+        ]
+
+        print(notifications)
+
+        # далее нужно эти нотификации сохранить и отправить в очередь емейл рассылок
+
+        #await self.repository ... сохранить нотификации
+        #await self.producer ... запустить дальше в очередь
 
 
 @lru_cache()
 def get_review_comment_received_handler(
         repository: AbstractRepository = Depends(get_repository),
-        producer: AbstractProducer = Depends(get_producer)
+        producer: AbstractProducer = Depends(get_producer),
+        pg_session: AsyncSession = Depends(get_pg_session)
 ) -> AbstractHandler:
-    return ReviewCommentReceivedHandler(repository, producer)
+    return ReviewCommentReceivedHandler(repository, producer, pg_session)

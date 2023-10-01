@@ -2,29 +2,6 @@ from enum import Enum
 
 from pydantic import BaseSettings
 
-from app.errors import WrongEventException
-from app.handlers.review_comment_received import get_review_comment_received_handler
-#from app.events import EventNames
-
-"""
-class EventNames(str, Enum):
-    REVIEW_COMMENT_RECEIVED = 'review_comment_received'
-
-
-class ServiceNames(str, Enum):
-    AUTH_SERVICE = 'auth_service'
-
-
-def get_event_handler(event_name):
-    event_handlers = {
-        EventNames.REVIEW_COMMENT_RECEIVED: get_review_comment_received_handler()
-    }
-
-    handler = event_handlers.get(event_name)
-    if not handler:
-        raise WrongEventException
-    return handler
-"""
 
 class Base(BaseSettings):
     class Config:
@@ -44,6 +21,28 @@ class AppConfig(Base):
     auth_token: str
 
 
+class PostgresConfig(Base):
+    password: str
+    user: str
+    db: str
+    host: str
+    port: str
+
+    @property
+    def sqlalchemy_uri(self) -> str:
+        template = 'postgresql+asyncpg://{}:{}@{}:{}/{}'
+        return template.format(
+            self.user,
+            self.password,
+            self.host,
+            self.port,
+            self.db
+        )
+
+    class Config:
+        env_prefix = 'postgres_'
+
+
 class MongoConfig(Base):
     uri: str
 
@@ -59,5 +58,6 @@ class RabbitConfig(Base):
 
 
 config = AppConfig()
+postgres_config = PostgresConfig()
 mongo_config = MongoConfig()
 rabbit_config = RabbitConfig()
