@@ -3,24 +3,24 @@ version: '3.1'
 
 services:
 
-  # notification:
-  #   build:
-  #     dockerfile: notification_app
-  #   container_name: notification_app
-  #   restart: always
-  #   image:
-  #     notification-image:latest
-  #   expose:
-  #     - 8000
-  #   env_file:
-  #     - ./.env.example
-  #   networks:
-  #     - notification_network
-  #     - service_network
-  #   depends_on:
-  #     - mongo
-  #     - mongo-express
-  #     - rabbitmq
+  notification:
+    build:
+      dockerfile: notification_app
+    container_name: notification_app
+    restart: always
+    image:
+      notification-image:latest
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.example
+    networks:
+      - notification_network
+    #  - service_network
+    depends_on:
+      - mongo
+      - mongo-express
+      - rabbitmq
 
   # notification_worker:
   #   build:
@@ -43,6 +43,8 @@ services:
     env_file:
       - .env.example
     hostname: notification_postgres
+    networks:
+      - notification_network
 
   mongo:
     image: mongo
@@ -51,6 +53,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
     hostname: notification_mongo
+    networks:
+      - notification_network
 
   mongo-express:
     image: mongo-express
@@ -62,20 +66,22 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
       ME_CONFIG_MONGODB_URL: mongodb://root:example@notification_mongo:27017/
     hostname: notification_mongo_exp
+    networks:
+      - notification_network
 
-  # rabbitmq:
-  #   image: rabbitmq:3.10.7-management
-  #   container_name: rabbitmq
-  #   hostname: rabbitmq
-  #   environment:
-  #     RABBITMQ_DEFAULT_USER: 'admin'
-  #     RABBITMQ_DEFAULT_PASS: 'qwe123'
-  #   ports:
-  #     - 15672:15672
-  #   expose:
-  #     - 5672
-  #   networks:
-  #     - notification_network
+  rabbitmq:
+    image: rabbitmq:3.10.7-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: 'admin'
+      RABBITMQ_DEFAULT_PASS: 'qwe123'
+    ports:
+      - 15672:15672
+    expose:
+      - 5672
+    networks:
+      - notification_network
 
   # smtp-server:
   #   image: 42bv/mailhog:latest

@@ -17,10 +17,10 @@ class Producer(AbstractProducer):
     def __init__(self, exchange: Exchange) -> None:
         self.exchange = exchange
 
-    async def send_message(self, message: EventBase):
+    async def send_message(self, message: EventBase, queue: str):
 
         await self.exchange.publish(
-            Message(message.json().encode(), priority=message.priority), message.type_delivery)
+            Message(message.json().encode(), priority=message.priority), queue)
 
 
 @lru_cache()

@@ -5,15 +5,12 @@ from functools import lru_cache
 from uuid import UUID
 
 from fastapi import Depends
-import jinja2
-from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.repository import AbstractRepository, get_repository
 from app.services.rabbit_producer import get_producer, AbstractProducer
 from app.handlers.common import AbstractHandler
 from app.errors import WrongTemplateException
-from app.models.core import ChannelNames
 from app.models.core import EventBase
 from app.template_engine import render_email
 from app.db.postgres import get_pg_session
@@ -21,7 +18,7 @@ from app.models.models import EmailTemlate, Notification, User
 
 
 #########################################################
-### для отработки в postgresql нужно добавить шаблон для события
+# для отработки в postgresql нужно добавить шаблон для события
 # event_name: 'review_comment_received'
 # topic_message: любое
 # template_str: 'Hello, {{user.email}}!'
@@ -57,7 +54,6 @@ class ReviewCommentReceivedHandler(AbstractHandler):
         self.producer = producer
         self.pg_session = pg_session
 
-
     async def handle(self, event: ReviewCommentReceivedEvent):
 
         # Получаем шаблон и тему из БД
@@ -66,7 +62,7 @@ class ReviewCommentReceivedHandler(AbstractHandler):
             raise WrongTemplateException
         email_teplate_str = email_template.template
         email_topic_message = email_template.topic_message
-    
+
         # Подготавливаем данные для рендера (вместо этого будем регать auth)
         mock_user = User(id='41e7bfbd-c0bc-4de2-902f-ba0f0c1eb501', email='hello@yandex.ru')
         users = [mock_user for _ in event.user_ids]
@@ -79,21 +75,26 @@ class ReviewCommentReceivedHandler(AbstractHandler):
         )
 
         # создаем нотификации
-        notifications = [
-            Notification(
+        # notifications = [
+        #     Notification(
+        #         recipient=user,
+        #         topic_message=email_topic_message,
+        #         text_message=message,
+        #         **event.dict()
+        #     ) for user, message in zip(users, email_body_list)
+        # ]
+
+        # далее нужно эти нотификации сохранить и отправить в очередь емейл рассылок
+        for user, message in zip(users, email_body_list):
+            notification = Notification(
                 recipient=user,
                 topic_message=email_topic_message,
                 text_message=message,
                 **event.dict()
-            ) for user, message in zip(users, email_body_list)
-        ]
-
-        print(notifications)
-
-        # далее нужно эти нотификации сохранить и отправить в очередь емейл рассылок
-
-        #await self.repository ... сохранить нотификации
-        #await self.producer ... запустить дальше в очередь
+            )
+            await self.producer.send_message(notification, 'email')
+        # await self.repository ... сохранить нотификации
+        # await self.producer ... запустить дальше в очередь
 
 
 @lru_cache()
