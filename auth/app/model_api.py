@@ -35,6 +35,6 @@ class ConfirmLetter:
         return dumps(self.__dict__)
 
 
-class ServiceUser(BaseModel):
+class ContactsUser(BaseModel):
     id: str
     email: str
