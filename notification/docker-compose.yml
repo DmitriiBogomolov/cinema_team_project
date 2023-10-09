@@ -3,57 +3,45 @@ version: '3.1'
 
 services:
 
-  notification:
-    build:
-      dockerfile: notification_app
-    container_name: notification_app
-    restart: always
-    image:
-      notification-image:latest
+  # notification:
+  #   build:
+  #     dockerfile: notification_app
+  #   container_name: notification_app
+  #   restart: always
+  #   image:
+  #     notification-image:latest
+  #   ports:
+  #     - 8000:8000
+  #   env_file:
+  #     - ./.env.example
+  #   networks:
+  #     - notification_network
+  #   depends_on:
+  #     - mongo
+  #     - mongo-express
+  #     - rabbitmq
+
+  # notification_worker:
+  #   build:
+  #     dockerfile: notification_worker
+  #   container_name: notification_worker
+  #   restart: always
+  #   image:
+  #     notification-worker-image:latest
+  #   env_file:
+  #     - ./.env.example
+  #   networks:
+  #     - notification_network
+  #   depends_on:
+  #     - rabbitmq
+
+  postgres:
+    image: postgres:13
     expose:
-      - 8000
+      - 5432
     env_file:
-      - ./.env.example
-    networks:
-      - notification_network
-      - service_network
-    depends_on:
-      - mongo
-      - mongo-express
-      - rabbitmq
-
-  notification_worker:
-    build:
-      dockerfile: notification_worker
-    container_name: notification_worker
-    restart: always
-    image:
-      notification-worker-image:latest
-    env_file:
-      - ./.env.example
-    networks:
-      - notification_network
-    depends_on:
-      - rabbitmq
-
-  mongo:
-    image: mongo
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-    networks:
-      - notification_network
-
-  mongo-express:
-    image: mongo-express
-    restart: always
-    expose:
-      - 8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: example
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+      - .env.example
+    hostname: notification_postgres
     networks:
       - notification_network
 
@@ -71,20 +59,18 @@ services:
     networks:
       - notification_network
 
-  smtp-server:
-    image: 42bv/mailhog:latest
-    container_name: smpt-server
-    ports:
-      - 8025:8025
-      - 587:587
-    networks:
-      - notification_network
-
-
+  # smtp-server:
+  #   image: 42bv/mailhog:latest
+  #   container_name: smpt-server
+  #   ports:
+  #     - 8025:8025
+  #     - 587:587
+  #   networks:
+  #     - notification_network
 
 networks:
   notification_network:
     name: notification_network
-  service_network:
-    name: service_network
-    external: True
+  #service_network:
+  #  name: service_network
+  #  external: True

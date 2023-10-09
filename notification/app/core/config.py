@@ -19,11 +19,26 @@ class AppConfig(Base):
     auth_token: str
 
 
-class MongoConfig(Base):
-    uri: str
+class PostgresConfig(Base):
+    password: str
+    user: str
+    db: str
+    host: str
+    port: str
+
+    @property
+    def sqlalchemy_uri(self) -> str:
+        template = 'postgresql+asyncpg://{}:{}@{}:{}/{}'
+        return template.format(
+            self.user,
+            self.password,
+            self.host,
+            self.port,
+            self.db
+        )
 
     class Config:
-        env_prefix = 'mongo_'
+        env_prefix = 'postgres_'
 
 
 class RabbitConfig(Base):
@@ -34,5 +49,5 @@ class RabbitConfig(Base):
 
 
 config = AppConfig()
-mongo_config = MongoConfig()
+postgres_config = PostgresConfig()
 rabbit_config = RabbitConfig()
