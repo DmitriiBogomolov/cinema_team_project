@@ -1,5 +1,3 @@
-from enum import Enum
-
 from pydantic import BaseSettings
 
 
@@ -43,13 +41,6 @@ class PostgresConfig(Base):
         env_prefix = 'postgres_'
 
 
-class MongoConfig(Base):
-    uri: str
-
-    class Config:
-        env_prefix = 'mongo_'
-
-
 class RabbitConfig(Base):
     uri: str
 
@@ -59,5 +50,4 @@ class RabbitConfig(Base):
 
 config = AppConfig()
 postgres_config = PostgresConfig()
-mongo_config = MongoConfig()
 rabbit_config = RabbitConfig()
