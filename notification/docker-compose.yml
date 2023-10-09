@@ -3,24 +3,23 @@ version: '3.1'
 
 services:
 
-  notification:
-    build:
-      dockerfile: notification_app
-    container_name: notification_app
-    restart: always
-    image:
-      notification-image:latest
-    ports:
-      - 8000:8000
-    env_file:
-      - ./.env.example
-    networks:
-      - notification_network
-    #  - service_network
-    depends_on:
-      - mongo
-      - mongo-express
-      - rabbitmq
+  # notification:
+  #   build:
+  #     dockerfile: notification_app
+  #   container_name: notification_app
+  #   restart: always
+  #   image:
+  #     notification-image:latest
+  #   ports:
+  #     - 8000:8000
+  #   env_file:
+  #     - ./.env.example
+  #   networks:
+  #     - notification_network
+  #   depends_on:
+  #     - mongo
+  #     - mongo-express
+  #     - rabbitmq
 
   # notification_worker:
   #   build:
@@ -43,29 +42,6 @@ services:
     env_file:
       - .env.example
     hostname: notification_postgres
-    networks:
-      - notification_network
-
-  mongo:
-    image: mongo
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-    hostname: notification_mongo
-    networks:
-      - notification_network
-
-  mongo-express:
-    image: mongo-express
-    restart: always
-    expose:
-      - 8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: example
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@notification_mongo:27017/
-    hostname: notification_mongo_exp
     networks:
       - notification_network
 
@@ -92,11 +68,9 @@ services:
   #   networks:
   #     - notification_network
 
-
-
 networks:
   notification_network:
     name: notification_network
-  service_network:
-    name: service_network
-    external: True
+  #service_network:
+  #  name: service_network
+  #  external: True

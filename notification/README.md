@@ -5,9 +5,6 @@ docker run --rm --hostname dns.mageddo \
 -v /etc/resolv.conf:/etc/resolv.conf \
 defreitas/dns-proxy-server
 
-накатить миграции
-alembic upgrade heads
-
 запустить приложение
 uvicorn app.main:app --reload
 
@@ -40,4 +37,5 @@ from app.models.models import SqlalchemyBase
 target_metadata = SqlalchemyBase.metadata)
 Дальше вводим: alembic revision --autogenerate -m "comment"
 Будет создана миграция
+
 Накатываем миграции: alembic upgrade heads

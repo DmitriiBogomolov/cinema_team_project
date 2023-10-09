@@ -1,35 +1,50 @@
-from datetime import datetime
-from uuid import UUID
-
-from sqlalchemy import Column, String
-from sqlalchemy.orm import declarative_base
-from pydantic import Field, EmailStr
-from pydantic import BaseModel as PydanticBase
-
-from app.models.core import EventBase
+from sqlalchemy import (
+    Column, String, CheckConstraint, Time,
+    ForeignKey, Integer, Date
+)
+from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.types import ARRAY
 
 
-SqlalchemyBase = declarative_base()  # Точка входа в sqlchemy
+SqlalchemyBase = declarative_base()  # Точка входа в sqlalchemy
+
+
+class StoredEvent(SqlalchemyBase):
+    """Хранимое событие (sqlalchemy + postgresql)"""
+    __tablename__ = 'events'
+
+    name = Column(String, primary_key=True)
+    description = Column(String)
+
+    #  если событие периодическое - следующие поля заполняются
+    days = Column(ARRAY(Integer))  # массив дней от 0 до 7
+    weeks = Column(ARRAY(Integer))  # массив недель от 0 до 3
+    months = Column(ARRAY(Integer))  # массив месяцев от 0 до 11
+    send_time = Column(Time(timezone=False))
+    last_generated = Column(Date)
+
+    email_template = relationship('EmailTemlate', uselist=False, back_populates='event')
+
+    __table_args__ = (
+        CheckConstraint('array_length(days, 1) > 0', name='days_not_empty'),
+        CheckConstraint('array_length(days, 1) < 7', name='days_max_length'),
+        CheckConstraint('array_length(weeks, 1) > 0', name='weeks_not_empty'),
+        CheckConstraint('array_length(weeks, 1) < 4', name='weeks_max_length'),
+        CheckConstraint('array_length(months, 1) > 0', name='months_not_empty'),
+        CheckConstraint('array_length(months, 1) < 12', name='months_max_length'),
+    )
 
 
 class EmailTemlate(SqlalchemyBase):
     """Хранимые шаблоны уведомлений (sqlalchemy + postgresql)"""
-    __tablename__ = "email_templates"
+    __tablename__ = 'email_templates'
 
-    event_name = Column(String, primary_key=True, nullable=False)
+    event_name = Column(String, ForeignKey('events.name'), primary_key=True)
     topic_message = Column(String, nullable=False)
     template = Column(String, nullable=False)
 
-
-class User(PydanticBase):
-    id: UUID
-    email: EmailStr | None
-
-
-class Notification(EventBase):
-    """Модель для хранения уведомления в mongodb и передачи в очередь"""
-    recipient: User
-    topic_message: str  # тема
-    text_message: str  # отрендеренное сообщение
-    send_message_datatime: datetime | None = None  # отправлено ли уведомление
-    created_at: datetime = Field(default_factory=datetime.now)
+    event = relationship(
+        'StoredEvent',
+        back_populates='email_template',
+        primaryjoin='EmailTemlate.event_name == StoredEvent.name'
+    )
