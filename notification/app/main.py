@@ -4,13 +4,14 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 from contextlib import asynccontextmanager
+from sqladmin import Admin
 
-from app.db import postgres
 from app.api.v1 import events
 from app.core.config import config, rabbit_config
-from app.db import redis, rabbit
+from app.db import redis, rabbit, postgres
 from app.core.jwt import configure_jwt
 from app.errors import register_error_handlers
+from app.views.views import StoredEventView, EmailTemlateView
 
 
 @asynccontextmanager
@@ -41,6 +42,11 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
     lifespan=lifespan
 )
+
+admin = Admin(app, postgres.engine)
+admin.add_model_view(StoredEventView)
+admin.add_model_view(EmailTemlateView)
+
 
 configure_jwt(app)
 register_error_handlers(app)

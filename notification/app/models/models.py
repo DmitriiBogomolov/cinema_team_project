@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, String, CheckConstraint, Time,
-    ForeignKey, Integer, Date
+    ForeignKey, Date
 )
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.types import ARRAY
@@ -17,9 +17,9 @@ class StoredEvent(SqlalchemyBase):
     description = Column(String)
 
     #  если событие периодическое - следующие поля заполняются
-    days = Column(ARRAY(Integer))  # массив дней от 0 до 7
-    weeks = Column(ARRAY(Integer))  # массив недель от 0 до 3
-    months = Column(ARRAY(Integer))  # массив месяцев от 0 до 11
+    days = Column(ARRAY(String))  # массив дней от 0 до 7
+    weeks = Column(ARRAY(String))  # массив недель от 0 до 3
+    months = Column(ARRAY(String))  # массив месяцев от 0 до 11
     send_time = Column(Time(timezone=False))
     last_generated = Column(Date)
 
@@ -33,6 +33,9 @@ class StoredEvent(SqlalchemyBase):
         CheckConstraint('array_length(months, 1) > 0', name='months_not_empty'),
         CheckConstraint('array_length(months, 1) < 12', name='months_max_length'),
     )
+
+    def __str__(self):
+        return self.name
 
 
 class EmailTemlate(SqlalchemyBase):
