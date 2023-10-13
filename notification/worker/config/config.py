@@ -7,13 +7,6 @@ class Base(BaseSettings):
         env_file_encoding = 'utf-8'
 
 
-class MongoConfig(Base):
-    uri: str
-
-    class Config:
-        env_prefix = 'mongo_'
-
-
 class RabbitConfig(Base):
     uri: str
 
@@ -37,4 +30,3 @@ class WorkerEmailConfig(Base):
 
 rabbit_config = RabbitConfig()
 worker_email_config = WorkerEmailConfig()
-mongo_config = MongoConfig()

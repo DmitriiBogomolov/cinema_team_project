@@ -9,9 +9,6 @@ class Base(BaseSettings):
 
 class AppConfig(Base):
     project_name: str = 'notification_service'
-    redis_host: str = 'localhost'
-    redis_port: int = 6379
-    redis_db: int = 0
     debug: bool = True
 
     authjwt_secret_key: str
@@ -25,6 +22,8 @@ class PostgresConfig(Base):
     db: str
     host: str
     port: str
+    future: bool
+    echo: bool
 
     @property
     def sqlalchemy_uri(self) -> str:

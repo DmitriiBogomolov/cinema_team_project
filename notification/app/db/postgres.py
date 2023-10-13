@@ -8,8 +8,8 @@ from app.core.config import postgres_config
 
 engine = create_async_engine(
     postgres_config.sqlalchemy_uri,
-    future=True,
-    echo=True,
+    future=postgres_config.future,
+    echo=postgres_config.echo,
 )
 
 
