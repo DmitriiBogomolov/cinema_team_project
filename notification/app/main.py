@@ -2,13 +2,12 @@ import uvicorn
 import aio_pika
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from redis.asyncio import Redis
 from contextlib import asynccontextmanager
 from sqladmin import Admin
 
 from app.api.v1 import events
 from app.core.config import config, rabbit_config
-from app.db import redis, rabbit, postgres
+from app.db import rabbit, postgres
 from app.core.jwt import configure_jwt
 from app.errors import register_error_handlers
 from app.views.views import StoredEventView, EmailTemlateView
@@ -16,12 +15,6 @@ from app.views.views import StoredEventView, EmailTemlateView
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    redis.redis = Redis(
-        host=config.redis_host,
-        port=config.redis_port,
-        db=config.redis_db
-    )
-
     conn = await aio_pika.connect(rabbit_config.uri)
     channel = await conn.channel()
     rabbit.rabbit_producer_exchange = await channel.declare_exchange('message', type='direct', auto_delete=True)
@@ -31,8 +24,6 @@ async def lifespan(app: FastAPI):
     await postgres.create_tables()
 
     yield
-
-    await redis.redis.close()
 
 
 app = FastAPI(

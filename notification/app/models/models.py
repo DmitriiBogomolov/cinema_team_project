@@ -13,13 +13,13 @@ class StoredEvent(SqlalchemyBase):
     """Хранимое событие (sqlalchemy + postgresql)"""
     __tablename__ = 'events'
 
-    name = Column(String, primary_key=True)
-    description = Column(String)
+    name = Column(String(20), primary_key=True)
+    description = Column(String(50))
 
     #  если событие периодическое - следующие поля заполняются
-    days = Column(ARRAY(String))  # массив дней от 0 до 7
-    weeks = Column(ARRAY(String))  # массив недель от 0 до 3
-    months = Column(ARRAY(String))  # массив месяцев от 0 до 11
+    days = Column(ARRAY(String(2)))  # массив дней от 0 до 7
+    weeks = Column(ARRAY(String(2)))  # массив недель от 0 до 3
+    months = Column(ARRAY(String(2)))  # массив месяцев от 0 до 11
     send_time = Column(Time(timezone=False))
     last_generated = Column(Date)
 
@@ -42,9 +42,9 @@ class EmailTemlate(SqlalchemyBase):
     """Хранимые шаблоны уведомлений (sqlalchemy + postgresql)"""
     __tablename__ = 'email_templates'
 
-    event_name = Column(String, ForeignKey('events.name'), primary_key=True)
-    topic_message = Column(String, nullable=False)
-    template = Column(String, nullable=False)
+    event_name = Column(String(20), ForeignKey('events.name'), primary_key=True)
+    topic_message = Column(String(50), nullable=False)
+    template = Column(String(120), nullable=False)
 
     event = relationship(
         'StoredEvent',

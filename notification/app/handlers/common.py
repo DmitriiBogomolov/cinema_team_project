@@ -3,5 +3,5 @@ from abc import ABC, abstractmethod
 
 class AbstractHandler(ABC):
     @abstractmethod
-    def handle():
+    def handle(self):
         pass
