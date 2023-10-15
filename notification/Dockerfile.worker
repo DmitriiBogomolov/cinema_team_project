@@ -10,7 +10,8 @@ COPY requirements.txt .
 RUN apt update && apt install -y curl &&\
     pip install --upgrade pip && pip install -r requirements.txt
 
-COPY worker/. .
+COPY . .
 
-
-CMD ["python", "main.py"]
+CMD ["sh", "-c", "python utils/wait_for_pg.py &&\
+                  python utils/wait_for_rabbitmq.py &&\
+                  python worker/main.py"]

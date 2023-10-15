@@ -1,11 +1,17 @@
-запустить днс
+Для разработки:
+
+1. запустить днс
 docker run --rm --hostname dns.mageddo \
 --name dns.mageddo \
 -v /var/run/docker.sock:/var/run/docker.sock \
 -v /etc/resolv.conf:/etc/resolv.conf \
 defreitas/dns-proxy-server
 
-запустить приложение
+2. запустить приложение
+docker-compose up --build
+
+
+можно запускать локально:
 uvicorn app.main:app --reload
 
 
@@ -20,6 +26,17 @@ uvicorn app.main:app --reload
     "user_ids": ["6b7aae84-517d-11ee-be56-0242ac120002"]
 }
 
+для (ручная рассылка): 127.0.0.1:8000/api/v1/events/send_manual
+{
+    "initiating_service_name": "auth_service",
+    "initiating_user_id": "6b7aae84-517d-11ee-be56-0242ac120002",
+    "description": "some_description",
+    "event_name": "review_comment_received",
+    "priority": 0,
+    "user_ids": ["6b7aae84-517d-11ee-be56-0242ac120002"],
+    "topic_message": "hello",
+    "email": "Hello {{user.email}}"
+}
 
 ----------------------------------
 

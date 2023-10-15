@@ -1,6 +1,6 @@
 from uuid import UUID
 from typing_extensions import Self
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from pydantic import EmailStr
 from pydantic import BaseModel as PydanticBase
@@ -17,10 +17,12 @@ class _BaseExternal(PydanticBase, ABC):
         return cls._prefetch_list(id_list)
 
     @staticmethod
+    @abstractmethod
     def _prefetch_list(id_list: list[UUID]) -> list[Self]:
         pass
 
     @staticmethod
+    @abstractmethod
     def _get_mock_list(id_list: list[UUID]) -> list[Self]:
         pass
 

@@ -1,39 +1,39 @@
-# Use root/example as user/password credentials
-version: '3.1'
+version: "3.1"
 
 services:
 
   notification:
     build:
-      context: .
+      context: ../../
       dockerfile: Dockerfile.app
-    volumes:
-      - ./:/app
     expose:
       - 8000
     env_file:
-      - ./.env.example
+      - ../../.env.example
+    hostname: notification
     depends_on:
       - postgres
       - rabbitmq
 
-  notification_worker:
+  tests:
     build:
-      context: .
-      dockerfile: Dockerfile.worker
+      context: ../../
+      dockerfile: tests/functional/Dockerfile
+    expose:
+      - 8000
     env_file:
-      - ./.env.example
+      - ../../.env.example
+    hostname: tests
     depends_on:
-      - rabbitmq
+      - notification
 
   postgres:
     image: postgres:13
     expose:
       - 5432
-    volumes:
-      - notification_pg_data:/var/lib/postgresql/data/
     env_file:
-      - .env.example
+      - ../../.env.example
+    hostname: postgres
 
   rabbitmq:
     image: rabbitmq:3.10.7-management
@@ -44,25 +44,16 @@ services:
       - 15672:15672
     expose:
       - 5672
-
-  smtp-server:
-    image: 42bv/mailhog:latest
-    ports:
-      - 8025:8025
-      - 587:587
+    hostname: rabbitmq
 
   nginx:
     image: nginx:1.25
     container_name: nginx
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/configs:/etc/nginx/conf.d:ro
+      - ../../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../../nginx/configs:/etc/nginx/conf.d:ro
       - /tmp/logs/nginx/:/var/log/nginx/
     depends_on:
       - notification
     ports:
       - "8100:8100"
-
-volumes:
-  notification_pg_data:
-    driver: local

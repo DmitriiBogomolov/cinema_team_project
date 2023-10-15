@@ -7,7 +7,10 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.rabbit_producer import get_producer, AbstractProducer
+from app.services.rabbit_producer import (
+    get_producer,
+    AbstractProducer
+)
 from app.handlers.common import AbstractHandler
 from app.errors import WrongTemplateException
 from app.models.core import EventAPI
@@ -41,7 +44,10 @@ class DefaultHandler(AbstractHandler):
 
     async def _process_email(self, event: DefaultEvent):
         # Получаем шаблон и тему из БД
-        email_template = await self.pg_session.get(EmailTemlate, event.event_name)
+        email_template = await self.pg_session.get(
+            EmailTemlate,
+            event.event_name
+        )
         if not email_template:
             raise WrongTemplateException
         email_teplate_str = email_template.template
