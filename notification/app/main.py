@@ -17,12 +17,22 @@ from app.views.views import StoredEventView, EmailTemlateView
 async def lifespan(app: FastAPI):
     conn = await aio_pika.connect(rabbit_config.uri)
     channel = await conn.channel()
-    rabbit.rabbit_producer_exchange = await channel.declare_exchange('message', type='direct', auto_delete=True)
-    queue_email = await channel.declare_queue('email', arguments={'x-max-priority': 10, 'x-message-ttl': 1800000})
+    rabbit.rabbit_producer_exchange = await (
+        channel.declare_exchange(
+            'message', type='direct',
+            auto_delete=True
+        )
+    )
+    queue_email = await (
+        channel.declare_queue(
+            'email',
+            arguments={
+                'x-max-priority': 10,
+                'x-message-ttl': 1800000
+            }
+        )
+    )
     await queue_email.bind(rabbit.rabbit_producer_exchange, 'email')
-
-    await postgres.create_tables()
-
     yield
 
 
@@ -43,7 +53,10 @@ configure_jwt(app)
 register_error_handlers(app)
 
 
-app.include_router(events.router, prefix='/api/v1/events', tags=['events'])
+app.include_router(
+    events.router, prefix='/api/v1/events',
+    tags=['events']
+)
 
 
 if __name__ == '__main__':
