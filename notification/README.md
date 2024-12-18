@@ -1,19 +1,19 @@
 Для разработки:
 
 1. запустить днс
-docker run --rm --hostname dns.mageddo \
---name dns.mageddo \
--v /var/run/docker.sock:/var/run/docker.sock \
--v /etc/resolv.conf:/etc/resolv.conf \
-defreitas/dns-proxy-server
+```dockerfile
+docker run --rm --hostname dns.mageddo --name dns.mageddo -v /var/run/docker.sock:/var/run/docker.sock -v /etc/resolv.conf:/etc/resolv.conf defreitas/dns-proxy-server
+```
 
-2. запустить приложение
+3. запустить приложение
+```python
 docker-compose up --build
-
+```
 
 можно запускать локально:
+```python
 uvicorn app.main:app --reload
-
+```
 
 
 далее дергаем ручку 127.0.0.1:8000/api/v1/events передавая туда
